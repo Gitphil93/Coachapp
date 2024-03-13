@@ -1,0 +1,37 @@
+
+.generate {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+.generate-key-button {
+    height: 3rem;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    background-color: rgb(17, 42, 121);
+    font-size: 1rem;
+    color: white;
+    transition: transform 0.1s ease;
+}
+
+.generate-key-button:hover{
+    cursor: pointer;
+}
+
+.generate-key-button:active {
+    transform: scale(0.98)
+}
+
+.key {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 3rem;
+    background-color: white;
+    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
+}
