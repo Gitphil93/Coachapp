@@ -3,18 +3,61 @@ import "../styles/addAthlete.css"
 import Header from "../components/Header.js"
 import Menu from "../components/Menu.js"
 import MenuContext from '../context/MenuContext.js'
+import Success from "../components/Success.js"
 
 export default function AddAthlete() {
     const [name, setName] = useState("");
     const [key, setKey] = useState("")
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
+    const [showNotification, setShowNotification] = useState(false);
+    const [showWarning, setShowWarning] = useState(false);
     const hamburgerRef = useRef(null); 
  const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
     const handleChange = (event, setter) => {
         setter(event.target.value);
     };
+
+
+    const registerAthlete = async () => {
+
+        if(name.length === 0 || lastName.length === 0 || email.length === 0 || key.length === 0) {
+            console.log(name.length)
+            setShowWarning(true)
+            return false
+
+        }
+        
+        try {
+            const response = await fetch("http://localhost:5000/admin/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name:name,
+                    lastname:lastName,
+                    email:email,
+                    key: key,
+                    role: 1000
+                })
+            })
+            console.log(response)
+            const data = response.status
+
+            if (data === 201){
+                setShowNotification(true)
+                setTimeout(() => setShowNotification(false), 500);
+                setShowWarning(false)
+                console.log("Användare skapad")
+            } 
+        }
+        catch (err) {
+            console.log(err, "Något gick fel")
+        }
+    }
+
 
 
     const generateKey = () => {
@@ -88,9 +131,22 @@ export default function AddAthlete() {
                     }
                 </div>
                 <div className="save-button-wrapper">
-                    <button className="save-button">Spara atlet</button>
+                    <button className="save-button" onClick={registerAthlete}>Spara atlet</button>
                 </div>
             </div>
+
+            {showNotification && 
+         <div className="notification">
+                <Success></Success>
+                </div>
+            }
+
+            {showWarning && 
+                <div className="notification">
+                     <h1 id="warning-notification">Fyll i alla fält och generera en nyckel innan du sparar</h1>
+                </div>
+            }
+
         </div>
         </div>
     );

@@ -40,7 +40,7 @@ export default function Home() {
 
 
       <div className="view-header">
-        <h1> {greeting}, {name}</h1>
+        <h1> {greeting}, {name}!</h1>
       </div>
       <div className="sessions-header">
        <h3>Dagens pass</h3>

@@ -62,9 +62,11 @@ export default function Menu({ hamburgerRef }) {
                 </div>
             </Link>
 
-            <div className="menu-item" id="logout">
+            <Link to="/login" className="menu-item"  id="logout">
+            <div>
                 <h4>Logga ut</h4>
             </div>
+            </Link>
         </div>
     );
 }

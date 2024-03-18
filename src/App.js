@@ -7,6 +7,7 @@ import AddExcercise from './views/AddExcercise';
 import AddAthlete from './views/AddAthlete';
 import Timer from './views/Timer';
 import Login from "./views/Login"
+import Register from "./views/Register"
 import {MenuProvider} from './context/MenuContext.js';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="add-athlete" element={<AddAthlete />} />
         <Route path="timer" element={<Timer/>} />
         <Route path="login" element={<Login/>} />
+        <Route path="register" element={<Register/>} />
         </Routes>
         </Router>
       </MenuProvider>

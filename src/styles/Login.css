@@ -14,12 +14,12 @@
     height: 2rem;
     display: flex;
     justify-content: center;
-align-items: center;
+    align-items: center;
 
 }
 
 
-.form-wrapper {
+.form-wrapper{
     display:flex;
     justify-content: flex-start;
     flex-direction: column;
@@ -45,8 +45,10 @@ align-items: center;
 #register-paragraph {
     margin-top: 1rem;
     font-size: 0.9rem;
-    width: 80%;
+    width: 100%;
     text-align: center;
+    color:rgb(17, 42, 121);
+    font-weight: 500;
 }
 
 .button-wrapper {
