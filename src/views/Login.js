@@ -1,14 +1,42 @@
 import React, {useState} from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import "../styles/Login.css"
 
 export default function Login() {
-const [usernameValue, setUsernameValue] = useState("")
+const [emailValue, setEmailValue] = useState("")
 const [passwordValue, setPasswordValue] = useState("")
+
+const navigate = useNavigate()
 
  const handleChange = (event, setter) => {
     setter(event.target.value)
  }
+
+
+ const login = async () => {
+   
+  try {
+    const response = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+    },
+     body: JSON.stringify({
+     email:emailValue,
+      password: passwordValue,
+                  })
+    })
+
+    if (response.ok) {
+      navigate('/')
+    }
+    console.log(response)
+  } catch (err){
+    console.log(err, "Något gick fel")
+  }
+ }
+
+
   return (
     <div className='login-wrapper'>
       <div className="form-wrapper">
@@ -18,7 +46,7 @@ const [passwordValue, setPasswordValue] = useState("")
 
       <div className="input-wrapper" id="login-input">
         <div className="input-name" >
-          <input type="email" placeholder='Email' value={usernameValue} onChange={(e) => handleChange(e, setUsernameValue)}></input>
+          <input type="email" placeholder='Email' value={emailValue} onChange={(e) => handleChange(e, setEmailValue)}></input>
       </div>
       <div className="input-name">
           <input type="password" placeholder='Lösenord' value={passwordValue} onChange={(e) => handleChange(e, setPasswordValue)}></input>
@@ -33,7 +61,7 @@ const [passwordValue, setPasswordValue] = useState("")
 
 
       <div className="button-wrapper">
-        <button className="login-button" id="login-button">Logga in</button>
+        <button className="login-button" id="login-button" onClick={login}>Logga in</button>
       </div>
 
 

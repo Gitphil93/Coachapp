@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import "../styles/Register.css"
 
 export default function Register() {
-    const [nameValue, setNameValue] = useState("")
-    const [lastNameValue, setLastNameValue] = useState("")
     const [emailValue, setEmailValue] = useState("")
     const [passwordValue, setPasswordValue] = useState("")
     const [passwordRepeatValue, setPasswordRepeatValue] = useState("")
@@ -15,7 +13,7 @@ export default function Register() {
     }
 
     const register = async () => {
-        console.log("hej")
+
         if (passwordValue === passwordRepeatValue) {
             try {
                 const response = await fetch("http://localhost:5000/register", {
@@ -24,8 +22,6 @@ export default function Register() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        name:nameValue,
-                        lastname:lastNameValue,
                         email:emailValue,
                         password: passwordValue,
                         key: keyValue
@@ -55,12 +51,6 @@ export default function Register() {
    
 
         <div className="input-wrapper">
-            <div className="input-name">
-                <input type="text" placeholder='Namn' value={nameValue} onChange={((e) => handleChange(e, setNameValue))}></input>
-            </div>
-            <div className="input-name">
-                <input type="text" placeholder='Efternamn' value={lastNameValue} onChange={((e) => handleChange(e, setLastNameValue))}></input>
-            </div>
             <div className="input-name">
                 <input type="email" placeholder='Email' value={emailValue} onChange={((e) => handleChange(e, setEmailValue))}></input>
             </div>

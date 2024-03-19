@@ -12,6 +12,7 @@ export default function AddAthlete() {
     const [email, setEmail] = useState("");
     const [showNotification, setShowNotification] = useState(false);
     const [showWarning, setShowWarning] = useState(false);
+    const [isAdded, setIsAdded] = useState(true)
     const hamburgerRef = useRef(null); 
  const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
@@ -22,8 +23,9 @@ export default function AddAthlete() {
 
     const registerAthlete = async () => {
 
+        console.log(name[0].toUpperCase())
+
         if(name.length === 0 || lastName.length === 0 || email.length === 0 || key.length === 0) {
-            console.log(name.length)
             setShowWarning(true)
             return false
 
@@ -44,14 +46,24 @@ export default function AddAthlete() {
                 })
             })
             console.log(response)
+            
             const data = response.status
 
             if (data === 201){
                 setShowNotification(true)
                 setTimeout(() => setShowNotification(false), 500);
                 setShowWarning(false)
+                setName("")
+                setLastName("")
+                setEmail("")
+                setKey("")
+                setIsAdded(true)
                 console.log("Användare skapad")
-            } 
+
+            } else if (data === 400) {
+                setIsAdded(false)
+               setTimeout(() => setIsAdded(true), 3000)
+            }
         }
         catch (err) {
             console.log(err, "Något gick fel")
@@ -146,6 +158,12 @@ export default function AddAthlete() {
                      <h1 id="warning-notification">Fyll i alla fält och generera en nyckel innan du sparar</h1>
                 </div>
             }
+
+            {!isAdded && 
+                <div className="notification">
+                     <h1 id="warning-notification">Användaren är redan tillagd</h1>
+                </div>
+                 }
 
         </div>
         </div>
