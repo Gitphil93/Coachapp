@@ -4,15 +4,35 @@ import Header from "../components/Header.js"
 import Menu from "../components/Menu.js"
 import MenuContext from '../context/MenuContext.js'
 
+
 export default function Home() {
 
   const hamburgerRef = useRef(null); 
+  const [name, setName] = useState("")
+  const [globalMessage, setGlobalMessage] = useState("Glad påsk!")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:5000/get-user", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("data",data)
+        if (data.success) {
+          setName(data.user.name); 
+        }
+      })
+      .catch(error => console.error("Error fetching user:", error));
+    }
+  }, []);
 
   let hour = new Date().getHours()
-  let name = " Philip"
   let greeting = ""
   let sessionObj = {header: "Styrka", day: "Måndag", time: "12:30", where: "Friidrottens Hus"}
 
@@ -40,8 +60,27 @@ export default function Home() {
 
 
       <div className="view-header">
-        <h1> {greeting}, {name}!</h1>
+        <h1> {greeting} {name}!</h1>
       </div>
+
+      {globalMessage.length != 0 &&
+
+      <div className="global-message">
+        <span className="global-message-author">
+            <h3>YT</h3>
+        </span>
+
+        <span id="skrev">
+          <p>:</p>
+        </span>
+
+        <span className="global-message-content">
+          <p>{globalMessage}</p>
+          </span>
+      </div>
+    }
+
+
       <div className="sessions-header">
        <h3>Dagens pass</h3>
       </div>

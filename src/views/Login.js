@@ -28,6 +28,8 @@ const navigate = useNavigate()
     })
 
     if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("token", data.token); // lagrar token i localstorage för att lätt kunna hämta det
       navigate('/')
     }
     console.log(response)

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef,useContext} from 'react'
+import React, {useState,useRef,useContext} from 'react'
 import "../styles/addExcercise.css"
 import Success from "../components/Success"
 import Header from "../components/Header.js"
@@ -7,46 +7,63 @@ import MenuContext from '../context/MenuContext'
 
 
 export default function AddExcercise() {
-    const [inputValue, setInputValue] = useState("");
-    const [exerciseDescriptionValue, setExerciseDescription] = useState("");
-    const [exerciseArray, setExerciseArray] = useState([]);
+    const [nameValue, setNameValue] = useState("");
+    const [descriptionValue, setDescriptionValue] = useState("");
+    const [categoryValue, setCategoryValue] = useState("")
     const [showNotification, setShowNotification] = useState(false);
-    const [isNewExerciseAdded, setIsNewExerciseAdded] = useState(false);
+    const [showWarning, setShowWarning] = useState(false);
+    const [isAdded, setIsAdded] = useState(true)
     const hamburgerRef = useRef(null); 
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
-    const handleChange = (event, setter) => {
-        setter(event.target.value);
-    };
+    const handleNameChange = (event) => {
+        setNameValue(event.target.value);
+      };
+    
+      const handleDescriptionChange = (event) => {
+        setDescriptionValue(event.target.value);
+      };
 
-  
 
-  
+      const handleCategoryChange = (event) => {
+        setCategoryValue(event.target.value);
+      };
 
-  
-    const saveExercise = () => {
-        if (inputValue.trim() !== '' && exerciseDescriptionValue.trim() !== '') {
-            const newExercise = { name: inputValue, description: exerciseDescriptionValue };
-            setExerciseArray(prevExerciseArray => [...prevExerciseArray, newExercise]);
-            setInputValue("");
-            setExerciseDescription("");
+    const addExcercise = async () => {
+
+        if (nameValue === "" || descriptionValue === "" || categoryValue === "") {
+            return false
+        }
+        try {
+            const response = await fetch("http://localhost:5000/add-excercise", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: nameValue,
+                    description: descriptionValue,
+                    category: categoryValue
+                })
+            });
+             
+            if (response.ok){
+                setShowNotification(true)
+                setTimeout(() => setShowNotification(false), 500);
+                setShowWarning(false)
+                setIsAdded(true)
+                console.log("Övning tillagd")
+
+            } else if (!response.ok) {
+                setIsAdded(false)
+               setTimeout(() => setIsAdded(true), 3000)
+            }
+
+            console.log(response)
+        } catch (err) {
+            console.log(err, "Något gick fel");
         }
     };
-
-    useEffect(() => {
-        if (exerciseArray.length > 0) {
-            setIsNewExerciseAdded(true);
-            console.log(exerciseArray)
-        }
-    }, [exerciseArray]);
-
-    useEffect(() => {
-        if (isNewExerciseAdded) {
-            setShowNotification(true);
-            setTimeout(() => setShowNotification(false), 500);
-            setIsNewExerciseAdded(false); // Återställ isNewExerciseAdded till false efter att ha visat notisen
-        }
-    }, [isNewExerciseAdded]);
 
   return (
 
@@ -67,8 +84,8 @@ export default function AddExcercise() {
             id="name"
             name="name"
             placeholder="Raka marklyft"
-            value={inputValue}
-            onChange={handleChange}
+            value={nameValue}
+            onChange={handleNameChange}
           />
             </div>
 
@@ -78,11 +95,22 @@ export default function AddExcercise() {
             name="description"
             rows="10"
             placeholder="Raka ben med långsamma och kontrollerade rörelser"
-            value={exerciseDescriptionValue}
-            onChange={handleChange}
+            value={descriptionValue}
+            onChange={handleDescriptionChange}
           />
         </div>
          </div>
+
+         <div className="select-category">
+            <select id="category" name="category" value={categoryValue} onChange={handleCategoryChange}>
+              <option value="">Välj kategori</option>
+              <option value="Styrka">Styrka</option>
+              <option value="Kondition">Kondition</option>
+              <option value="Hoppträning">Hoppträning</option>
+              <option value="Löpning">Löpning</option>
+            </select>
+          </div>
+       
 
          {showNotification && 
          <div className="notification">
@@ -90,8 +118,20 @@ export default function AddExcercise() {
                 </div>
             }
 
+        {showWarning && 
+                <div className="notification">
+                     <h1 id="warning-notification">Fyll i alla fält innan du sparar</h1>
+                </div>
+            }
+
+        {!isAdded && 
+                <div className="notification">
+                     <h1 id="warning-notification">Övningen är redan tillagd</h1>
+                </div>
+                 }
+
         <div className="save-button-wrapper">
-            <button className="save-button" onClick={saveExercise}>Spara övning</button>
+            <button className="save-button" onClick={addExcercise}>Spara övning</button>
         </div>
     </div>
     </div>

@@ -131,7 +131,7 @@ app.post("/login", async (req, res) => {
 
 
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: 1200
+      expiresIn: 12000
     });
     resObj.success = true;
     resObj.token = token;
@@ -140,6 +140,65 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ error: 'Error during login' }); 
+  }
+});
+
+
+app.get("/get-user", async (req, res) => {
+  try {
+
+    const database = client.db('Coachapp'); 
+    const usersCollection = database.collection('users'); 
+
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await usersCollection.findOne({ email: decodedToken.email });
+    if (user) {
+      res.status(200).json({ success: true, user: user });
+    } else {
+      res.status(404).json({ success: false, message: "Användaren hittades inte" });
+    }
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av användare" });
+  }
+});
+
+
+app.post("/add-excercise", async (req, res) => {
+  const newExercise = req.body;
+  console.log(newExercise)
+
+  try {
+    const database = client.db('Coachapp'); 
+    const exerciseCollection = database.collection('exercises');
+
+    const exercise = await exerciseCollection.findOne({ name: newExercise.name });
+    
+    if (exercise) {
+      return res.status(401).json({ error: 'Övning finns redan' });
+    }
+
+    const result = await exerciseCollection.insertOne(newExercise);
+    res.status(200).json({ message: 'Övning tillagd', exerciseId: result.insertedId });
+
+  } catch (err) {
+    console.log(err, "Något gick fel, kunde inte spara övning")
+  }
+})
+
+app.get("/get-exercises", async (req, res) => {
+  try {
+    const database = client.db('Coachapp');
+    const exerciseCollection = database.collection('exercises');
+
+    const exercises = await exerciseCollection.find().toArray();
+
+    console.log(exercises)
+    res.status(200).json(exercises);
+  } catch (err) {
+    console.error('Error fetching exercises:', err);
+    res.status(500).json({ error: 'An error occurred while fetching exercises' });
   }
 });
 

@@ -29,13 +29,18 @@ export default function Menu({ hamburgerRef }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutsideMenu);
         };
-    }, [isMenuOpen, hamburgerRef]);
+    }, [isMenuOpen]);
 
     return (
+
+
         <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef} style={{ transform: isMenuOpen ? 'translateX(0%)' : 'translateX(100%)' }}>
-            <div className="menu-item">
-                <h2>Skapa pass</h2>
+            <Link to="/add-session" className="menu-item" onClick={closeMenu}>
+            <div>
+                <h2>Lägg till pass</h2>
             </div>
+            </Link>
+
             <Link to="/add-excercise" className="menu-item" onClick={closeMenu}>
                 <div>
                     <h2>Lägg till övning</h2>

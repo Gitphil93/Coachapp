@@ -58,7 +58,7 @@ textarea::placeholder {
     width: 100%;
     border: none;
     border-radius: 5px;
-    background-color: rgb(17, 42, 121);
+    background-color: rgb(38, 42, 56);
     font-size: 1rem;
     color: white;
     transition: transform 0.1s ease;
@@ -72,5 +72,16 @@ textarea::placeholder {
     transform: scale(0.98)
 }
 
-
-
+.select-category {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+    width: 100%;
+}
+#category {
+    width: 80%;
+    height: 2rem;
+    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
+    outline: none;
+    border: none;
+}

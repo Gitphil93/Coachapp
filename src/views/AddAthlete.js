@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import "../styles/addAthlete.css"
 import Header from "../components/Header.js"
 import Menu from "../components/Menu.js"
@@ -23,8 +23,6 @@ export default function AddAthlete() {
 
     const registerAthlete = async () => {
 
-        console.log(name[0].toUpperCase())
-
         if(name.length === 0 || lastName.length === 0 || email.length === 0 || key.length === 0) {
             setShowWarning(true)
             return false
@@ -42,14 +40,14 @@ export default function AddAthlete() {
                     lastname:lastName,
                     email:email,
                     key: key,
-                    role: 1000
+                    role: 1000,
+                    coach: "Yannick"
                 })
             })
             console.log(response)
             
-            const data = response.status
 
-            if (data === 201){
+            if (response.ok){
                 setShowNotification(true)
                 setTimeout(() => setShowNotification(false), 500);
                 setShowWarning(false)
@@ -60,7 +58,7 @@ export default function AddAthlete() {
                 setIsAdded(true)
                 console.log("Användare skapad")
 
-            } else if (data === 400) {
+            } else if (!response.ok) {
                 setIsAdded(false)
                setTimeout(() => setIsAdded(true), 3000)
             }
