@@ -9,8 +9,10 @@ export default function Home() {
 
   const hamburgerRef = useRef(null); 
   const [name, setName] = useState("")
-  const [globalMessage, setGlobalMessage] = useState("Glad påsk!")
+  const [globalMessage, setGlobalMessage] = useState("Globalt meddelande")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+
+  console.log(isMenuOpen)
   
   useEffect(() => {
     const token = localStorage.getItem("token");

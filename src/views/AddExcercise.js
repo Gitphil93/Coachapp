@@ -108,6 +108,7 @@ export default function AddExcercise() {
               <option value="Kondition">Kondition</option>
               <option value="Hoppträning">Hoppträning</option>
               <option value="Löpning">Löpning</option>
+              <option value="Uppvärmning">Uppvärmning</option>
             </select>
           </div>
        

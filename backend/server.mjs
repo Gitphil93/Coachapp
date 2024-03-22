@@ -164,6 +164,24 @@ app.get("/get-user", async (req, res) => {
   }
 });
 
+app.get("/get-all-users", async (req, res) => {
+  try {
+    const database = client.db('Coachapp'); 
+    const usersCollection = database.collection('users'); 
+
+    const allUsers = await usersCollection.find().toArray();
+
+    if (allUsers.length > 0) {
+      res.status(200).json({ success: true, users: allUsers });
+    } else {
+      res.status(404).json({ success: false, message: "Inga användare hittades" });
+    }
+  } catch (error) {
+    console.error("Error retrieving all users:", error);
+    res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av alla användare" });
+  }
+});
+
 
 app.post("/add-excercise", async (req, res) => {
   const newExercise = req.body;
@@ -183,7 +201,7 @@ app.post("/add-excercise", async (req, res) => {
     res.status(200).json({ message: 'Övning tillagd', exerciseId: result.insertedId });
 
   } catch (err) {
-    console.log(err, "Något gick fel, kunde inte spara övning")
+    console.error("Något gick fel, kunde inte spara övning", err)
   }
 })
 
@@ -194,7 +212,6 @@ app.get("/get-exercises", async (req, res) => {
 
     const exercises = await exerciseCollection.find().toArray();
 
-    console.log(exercises)
     res.status(200).json(exercises);
   } catch (err) {
     console.error('Error fetching exercises:', err);
