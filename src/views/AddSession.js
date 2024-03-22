@@ -3,7 +3,6 @@ import "../styles/addSession.css";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from '../context/MenuContext';
-import 'react-datepicker/dist/react-datepicker.css';
 
 export default function AddSession() {
     const hamburgerRef = useRef(null);
@@ -13,7 +12,8 @@ export default function AddSession() {
     const [selectedPlace, setSelectedPlace] = useState("");
     const [users, setUsers] = useState([]);
     const [sessionArray, setSessionArray] = useState([]);
-    const [expanded, setExpanded] = useState(false);
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [exerciseCategories, setExerciseCategories] = useState([]);
 
     const handleDateChange = (date) => {
         setSelectedDate(date);
@@ -50,7 +50,7 @@ export default function AddSession() {
     }, []);
 
     useEffect(() => {
-        async function getExcercises() {
+        async function getExercises() {
             const token = localStorage.getItem("token");
             if (token) {
                 try {
@@ -61,19 +61,22 @@ export default function AddSession() {
                         }
                     });
                     const data = await response.json();
-                    console.log(data); // Logga ut de hämtade övningarna
+                    console.log(data);
+                    // Uppdatera sessionArray med hämtade övningar
+                    setSessionArray(data);
+                    // Extrahera och sätt kategorierna för övningarna
+                    const categories = Array.from(new Set(data.map(exercise => exercise.category)));
+                    setExerciseCategories(categories);
                 } catch (err) {
                     console.log(err, "Kunde inte hämta övningarna");
                 }
             }
         }
-        getExcercises();
+        getExercises();
     }, []);
 
-    const toggleExpand = () => {
-        setExpanded(!expanded);
-
-   
+    const toggleExpand = (category) => {
+        setExpandedCategory(prevCategory => (prevCategory === category ? null : category));
     };
 
     return (
@@ -126,22 +129,31 @@ export default function AddSession() {
                             <h2>Lägg till övningar</h2>
                         </div>
 
-                        <div className="expand-wrapper">
-                        <div className="expand" onClick={toggleExpand}>
-                            <h2>Uppvärmning</h2>
-                            <img id="arrow" src="/arrow.png" style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
-                        </div>
-                        <div className={expanded ? "expanded-content expanded" : "expanded-content"}>
-                          <button className="exercise-button">Övningar</button>
-                          <button className="exercise-button">Jogga 1 km</button>
-                          <button className="exercise-button">Stretch</button>
-                          <button className="exercise-button">Spring 4 gånger 400m</button>
-                          <button className="exercise-button">Övningar</button>
-                          <button className="exercise-button">Övningar</button>
-       
 
-                        </div>
-                        </div>
+                        <div className="expand-wrapper">
+                         {exerciseCategories.map(category => (
+                             <div key={category}>
+                                 <div className="expand" onClick={() => toggleExpand(category)}>
+                                    <h2>{category}</h2>
+                                     <img id="arrow" src="/arrow.png" style={{ transform: expandedCategory === category ? 'rotate(90deg)' : 'rotate(-90deg)' }} />
+                                 </div>
+
+                             <div className={expandedCategory === category ? "expanded-content expanded" : "expanded-content"}>
+                                 {sessionArray.map(exercise => {
+                                  if (exercise.category === category) {
+                                return (
+                                      <button key={exercise.name} className="exercise-button">{exercise.name}</button>
+                                      );
+                            }
+                                  return null;
+                            })}
+                          </div>
+        </div>
+    ))}
+</div>
+
+                        
+
                     </div>
                 </div>
             </div>
