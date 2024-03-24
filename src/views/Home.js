@@ -17,7 +17,7 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:5000/get-user", {
+      fetch("http://192.168.0.36:5000/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -42,9 +42,9 @@ export default function Home() {
   if (hour < 10) {
       greeting = "God morgon";
   } else if (hour >= 10 && hour < 14) {
-      greeting = "God middag";
+      greeting = "Hej";
   } else if (hour >= 14 && hour < 18) {
-      greeting = "God eftermiddag";
+      greeting = "Hej";
   } else if (hour >= 18 && hour < 23) {
       greeting = "God kväll";
   }

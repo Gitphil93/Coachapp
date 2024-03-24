@@ -34,7 +34,7 @@ export default function Menu({ hamburgerRef }) {
     return (
 
 
-        <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef} style={{ transform: isMenuOpen ? 'translateX(0%)' : 'translateX(100%)' }}>
+        <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}  style={{ display: isMenuOpen ? 'block' : 'none' }}>
             <Link to="/add-session" className="menu-item" onClick={closeMenu}>
             <div>
                 <h2>Lägg till pass</h2>
@@ -58,7 +58,7 @@ export default function Menu({ hamburgerRef }) {
             </div>
 
             <div className="menu-item">
-                <h2>Tävlingar</h2>
+                <h2>Mina tävlingar</h2>
             </div>
 
             <Link to="/timer" className="menu-item" onClick={closeMenu}>

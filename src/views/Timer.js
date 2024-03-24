@@ -43,7 +43,7 @@ export default function Timer() {
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} hamburgerRef={hamburgerRef} />
         
         <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
-            <h2 className="view-header">Timer</h2>
+            <h1 className="view-header">Timer</h1>
 
             <div className="timer">
                 <h1>{formattedTime}</h1>
