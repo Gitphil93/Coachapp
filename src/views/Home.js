@@ -3,16 +3,28 @@ import "../styles/Home.css"
 import Header from "../components/Header.js"
 import Menu from "../components/Menu.js"
 import MenuContext from '../context/MenuContext.js'
+import Modal from "../components/Modal.js"
 
 
 export default function Home() {
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const hamburgerRef = useRef(null); 
+  const modalRef = useRef();
   const [name, setName] = useState("")
-  const [globalMessage, setGlobalMessage] = useState("Globalt meddelande")
+  const [globalMessage, setGlobalMessage] = useState("")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+  const [userRole, setUserRole] = useState(0)
+  const [initials, setInitials] = useState("")
+console.log(globalMessage)
 
-  console.log(isMenuOpen)
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,11 +40,79 @@ export default function Home() {
         console.log("data",data)
         if (data.success) {
           setName(data.user.name); 
+          setInitials(data.user.name[0] + data.user.lastname[0])
+          setUserRole(data.user.role)
         }
       })
       .catch(error => console.error("Error fetching user:", error));
     }
   }, []);
+
+  const message = async () => {
+    setIsModalOpen(false);
+    const message = prompt("Skriv globalt meddelande");
+  
+    if (message === null || message.trim() === "") {
+      return;
+    }
+  
+    setGlobalMessage(message);
+   
+    await postMessage(message);
+  }
+
+  const postMessage = async (message) => {
+
+    try {
+    const response = await fetch("http://192.168.0.36:5000/admin/post-global-message", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+         globalMessage: message,
+         author: initials
+      })
+  })
+
+  if (response.ok) {
+    console.log("Meddelande postat")
+    fetchGlobalMessage()
+  } 
+
+  console.log(response)
+    } catch (err) {
+      console.error("Något gick fel vid postning av meddelande", err)
+    }
+  }
+
+  useEffect(() => {
+    fetchGlobalMessage();
+  }, []);
+
+  const fetchGlobalMessage = async () => {
+    try {
+      const response = await fetch("http://192.168.0.36:5000/get-global-message");
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data)
+        if (data.globalMessage === null) {
+          setGlobalMessage(null)
+      } else {
+        setGlobalMessage(data.globalMessage)
+      }
+      } else {
+        console.error("Failed to fetch global message");
+      }
+    } catch (error) {
+      console.error("Error fetching global message:", error);
+    }
+  };
+
+  const deleteGlobalMessage = () => {
+    setGlobalMessage(null)
+    setIsModalOpen(false)
+  }
 
   let hour = new Date().getHours()
   let greeting = ""
@@ -65,22 +145,21 @@ export default function Home() {
         <h1> {greeting} {name}!</h1>
       </div>
 
-      {globalMessage.length != 0 &&
+      {globalMessage !== null &&
+  <div className="global-message">
+    <span className="global-message-author">
+      <h3 id="author">{globalMessage.author}</h3>
+    </span>
 
-      <div className="global-message">
-        <span className="global-message-author">
-            <h3>YT</h3>
-        </span>
+    <span id="skrev">
+      <p>:</p>
+    </span>
 
-        <span id="skrev">
-          <p>:</p>
-        </span>
-
-        <span className="global-message-content">
-          <p>{globalMessage}</p>
-          </span>
-      </div>
-    }
+    <span className="global-message-content" onClick={openModal}>
+      <p>{globalMessage.globalMessage}</p>
+    </span>
+  </div>
+}
 
 
       <div className="sessions-header">
@@ -94,6 +173,30 @@ export default function Home() {
         </div>
       </div>
       
+
+{userRole > 1000 && (
+                    <div className="menu-icon">
+                        <img src="./plus-icon.svg" alt="plus-icon" onClick={message} className="admin-button"/>
+                    </div>
+                )}
+
+<div id="modal-root">
+<Modal isOpen={isModalOpen} onClose={closeModal}>
+  <div className="modal-wrapper">
+    <div className="modal-header">
+        <h2>Ändra eller ta bort globalt meddelande</h2>
+    </div>
+
+    <div className="modal-buttons">
+        <button className="modal-button" onClick={message}>Ändra</button>
+        <button className="modal-delete-button" onClick={deleteGlobalMessage}>Ta bort</button>
+    </div>
+  </div>
+      </Modal>
+</div>
+
+
+
 
     </div>
     </div>

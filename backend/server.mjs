@@ -131,7 +131,7 @@ app.post("/login", async (req, res) => {
 
 
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: 12000
+      expiresIn: 120000
     });
     resObj.success = true;
     resObj.token = token;
@@ -218,6 +218,48 @@ app.get("/get-exercises", async (req, res) => {
     res.status(500).json({ error: 'An error occurred while fetching exercises' });
   }
 });
+
+
+app.post("/admin/post-global-message", async (req, res) => {
+  const globalMessage = req.body
+
+  try {
+      const database = client.db('Coachapp');
+      const globalMessageCollection = database.collection('globalmessage');
+
+      const existingMessage = await globalMessageCollection.findOne();
+
+      if (existingMessage) {
+          await globalMessageCollection.updateOne({}, { $set: { globalMessage } });
+          res.status(200).json({ message: "Globalt meddelande uppdaterat" });
+      } else {
+          const result = await globalMessageCollection.insertOne({ globalMessage });
+          res.status(200).json({ message: "Globalt meddelande tillagt", messageId: result.insertedId });
+      }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Något gick fel vid hantering av globalt meddelande" });
+  }
+});
+
+app.get("/get-global-message", async (req, res) => {
+  try {
+    const database = client.db('Coachapp');
+    const globalMessageCollection = database.collection('globalmessage');
+
+    const result = await globalMessageCollection.findOne();
+    console.log(1, result.globalMessage)
+
+    if (result) {
+      res.status(200).json({ message: "Globalt meddelande hämtat", globalMessage: result.globalMessage });
+    } else {
+      res.status(404).json({ message: "Inget globalt meddelande hittades" });
+    }
+  } catch (err) {
+    console.error("Något gick fel vid hämtning av meddelande", err);
+    res.status(500).json({ error: "Något gick fel vid hämtning av meddelande" });
+  }
+}); 
 
 
 app.listen(port, () => {

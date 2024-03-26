@@ -34,40 +34,46 @@ export default function Menu({ hamburgerRef }) {
     return (
 
 
-        <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}  style={{ display: isMenuOpen ? 'block' : 'none' }}>
+        <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef} >
             <Link to="/add-session" className="menu-item" onClick={closeMenu}>
             <div>
-                <h2>Lägg till pass</h2>
+            <h2 className="menu-item-h2">Lägg till pass</h2>
             </div>
             </Link>
 
             <Link to="/add-excercise" className="menu-item" onClick={closeMenu}>
                 <div>
-                    <h2>Lägg till övning</h2>
+                <h2 className="menu-item-h2">Lägg till övning</h2>
                 </div>
             </Link>
 
             <Link to="/add-athlete" className="menu-item" onClick={closeMenu}>
                 <div>
-                    <h2>Lägg till atlet</h2>
+                <h2 className="menu-item-h2">Lägg till atlet</h2>
                 </div>
             </Link>
 
             <div className="menu-item">
-                <h2>Mina pass</h2>
+                <h2 className="menu-item-h2">Mina pass</h2>
             </div>
 
             <div className="menu-item">
-                <h2>Mina tävlingar</h2>
+                 <h2 className="menu-item-h2">Mina tävlingar</h2>
             </div>
 
             <Link to="/timer" className="menu-item" onClick={closeMenu}>
                 <div>
-                    <h2>Timer</h2>
+                    <h2 className="menu-item-h2">Timer</h2>
                 </div>
             </Link>
 
-            <Link to="/login" className="menu-item"  id="logout">
+            <Link to="/settings" className="menu-item" onClick={closeMenu}>
+                <div>
+                    <h2 className="menu-item-h2">Inställningar</h2>
+                </div>
+            </Link>
+
+            <Link to="/login" className="menu-item"  id="logout" onClick={closeMenu}>
             <div>
                 <h4>Logga ut</h4>
             </div>
