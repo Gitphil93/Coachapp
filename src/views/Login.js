@@ -1,74 +1,79 @@
-import React, {useState} from 'react'
-import { Link, useNavigate } from 'react-router-dom';
-import "../styles/Login.css"
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../styles/Login.css";
 
 export default function Login() {
-const [emailValue, setEmailValue] = useState("")
-const [passwordValue, setPasswordValue] = useState("")
+  const [emailValue, setEmailValue] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
 
-const navigate = useNavigate()
+  const navigate = useNavigate();
 
- const handleChange = (event, setter) => {
-    setter(event.target.value)
- }
+  const handleChange = (event, setter) => {
+    setter(event.target.value);
+  };
 
+  const login = async () => {
+    try {
+      const response = await fetch("http://192.168.0.36:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailValue,
+          password: passwordValue,
+        }),
+      });
 
- const login = async () => {
-   
-  try {
-    const response = await fetch("http://192.168.0.36:5000/login", {
-      method: "POST",
-      headers: {
-       "Content-Type": "application/json",
-    },
-     body: JSON.stringify({
-     email:emailValue,
-      password: passwordValue,
-                  })
-    })
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.token); // lagrar token i localstorage för att lätt kunna hämta det
-      navigate('/')
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token); // lagrar token i localstorage för att lätt kunna hämta det
+        navigate("/");
+      }
+      console.log(response);
+    } catch (err) {
+      console.log(err, "Något gick fel");
     }
-    console.log(response)
-  } catch (err){
-    console.log(err, "Något gick fel")
-  }
- }
-
+  };
 
   return (
-    <div className='login-wrapper'>
+    <div className="login-wrapper">
       <div className="form-wrapper">
         <div className="login-header">
-      <h1>Logga in</h1>
-      </div>
-
-      <div className="input-wrapper" id="login-input">
-        <div className="input-name" >
-          <input type="email" placeholder='Email' value={emailValue} onChange={(e) => handleChange(e, setEmailValue)}></input>
-      </div>
-      <div className="input-name">
-          <input type="password" placeholder='Lösenord' value={passwordValue} onChange={(e) => handleChange(e, setPasswordValue)}></input>
-      </div>
-      </div>
-
-      <Link to="/register" className="register-text">
-        <div>
-          <p id="register-paragraph">Registrera dig här</p>
+          <h1>Logga in</h1>
         </div>
-      </Link>
 
+        <div className="input-wrapper" id="login-input">
+          <div className="input-name">
+            <input
+              type="email"
+              placeholder="Email"
+              value={emailValue}
+              onChange={(e) => handleChange(e, setEmailValue)}
+            ></input>
+          </div>
+          <div className="input-name">
+            <input
+              type="password"
+              placeholder="Lösenord"
+              value={passwordValue}
+              onChange={(e) => handleChange(e, setPasswordValue)}
+            ></input>
+          </div>
+        </div>
 
-      <div className="button-wrapper">
-        <button className="login-button" id="login-button" onClick={login}>Logga in</button>
+        <Link to="/register" className="register-text">
+          <div>
+            <p id="register-paragraph">Registrera dig här</p>
+          </div>
+        </Link>
+
+        <div className="button-wrapper">
+          <button className="login-button" id="login-button" onClick={login}>
+            Logga in
+          </button>
+        </div>
       </div>
-
-
-      </div>
-      </div>
-    
-  )
+    </div>
+  );
 }

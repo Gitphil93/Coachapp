@@ -1,87 +1,87 @@
 .input-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 80%;
-    height: auto;
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  height: auto;
 }
 
-.input-name{
-    margin-top:1rem ;
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+.input-name {
+  margin-top: 1rem;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 input {
-    position: relative;
-    height: 2rem;
-    border: none;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
-    border-radius: 5px;
-    outline: none;
+  position: relative;
+  height: 2rem;
+  border: none;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+  border-radius: 5px;
+  outline: none;
 }
-input::placeholder{
-    font-style: oblique;
+input::placeholder {
+  font-style: oblique;
 }
 
 .textarea-description {
-    margin-top:1rem ;
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+  margin-top: 1rem;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 textarea {
-    position: relative;
-    outline: none;
-    border-radius: 5px;
-    border: none;
+  position: relative;
+  outline: none;
+  border-radius: 5px;
+  border: none;
 
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
-    resize: none;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+  resize: none;
 }
 
 textarea::placeholder {
-    margin-left: 1rem;
-    font-style: oblique;
+  margin-left: 1rem;
+  font-style: oblique;
 }
 
 .save-button-wrapper {
-    width: 80%;
-    position: absolute;
-    bottom: 4rem;
+  width: 80%;
+  position: absolute;
+  bottom: 4rem;
 }
 
 .save-button {
-    height: 3rem;
-    width: 100%;
-    border: none;
-    border-radius: 5px;
-    background-color: rgb(38, 42, 56);
-    font-size: 1rem;
-    color: white;
-    transition: transform 0.1s ease;
+  height: 3rem;
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  background-color: rgb(38, 42, 56);
+  font-size: 1rem;
+  color: white;
+  transition: transform 0.1s ease;
 }
 
-.save-button:hover{
-    cursor: pointer;
+.save-button:hover {
+  cursor: pointer;
 }
 
 .save-button:active {
-    transform: scale(0.98)
+  transform: scale(0.98);
 }
 
 .select-category {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-    width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  width: 100%;
 }
 #category {
-    width: 80%;
-    height: 2rem;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
-    outline: none;
-    border: none;
+  width: 80%;
+  height: 2rem;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+  outline: none;
+  border: none;
 }

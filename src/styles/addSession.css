@@ -1,181 +1,183 @@
 .home-wrapper-exercises {
-display:flex;
-flex-direction: column;
-align-items: center;
-font-size: 1rem;
-position: relative;
-z-index: 1;
-box-sizing: border-box;
-/* height: calc(100vh - var(--header-height)); */
-height: auto;
-background-color: rgb(241, 241, 241);
-overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  /* height: calc(100vh - var(--header-height)); */
+  height: auto;
+  background-color: rgb(241, 241, 241);
+  overflow-y: auto;
 }
 
 .attendees {
-    margin-top: 1rem;
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    align-items: center;
-    height: auto;
-    width: 100%;
-    background-color: white;
-    border-radius: 10px;
-    padding-bottom: 1rem;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: center;
+  height: auto;
+  width: 100%;
+  background-color: white;
+  border-radius: 10px;
+  padding-bottom: 1rem;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
 }
 .attendees-button {
-    height: 3rem;
-    width: 6rem;
-    margin-top: 1rem;
-    border: none;
-    color: white;
-    background-color: rgb(38, 42, 56);
-    border-radius: 10px;
+  height: 3rem;
+  width: 6rem;
+  margin-top: 1rem;
+  border: none;
+  color: white;
+  background-color: rgb(38, 42, 56);
+  border-radius: 10px;
 }
 
-.datetime-wrapper{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.datetime-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
-.datetime-picker{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.datetime-picker {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
-
-.date-time-header{
-    margin-top: 1rem ;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+.date-time-header {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .add-exercises {
-    margin-top: 1rem;
-    width: 100%;
+  margin-top: 1rem;
+  width: 100%;
 }
 
 .expand-wrapper {
-    border-bottom: 1px solid rgb(182, 180, 180);
-    padding-bottom: 3rem;
+  border-bottom: 1px solid rgb(182, 180, 180);
+  padding-bottom: 3rem;
 }
 
 .expand {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 1rem;
-    width: 100%;
-    height: 3rem;
-    background-color: white;
-    border-top-left-radius: 10px; 
-    border-top-right-radius: 10px; 
-    padding-left: 1rem;
-    padding-right: 1rem;
-    overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  width: 100%;
+  height: 3rem;
+  background-color: white;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  overflow: hidden;
 }
 
 
 .expanded-content {
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    align-items: center;
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    background-color: white;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    transition: max-height 0.3s ease-in-out; 
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  background-color: white;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  transition: max-height 0.3s ease-in-out;
 }
 
 .expanded-content.expanded {
-    display: flex;
-    justify-content: space-evenly;
-    flex-wrap: wrap;
-    align-items: center;
-    max-height: 10rem;
-    transition: max-height 0.3s ease-in-out;
-    overflow-y: auto;
-    padding-bottom: 1rem;
-
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: center;
+  max-height: 10rem;
+  transition: max-height 0.3s ease-in-out;
+  overflow-y: auto;
+  padding-bottom: 1rem;
 }
 
 .exercise-button {
-    margin-top: 1rem;
-    outline: none;
-    border:none;
-    height: 3rem;
-    width: 6rem;
-    border-radius: 10px;
-    background-color: rgb(38, 42, 56);
-    color: white;
+  margin-top: 1rem;
+  outline: none;
+  border: none;
+  height: 3rem;
+  width: 6rem;
+  border-radius: 10px;
+  background-color: rgb(38, 42, 56);
+  color: white;
 }
 
 #arrow {
-    height: 1rem;
-    transition: transform 0.3s ease; 
+  height: 1rem;
+  transition: transform 0.3s ease;
 }
 
 .expanded #arrow {
-    transform: rotate(90deg); 
+  transform: rotate(90deg);
 }
 
 .session-summary {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
- .session-summary-exercises{
-margin-top:1rem;
-} 
+.session-summary-exercises {
+  margin-top: 1rem;
+}
 
-.selected-time-place{
-    margin-top: 1rem;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
-    padding: 1rem;
+.selected-time-place {
+  margin-top: 1rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+  padding: 1rem;
 }
 
 .selected-exercises {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 1rem;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218); 
-    padding: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+  padding: 1rem;
 }
 
 .up-button {
-margin-right:3rem;
-transform: rotate(90deg);
-height:auto;
-width: 1rem;
+  margin-right: 3rem;
+  transform: rotate(90deg);
+  height: auto;
+  width: 1rem;
 }
 
 .down-button {
-margin-left:3rem;
-transform: rotate(-90deg);
-height:auto;
-width: 1rem;
+  margin-left: 3rem;
+  transform: rotate(-90deg);
+  height: auto;
+  width: 1rem;
 }
 
-
 .save-exercise-button {
-    margin-top: 3rem;
-    padding-bottom: 5rem;
+  margin-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+#commented-svg {
+  position: absolute;
+  right: 5.5rem;
+  width: 1.5rem;
+  height:1.5rem;
 }

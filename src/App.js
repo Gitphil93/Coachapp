@@ -1,31 +1,30 @@
-import './App.css';
-import React from 'react';
-import {BrowserRouter as Router,Routes,Route} from 'react-router-dom';
+import "./App.css";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./views/Home";
-import AddExcercise from './views/AddExcercise';
-import AddAthlete from './views/AddAthlete';
-import Timer from './views/Timer';
-import Login from "./views/Login"
-import Register from "./views/Register"
-import AddSession from './views/AddSession';
-import {MenuProvider} from './context/MenuContext.js';
+import AddExcercise from "./views/AddExcercise";
+import AddAthlete from "./views/AddAthlete";
+import Timer from "./views/Timer";
+import Login from "./views/Login";
+import Register from "./views/Register";
+import AddSession from "./views/AddSession";
+import { MenuProvider } from "./context/MenuContext.js";
 
 function App() {
- 
   return (
     <div className="App">
-     <MenuProvider>
+      <MenuProvider>
         <Router>
-        <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="add-excercise" element={<AddExcercise />} />
-        <Route path="add-athlete" element={<AddAthlete />} />
-        <Route path="add-session" element ={<AddSession />} /> 
-        <Route path="timer" element={<Timer/>} />
-        <Route path="login" element={<Login/>} />
-        <Route path="register" element={<Register/>} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="add-excercise" element={<AddExcercise />} />
+            <Route path="add-athlete" element={<AddAthlete />} />
+            <Route path="add-session" element={<AddSession />} />
+            <Route path="timer" element={<Timer />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+          </Routes>
         </Router>
       </MenuProvider>
     </div>

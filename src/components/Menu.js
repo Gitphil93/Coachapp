@@ -1,83 +1,63 @@
-import React, { useEffect, useRef, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useContext } from "react";
+import { Link } from "react-router-dom";
 import "../styles/Menu.css";
-import MenuContext from '../context/MenuContext.js';
+import MenuContext from "../context/MenuContext.js";
 
 export default function Menu({ hamburgerRef }) {
-    const { isMenuOpen, toggleMenu } = useContext(MenuContext);
-    const menuRef = useRef(null);
+  const { isMenuOpen, toggleMenu } = useContext(MenuContext);
+  const menuRef = useRef(null);
 
-    const closeMenu = () => {
-        toggleMenu();
+  const closeMenu = () => {
+    toggleMenu();
+  };
+
+  useEffect(() => {
+    const handleClickOutsideMenu = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        isMenuOpen &&
+        event.target !== hamburgerRef.current &&
+        event.target.parentNode !== hamburgerRef.current
+      ) {
+        closeMenu();
+      }
     };
 
-    useEffect(() => {
-        const handleClickOutsideMenu = (event) => {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(event.target) &&
-                isMenuOpen &&
-                event.target !== hamburgerRef.current &&
-                event.target.parentNode !== hamburgerRef.current
-            ) {
-                closeMenu();
-            }
-        };
+    document.addEventListener("mousedown", handleClickOutsideMenu);
 
-        document.addEventListener('mousedown', handleClickOutsideMenu);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideMenu);
+    };
+  }, [isMenuOpen]);
 
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutsideMenu);
-        };
-    }, [isMenuOpen]);
+  return (
+    <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}>
+      <div className="menu-item">
+        <h2 className="menu-item-h2">Mina pass</h2>
+      </div>
 
-    return (
+      <div className="menu-item">
+        <h2 className="menu-item-h2">Mina tävlingar</h2>
+      </div>
 
-
-        <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef} >
-            <Link to="/add-session" className="menu-item" onClick={closeMenu}>
-            <div>
-            <h2 className="menu-item-h2">Lägg till pass</h2>
-            </div>
-            </Link>
-
-            <Link to="/add-excercise" className="menu-item" onClick={closeMenu}>
-                <div>
-                <h2 className="menu-item-h2">Lägg till övning</h2>
-                </div>
-            </Link>
-
-            <Link to="/add-athlete" className="menu-item" onClick={closeMenu}>
-                <div>
-                <h2 className="menu-item-h2">Lägg till atlet</h2>
-                </div>
-            </Link>
-
-            <div className="menu-item">
-                <h2 className="menu-item-h2">Mina pass</h2>
-            </div>
-
-            <div className="menu-item">
-                 <h2 className="menu-item-h2">Mina tävlingar</h2>
-            </div>
-
-            <Link to="/timer" className="menu-item" onClick={closeMenu}>
-                <div>
-                    <h2 className="menu-item-h2">Timer</h2>
-                </div>
-            </Link>
-
-            <Link to="/settings" className="menu-item" onClick={closeMenu}>
-                <div>
-                    <h2 className="menu-item-h2">Inställningar</h2>
-                </div>
-            </Link>
-
-            <Link to="/login" className="menu-item"  id="logout" onClick={closeMenu}>
-            <div>
-                <h4>Logga ut</h4>
-            </div>
-            </Link>
+      <Link to="/timer" className="menu-item" onClick={closeMenu}>
+        <div>
+          <h2 className="menu-item-h2">Timer</h2>
         </div>
-    );
+      </Link>
+
+      <Link to="/settings" className="menu-item" onClick={closeMenu}>
+        <div>
+          <h2 className="menu-item-h2">Inställningar</h2>
+        </div>
+      </Link>
+
+      <Link to="/login" className="menu-item" id="logout" onClick={closeMenu}>
+        <div>
+          <h4>Logga ut</h4>
+        </div>
+      </Link>
+    </div>
+  );
 }

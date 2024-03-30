@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState } from "react";
 
 const MenuContext = createContext();
 
@@ -6,8 +6,8 @@ export const MenuProvider = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen(prevState => !prevState);
-    console.log(isMenuOpen)
+    setIsMenuOpen((prevState) => !prevState);
+    console.log(isMenuOpen);
   };
 
   return (

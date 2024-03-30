@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import '../styles/Modal.css';
+import React, { useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
+import "../styles/Modal.css";
 
 const Modal = ({ isOpen, onClose, children }) => {
   const modalRef = useRef();
@@ -12,9 +12,9 @@ const Modal = ({ isOpen, onClose, children }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
@@ -22,11 +22,15 @@ const Modal = ({ isOpen, onClose, children }) => {
 
   return ReactDOM.createPortal(
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" ref={modalRef} onClick={(event) => event.stopPropagation()}>
+      <div
+        className="modal"
+        ref={modalRef}
+        onClick={(event) => event.stopPropagation()}
+      >
         {children}
       </div>
     </div>,
-    document.getElementById('modal-root')
+    document.getElementById("modal-root"),
   );
 };
 
