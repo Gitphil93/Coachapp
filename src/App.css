@@ -29,3 +29,8 @@ h3 {
 .header-text {
   font-weight: 400;
 }
+
+input, textarea {
+  touch-action: none; 
+}
+

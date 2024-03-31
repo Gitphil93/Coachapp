@@ -302,6 +302,59 @@ app.get("/get-global-message", async (req, res) => {
   }
 });
 
+
+app.post("/post-session", async (req, res) => {
+  const session = req.body
+  console.log(session)
+
+  try {
+    const database = client.db("Coachapp");
+    const sessionsCollection = database.collection("sessions");
+
+    const result = await sessionsCollection.insertOne(session)
+    res
+    .status(200)
+    .json({ message: "Träningspass tillagt", session: session });
+
+  } catch (err) {
+    console.error("Kunde inte posta träningspass", err)
+    res
+    .status(500)
+    .json({
+      message: "Ett fel inträffade vid försök att lägga till träningspass",
+    });
+  }
+})
+
+app.post("/assign-session", async (req, res) => {
+  const { email, session } = req.body; 
+  console.log(email, session)
+
+  try {
+    const database = client.db("Coachapp");
+    const usersCollection = database.collection("users");
+
+    const user = await usersCollection.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).json({ error: "Användaren hittades inte" });
+    }
+
+    // Lägg till hela sessionen i användarens sessions-array
+    await usersCollection.updateOne(
+      { email: email },
+      { $push: { sessions: session } }
+    );
+
+    res.status(200).json({ message: "Träningspass tillagt till användaren" });
+  } catch (error) {
+    console.error("Fel vid tilldelning av träningspass:", error);
+    res.status(500).json({ error: "Ett fel inträffade vid tilldelning av träningspass" });
+  }
+});
+
+
+
 app.listen(port, () => {
   console.log("Server running at port " + port);
 });

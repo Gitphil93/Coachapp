@@ -10,6 +10,8 @@ import Modal from "../components/Modal.js";
 export default function AddSession() {
   const hamburgerRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -23,7 +25,7 @@ export default function AddSession() {
   const [selectedExercises, setSelectedExercises] = useState([]);
   const [sessionArray, setSessionArray] = useState([]);
   const [comment, setComment] = useState(""); 
-    console.log(typeof selectedExercise)
+  const [filteredExercises, setFilteredExercises] = useState([]);
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -44,6 +46,43 @@ export default function AddSession() {
 
   const handlePlaceChange = (e) => {
     setSelectedPlace(e.target.value);
+  };
+
+  const openSearchModal = () => {
+      setIsSearchModalOpen(true)
+  }
+
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false)
+    setSearchTerm("")
+}
+
+  const handleSearch = (e) => {
+      setSearchTerm(e.target.value)
+  }
+
+  const filterExercises = () => {
+    if (searchTerm.trim() === "") {
+      setFilteredExercises([]); // Om söktermen är tom, sätt filtrerade övningar till en tom array
+    } else {
+      const filtered = exerciseArray.filter((exercise) =>
+        exercise.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredExercises(filtered);
+    }
+  };
+
+  useEffect(() => {
+    filterExercises();
+  }, [searchTerm]);
+
+  const addFromSearch = (exercise) => {
+    setSelectedExercises((prevExercises) => [...prevExercises, exercise]);
+    setFilteredExercises((prevFiltered) =>
+      prevFiltered.filter((item) => item.name !== exercise.name)
+    );
+
+    setIsSearchModalOpen(false);
   };
 
   const addAttendees = (user) => {
@@ -94,9 +133,6 @@ export default function AddSession() {
   };
 
   useEffect(() => {
-    console.log(selectedAttendees);
-    console.log(selectedExercise);
-    console.log(selectedExercises);
   }, [selectedAttendees, selectedExercises, selectedExercise]);
 
   useEffect(() => {
@@ -114,7 +150,7 @@ export default function AddSession() {
             },
           );
           const data = await response.json();
-          console.log(data);
+
           setUsers(data.users);
         } catch (err) {
           console.log(err, "Kunde inte hämta användarna");
@@ -175,6 +211,75 @@ export default function AddSession() {
     setIsModalOpen(false);
   };
 
+
+  const postSession = async () => {
+      if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
+          console.log("Fyll i alla fält")
+          return false
+      }
+
+
+console.log("Selected attendees", selectedAttendees)
+      try{
+        const response = await fetch("http://192.168.0.36:5000/post-session", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+            attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email })),
+              date: selectedDate,
+              time: selectedTime,
+              place: selectedPlace,
+              exercises: selectedExercises
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json(); 
+
+            console.log(data)
+            selectedAttendees.forEach(async (attendee) => {
+                console.log(1,data.session)
+                await assignSessionToUser(attendee.email, data.session);
+              });
+        
+              setComment("")
+              setSelectedAttendees([])
+              setSelectedExercises([])
+              setSelectedDate("")
+              setSelectedTime("")
+              setSelectedPlace("")
+          }
+
+      } catch (err) {
+          console.error("Något gickfel vid postning av träningspass" , err)
+      }
+  }
+
+  const assignSessionToUser = async (email, data) => {
+    try {
+      const response = await fetch("http://192.168.0.36:5000/assign-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          session: data
+        }),
+      });
+  
+      if (response.ok) {
+        console.log("Träningspass tillagt till användaren");
+      } else {
+        console.error("Kunde inte tilldela träningspass till användaren");
+      }
+    } catch (error) {
+      console.error("Något gick fel vid tilldelning av träningspass:", error);
+    }
+  };
+
   return (
     <div>
       <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
@@ -206,7 +311,7 @@ export default function AddSession() {
                 className="attendees-button"
                 onClick={() => addAttendees(user)}
               >
-                {user.name}
+                {user.name} {user.lastname}
               </button>
             ))}
           </div>
@@ -246,6 +351,7 @@ export default function AddSession() {
           <div className="add-exercises">
             <div className="add-exercises-header">
               <h2 className="header-text">Lägg till övningar</h2>
+              <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
             </div>
 
             <div className="expand-wrapper">
@@ -308,7 +414,7 @@ export default function AddSession() {
               removeAttendee(attendee);
             }}
           >
-            {attendee.name}
+            {attendee.name} {attendee.lastname}
           </button>
         ))}
       </div>
@@ -358,7 +464,7 @@ export default function AddSession() {
 
 
             <div className="save-exercise-button">
-              <button className="save-button">Spara pass</button>
+              <button className="save-button" onClick={postSession}>Spara pass</button>
             </div>
           </div>
         </div>
@@ -370,11 +476,12 @@ export default function AddSession() {
                 <h2>Ta bort eller kommentera övning</h2>
               </div>
 
-               {selectedExercise.comment && (
-              <div className="exercise-comment">
-                  <p>Kommentar: {selectedExercise.comment}</p>
-              </div>
-)}
+              {selectedExercise && selectedExercise.comment && (
+                 <div className="exercise-comment">
+                    <p>Kommentar: {selectedExercise.comment}</p>
+                </div>
+                )} 
+
               <div className="modal-buttons">
                 <button className="modal-button" onClick={commentExercise}>Kommentera</button>
                 <button
@@ -387,6 +494,47 @@ export default function AddSession() {
             </div>
           </Modal>
         </div>
+
+
+ 
+        <div id="modal-root">
+          <Modal isOpen={isSearchModalOpen} onClose={closeSearchModal}>
+            <div className="modal-wrapper">
+              <div className="modal-header">
+                <h2>Sök övningar</h2>
+              </div>
+
+                <div>
+                    <input className="input-name"
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        />
+                </div>
+
+
+                <div className="filtered-exercises">
+        {filteredExercises.map((exercise) => (
+          <button
+            key={exercise.name}
+            className="exercise-button"
+            onClick={() => addFromSearch(exercise)}
+          >
+            {exercise.name}
+          </button>
+        ))}
+      </div>
+
+
+              <div className="modal-buttons">
+                <button className="modal-button" onClick={closeSearchModal}>Stäng</button>
+
+              </div>
+            </div>
+          </Modal>
+        </div>
+
+
       </div>
     </div>
   );
