@@ -48,6 +48,20 @@ const comparePassword = async (password, storedPassword) => {
   return isTheSame;
 };
 
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token missing" });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", async (req, res) => {
   const newUser = req.body;
@@ -160,14 +174,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/get-user", async (req, res) => {
+app.get("/get-user", verifyToken, async (req, res) => {
   try {
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
-    const token = req.headers.authorization.split(" ")[1];
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await usersCollection.findOne({ email: decodedToken.email });
+    const user = await usersCollection.findOne({ email: req.decoded.email });
     if (user) {
       res.status(200).json({ success: true, user: user });
     } else {
@@ -186,7 +198,7 @@ app.get("/get-user", async (req, res) => {
   }
 });
 
-app.get("/get-all-users", async (req, res) => {
+app.get("/get-all-users", verifyToken, async (req, res) => {
   try {
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
@@ -211,7 +223,7 @@ app.get("/get-all-users", async (req, res) => {
   }
 });
 
-app.post("/add-excercise", async (req, res) => {
+app.post("/add-excercise", verifyToken, async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
 
@@ -305,7 +317,6 @@ app.get("/get-global-message", async (req, res) => {
 
 app.post("/post-session", async (req, res) => {
   const session = req.body
-  console.log(session)
 
   try {
     const database = client.db("Coachapp");
@@ -328,7 +339,7 @@ app.post("/post-session", async (req, res) => {
 
 app.post("/assign-session", async (req, res) => {
   const { email, session } = req.body; 
-  console.log(email, session)
+
 
   try {
     const database = client.db("Coachapp");

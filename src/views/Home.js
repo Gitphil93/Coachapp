@@ -7,8 +7,8 @@ import MenuContext from "../context/MenuContext.js";
 import Modal from "../components/Modal.js";
 
 export default function Home() {
-  const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] =
-    useState(false);
+  const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
+  const [today, setToday] = useState("")
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const hamburgerRef = useRef(null);
   const modalRef = useRef();
@@ -17,6 +17,19 @@ export default function Home() {
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [userRole, setUserRole] = useState(0);
   const [initials, setInitials] = useState("");
+  const [user, setUser] = useState(null)
+  const [todaysSessions, setTodaysSessions] = useState([])
+console.log(2,todaysSessions )
+
+const getToday = () => {
+  const dateObj = new Date();
+  const year = dateObj.getFullYear().toString();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0'); 
+  const day = dateObj.getDate().toString().padStart(2, '0'); 
+  const date = `${year}-${month}-${day}`; 
+  setToday(date)
+  console.log(date);
+}
 
   const openGlobalMessageModal = () => {
     if (userRole > 1000) {
@@ -61,16 +74,19 @@ export default function Home() {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("data", data);
           if (data.success) {
             setName(data.user.name);
             setInitials(data.user.name[0] + data.user.lastname[0]);
             setUserRole(data.user.role);
+            setUser(data.user)
+            const todaySessions = data.user.sessions.filter(session => session.date === today);
+            setTodaysSessions(todaySessions);
+            console.log(todaySessions)
           }
         })
         .catch((error) => console.error("Error fetching user:", error));
     }
-  }, []);
+  }, [today]);
 
   const message = async () => {
     setIsGlobalMessageModalOpen(false);
@@ -103,7 +119,6 @@ export default function Home() {
       );
 
       if (response.ok) {
-        console.log("Meddelande postat");
         fetchGlobalMessage();
       }
 
@@ -115,6 +130,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchGlobalMessage();
+    getToday()
   }, []);
 
   const fetchGlobalMessage = async () => {
@@ -145,12 +161,7 @@ export default function Home() {
 
   let hour = new Date().getHours();
   let greeting = "";
-  let sessionObj = {
-    header: "Styrka",
-    day: "Måndag",
-    time: "12:30",
-    where: "Friidrottens Hus",
-  };
+  
 
   if (hour < 10) {
     greeting = "God morgon";
@@ -209,20 +220,9 @@ export default function Home() {
           </div>
         )}
 
-        <div className="sessions-header">
-          <h3>Dagens pass</h3>
-        </div>
-        <div className="sessions">
-          <div className="sessions-content">
-            <h2>{sessionObj.header}</h2>
-            <h2>
-              {sessionObj.day} {sessionObj.time}
-            </h2>
-            <h2>{sessionObj.where}</h2>
-          </div>
-        </div>
 
-        {userRole > 1000 && (
+
+{userRole > 1000 && (
           <div className="menu-icon">
             <img
               src="./plus-icon.svg"
@@ -232,6 +232,106 @@ export default function Home() {
             />
           </div>
         )}
+
+{todaysSessions.length > 0 ? (
+  <div className="sessions-wrapper">
+    <div className="sessions-header">
+      <h2>Dagens Pass</h2>
+    </div>
+    {todaysSessions.map((session, sessionIndex) => {
+      const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
+      return (
+        <div className="sessions" key={sessionIndex}>
+          <div className="sessions-content">
+            <div className="session-top">
+              <h2>
+                {session.date} {session.time}
+              </h2>
+            </div>
+            <div className="session-bottom">
+              <h2>{session.place}</h2>
+              <div className="session-initials">
+                {attendeesInitials.map((initials, attendeeIndex) => (
+                  <span key={attendeeIndex} className="initials-wrapper">
+                    <h3>{initials}</h3>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  
+  <div className="if-no-sessions">
+      <div className="sessions-header">
+      <h2>Dagens pass</h2>
+      </div>
+
+      <div className="no-sessions">
+    <h2>Du har inga pass idag</h2>
+    </div>
+  </div>
+)}
+
+
+
+
+
+{user && user.sessions && user.sessions.length > 0 && (
+  <div className="sessions-wrapper">
+    <div className="sessions-header">
+      <h2>Kommande Pass</h2>
+    </div>
+    {user.sessions
+      .filter((session) => {
+        const sessionDateTime = new Date(`${session.date}T${session.time}`);
+        const todayDateTime = new Date();
+        const sessionDate = sessionDateTime.toDateString();
+        const todayDate = todayDateTime.toDateString();
+        return sessionDate !== todayDate && sessionDateTime > todayDateTime;
+      })
+      .sort((a, b) => {
+        const dateATime = new Date(`${a.date}T${a.time}`);
+        const dateBTime = new Date(`${b.date}T${b.time}`);
+        return dateATime - dateBTime;
+      })
+      .map((session, index) => {
+        const sessionDateTime = new Date(`${session.date}T${session.time}`);
+        let dayOfWeek = sessionDateTime.toLocaleDateString("sv-SE", { weekday: "long" });
+        dayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+
+        // Skapa en array med initialer för varje deltagare på passet
+        const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
+
+        return (
+          <div className="sessions" key={index}>
+            <div className="sessions-content">
+              <div className="session-top">
+              <h2>
+                {dayOfWeek} {session.date} {session.time} 
+              </h2>
+              </div>
+              <div className="session-bottom">
+              <h2>{session.place}</h2>
+              <div className="session-initials">
+                {attendeesInitials.map((initials, index) => (
+                  <span key={index} className="initials-wrapper">
+                    <h3 id="initials">{initials}</h3>
+                  </span>
+                ))}
+              </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+  </div>
+)}
+
+
 
         <div id="modal-root">
           <Modal

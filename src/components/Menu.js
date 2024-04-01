@@ -11,6 +11,10 @@ export default function Menu({ hamburgerRef }) {
     toggleMenu();
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    closeMenu();
+  };
   useEffect(() => {
     const handleClickOutsideMenu = (event) => {
       if (
@@ -53,7 +57,7 @@ export default function Menu({ hamburgerRef }) {
         </div>
       </Link>
 
-      <Link to="/login" className="menu-item" id="logout" onClick={closeMenu}>
+      <Link to="/login" className="menu-item" id="logout" onClick={handleLogout}>
         <div>
           <h4>Logga ut</h4>
         </div>

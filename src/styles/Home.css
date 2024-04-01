@@ -5,15 +5,15 @@
 }
 
 .home-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 1rem;
-  position: relative;
+
   z-index: 1;
   box-sizing: border-box;
-  height: calc(100vh - var(--header-height));
-  /*  background-color: linear-gradient(to bottom right, rgb(241, 241, 241), rgb(255, 255, 255));  */
+  height: calc(100vh - var(--header-height));                          
   background: linear-gradient(
     to bottom right,
     rgba(241, 241, 241, 1),
@@ -28,10 +28,21 @@
 .sessions-header {
   margin-top: 2rem;
   width: 80%;
+  
 }
 
 .sessions-header > h3 {
   font-weight: 500;
+
+
+}
+
+.sessions-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
 }
 
 .sessions {
@@ -41,11 +52,10 @@
   align-items: center;
   width: 80%;
   height: 20vh;
-  border-radius: 20px;
+  border-radius: 10px;
   box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
-  background-color: inherit;
-  background-image: url("/public/trackfield.jpeg");
-  backdrop-filter: brightness(60%);
+  background-color: white;
+
 }
 
 .sessions-content {
@@ -55,15 +65,82 @@
   align-items: center;
   flex-direction: column;
   justify-content: space-between;
-  background-color: inherit;
+  background: linear-gradient(to bottom right, rgb(235, 233, 233) 50%, rgb(4, 52, 85));
+  border-radius: 10px;
 }
 
-.sessions-content > h2 {
-  color: white;
-  font-weight: 500;
-  font-size: 1.5rem;
-  margin: 0;
+.session-top {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 }
+.session-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.session-initials {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  opacity: 1;
+}
+
+.initials-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; 
+  height: 2rem;
+  width: 2rem;
+  color: rgb(255, 255, 255);
+  border: 2px solid rgb(255, 253, 253);
+  border-radius: 50%;
+  font-size: 0.8rem;
+  margin-right: -0.4rem;
+  background-color: rgb(131, 141, 148);
+  z-index: 1;
+
+}
+
+#initials {
+  font-weight: 500;
+}
+
+.session-top > h2 {
+  padding: 1rem;
+  color: black;
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0;
+  color: rgb(71, 70, 70);
+}
+.session-bottom > h2 {
+  padding: 1rem;
+  color: black;
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0;
+  color: rgb(71, 70, 70);
+}
+
+.if-no-sessions{
+  width: 80%;
+}
+
+.no-sessions > h2{
+  margin-top: 1rem ;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.sessions-header > h2 {
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
 
 .global-message {
   display: flex;
@@ -107,11 +184,13 @@
 
 .admin-button {
   position: fixed;
-  /*     height: 4rem;
-    width: 4rem; */
-
   bottom: 5rem;
   right: 3rem;
+  width: auto;
+  height: auto;
+  background-color: rgb(228, 228, 228);
+  border-radius: 50%;
+  box-shadow: 0px 0px 5px 1px rgb(248, 247, 247);
 }
 
 #author {

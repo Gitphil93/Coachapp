@@ -23,9 +23,9 @@ export default function AddSession() {
   const [exerciseCategories, setExerciseCategories] = useState([]);
   const [selectedAttendees, setSelectedAttendees] = useState([]);
   const [selectedExercises, setSelectedExercises] = useState([]);
-  const [sessionArray, setSessionArray] = useState([]);
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
+  const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -157,8 +157,12 @@ export default function AddSession() {
         }
       }
     }
-    getUsers();
-  }, []);
+    getUsers()
+if (isPostSessionSuccess) {
+  getUsers();
+  setIsPostSessionSuccess(false); 
+}
+}, [isPostSessionSuccess]);
 
   useEffect(() => {
     async function getExercises() {
@@ -198,11 +202,11 @@ export default function AddSession() {
 
   const commentExercise = () => {
     const newComment = prompt("Kommentera övning");
-    if (newComment !== null) { // Ensure a comment is provided
+    if (newComment !== null) { 
       setSelectedExercises(prevExercises =>
         prevExercises.map(exercise => {
           if (exercise.name === selectedExercise.name) {
-            return { ...exercise, comment: newComment }; // Add comment to the selected exercise
+            return { ...exercise, comment: newComment }
           }
           return exercise;
         })
@@ -217,9 +221,6 @@ export default function AddSession() {
           console.log("Fyll i alla fält")
           return false
       }
-
-
-console.log("Selected attendees", selectedAttendees)
       try{
         const response = await fetch("http://192.168.0.36:5000/post-session", {
             method: "POST",
@@ -250,8 +251,10 @@ console.log("Selected attendees", selectedAttendees)
               setSelectedDate("")
               setSelectedTime("")
               setSelectedPlace("")
+              setIsPostSessionSuccess(true);
+              
           }
-
+  
       } catch (err) {
           console.error("Något gickfel vid postning av träningspass" , err)
       }

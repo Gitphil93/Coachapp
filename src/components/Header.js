@@ -7,11 +7,13 @@ export default function Header({ onMenuToggle, hamburgerRef }) {
     <div className="header">
       <Link to="/">
         <div className="runner">
-          <img src="./runner-logo.svg" id="runner-logo" alt="runner-logo" />
+        <h1>appleet.</h1>
+{/*           <img src="./runner-logo.svg" id="runner-logo" alt="runner-logo" /> */}
         </div>
       </Link>
 
       <div className="hamburger" ref={hamburgerRef} onClick={onMenuToggle}>
+
         <img src="./hamburger.svg" id="hamburger-logo" alt="hamburger-logo" />
       </div>
     </div>

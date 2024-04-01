@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext,useEffect } from "react";
 import "../styles/addAthlete.css";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
@@ -15,6 +15,35 @@ export default function AddAthlete() {
   const [isAdded, setIsAdded] = useState(true);
   const hamburgerRef = useRef(null);
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+  const [coach, setCoach ] = useState("")
+
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const response = await fetch("http://192.168.0.36:5000/get-user", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCoach(data.user.name + " " + data.user.lastname)
+          } else {
+            console.log("Kunde inte hämta användaren");
+          }
+        } catch (error) {
+          console.error("Något gick fel vid hämtning av användare:", error);
+        }
+      } else {
+        console.log("Token saknas");
+      }
+    };
+
+    getUser();
+  }, []);
 
   const handleChange = (event, setter) => {
     setter(event.target.value);
@@ -43,7 +72,7 @@ export default function AddAthlete() {
           email: email,
           key: key,
           role: 1000,
-          coach: "Yannick",
+          coach: coach,
         }),
       });
       console.log(response);
