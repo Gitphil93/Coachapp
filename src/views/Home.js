@@ -66,7 +66,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("https://appleet-gitphil93s-projects.vercel.app/get-user", {
+      fetch("http://localhost:5000/get-user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
