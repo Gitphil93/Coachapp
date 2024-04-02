@@ -42,6 +42,9 @@ export default function Register() {
 
   return (
     <div className="register-wrapper">
+            <div className="logo-header">
+        <h1>appleet.</h1>
+        </div>
       <div className="form-wrapper-register">
         <div className="login-header">
           <h1>Registrera dig</h1>

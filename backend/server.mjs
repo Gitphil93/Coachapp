@@ -223,7 +223,7 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/add-excercise", verifyToken, async (req, res) => {
+app.post("/add-excercise", async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
 

@@ -56,8 +56,9 @@ export default function Timer() {
         <h1 className="view-header">Timer</h1>
 
         <div className="timer">
+          <div className="counter">
           <h1>{formattedTime}</h1>
-
+          </div>
           {time !== 0 && !isRunning && (
             <div className="clear-button-wrapper">
               <button className="clear-button" onClick={clearTimer}>

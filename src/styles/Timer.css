@@ -12,6 +12,20 @@
   font-size: 5rem;
 }
 
+.counter {
+display: flex;
+align-items: center;
+text-align: center;
+min-width: 100%;
+}
+
+.counter > h1 {
+  font-family: monospace;
+  font-weight: 100;
+  font-size: 4rem;
+  min-width: 100%;
+}
+
 .clear-button-wrapper {
   display: flex;
   justify-content: center;

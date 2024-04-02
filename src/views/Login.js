@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 
@@ -11,6 +11,13 @@ export default function Login() {
   const handleChange = (event, setter) => {
     setter(event.target.value);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, []);
 
   const login = async () => {
     try {
@@ -38,7 +45,11 @@ export default function Login() {
 
   return (
     <div className="login-wrapper">
+      <div className="logo-header">
+        <h1>appleet.</h1>
+        </div>
       <div className="form-wrapper">
+  
         <div className="login-header">
           <h1>Logga in</h1>
         </div>

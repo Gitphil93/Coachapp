@@ -252,6 +252,11 @@ if (isPostSessionSuccess) {
               setSelectedTime("")
               setSelectedPlace("")
               setIsPostSessionSuccess(true);
+              setExpandedCategory(false)
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+              });
               
           }
   
