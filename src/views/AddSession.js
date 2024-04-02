@@ -239,7 +239,7 @@ if (isPostSessionSuccess) {
           if (response.ok) {
             const data = await response.json(); 
 
-            console.log(data)
+
             selectedAttendees.forEach(async (attendee) => {
                 console.log(1,data.session)
                 await assignSessionToUser(attendee.email, data.session);
