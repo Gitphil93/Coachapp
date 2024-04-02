@@ -66,7 +66,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://192.168.0.36:5000/get-user", {
+      fetch("/get-user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
