@@ -31,6 +31,13 @@ run().catch(console.dir);
 app.use(express.json());
 app.use(cors());
 
+app.options('*', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.status(200).send();
+});
+
 const hashPassword = async (password) => {
   try {
     const salt = await bcrypt.genSalt(saltRounds);
