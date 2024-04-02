@@ -21,7 +21,7 @@ export default function Login() {
 
   const login = async () => {
     try {
-      const response = await fetch("https://appleet-backend-90f1296dd7aa.herokuapp.com/login", {
+      const response = await fetch("https://appleet-backend-bd150ba4b33f.herokuapp.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
