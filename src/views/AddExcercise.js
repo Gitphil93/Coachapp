@@ -32,13 +32,13 @@ export default function AddExcercise() {
       return false;
     }
     try {
-      const response = await fetch("https://appleet-backend.vercel.app/add-excercise", {
+      const response = await fetch("http://localhost:5000/add-excercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: nameValue,
+          name: nameValue.trim(),
           description: descriptionValue,
           category: categoryValue,
         }),

@@ -72,7 +72,7 @@ const verifyToken = (req, res, next) => {
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", async (req, res) => {
   const newUser = req.body;
-  console.log(newUser);
+ 
 
   try {
     const database = client.db("Coachapp");
@@ -107,7 +107,6 @@ app.post("/admin/register", async (req, res) => {
 // användarobjektet
 app.post("/register", async (req, res) => {
   const newUser = req.body;
-  console.log(newUser);
 
   try {
     const database = client.db("Coachapp");
