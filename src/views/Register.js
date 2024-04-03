@@ -15,7 +15,7 @@ export default function Register() {
   const register = async () => {
     if (passwordValue === passwordRepeatValue) {
       try {
-        const response = await fetch("http://192.168.0.36:5000/register", {
+        const response = await fetch("https://appleet-backend.vercel.app/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
