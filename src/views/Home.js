@@ -21,6 +21,8 @@ export default function Home() {
   const [todaysSessions, setTodaysSessions] = useState([])
 console.log(2,todaysSessions )
 
+
+
 const getToday = () => {
   const dateObj = new Date();
   const year = dateObj.getFullYear().toString();
@@ -66,7 +68,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("/get-user", {
+      fetch("http://localhost:5000/get-user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -105,7 +107,7 @@ const getToday = () => {
   const postMessage = async (message) => {
     try {
       const response = await fetch(
-        "/admin/post-global-message",
+        "http://192.168.0.36:5000/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -136,7 +138,7 @@ const getToday = () => {
   const fetchGlobalMessage = async () => {
     try {
       const response = await fetch(
-        "/get-global-message",
+        "http://192.168.0.36:5000/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
