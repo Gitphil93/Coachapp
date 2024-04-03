@@ -1,5 +1,7 @@
 {
     "version": 2,
+    "functions": { "api": { "handler": "server.mjs" } },
+    "routes": [{ "src": "/backend(.*)", "dest": "/server.mjs" }],
     "builds": [
       { "src": "/backend/**", "use": "@vercel/node" },
       { "src": "/src/**", "use": "@vercel/static" }
@@ -9,3 +11,6 @@
       { "src": "/(.*)", "dest": "/src/$1" }
     ]
   }
+
+
+
