@@ -68,7 +68,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("/get-user", {
+      fetch("https://appleet-backend.vercel.app/get-user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ const getToday = () => {
   const postMessage = async (message) => {
     try {
       const response = await fetch(
-        "/admin/post-global-message",
+        "https://appleet-backend.vercel.app/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -138,7 +138,7 @@ const getToday = () => {
   const fetchGlobalMessage = async () => {
     try {
       const response = await fetch(
-        "/get-global-message",
+        "https://appleet-backend.vercel.app/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
