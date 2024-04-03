@@ -1,9 +1,9 @@
-import express from "express";
-import dotenv from "dotenv";
-import { MongoClient } from "mongodb";
-import cors from "cors";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+const express = require("express");
+const dotenv = require("dotenv");
+const { MongoClient } = require("mongodb");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 dotenv.config();
 
