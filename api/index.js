@@ -32,7 +32,7 @@ async function getConnection() {
   } else {
     connection = connectionPool.pop();
   }
-
+  console.log(connection)
   return connection;
 }
 
@@ -415,7 +415,7 @@ app.post("/post-session", async (req, res) => {
     const result = await sessionsCollection.insertOne(session)
     res
     .status(200)
-    .json({ message: "Träningspass tillagt", session: session });
+    .json({ message: "Träningspass tillagt", session: result });
 
   } catch (err) {
     console.error("Kunde inte posta träningspass", err)
