@@ -41,7 +41,7 @@ function releaseConnection(connection) {
 }
 
 async function run() {
-  let client;
+  let client
   try {
     client = await getConnection();
     await client.db("admin").command({ ping: 1 });
@@ -293,9 +293,9 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
 app.post("/add-excercise", async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
- let client
+  let client 
   try {
-    client = await getConnection()
+     client = await getConnection()
     const database = client.db("Coachapp");
     const exerciseCollection = database.collection("exercises");
 
@@ -346,6 +346,7 @@ app.post("/admin/post-global-message", async (req, res) => {
   const globalMessage = req.body;
   let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const globalMessageCollection = database.collection("globalmessage");
 
@@ -433,10 +434,9 @@ app.post("/post-session", async (req, res) => {
 
 app.post("/assign-session", async (req, res) => {
   const { email, session } = req.body; 
-let client
-
+  let client
   try {
-    client = await getConnection()
+     client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
