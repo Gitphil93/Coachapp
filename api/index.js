@@ -415,7 +415,7 @@ app.post("/post-session", async (req, res) => {
     const result = await sessionsCollection.insertOne(session)
     res
     .status(200)
-    .json({ message: "Träningspass tillagt", session: result });
+    .json({ message: "Träningspass tillagt", session: session });
 
   } catch (err) {
     console.error("Kunde inte posta träningspass", err)
