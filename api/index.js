@@ -11,18 +11,47 @@ const app = express();
 const port = process.env.PORT;
 const uri = process.env.MONGODB_URI;
 const saltRounds = 10;
+let connectionPool = [];
 
-const client = new MongoClient(uri);
+async function createConnection() {
+  try {
+    const client = new MongoClient(uri);
+    await client.connect();
+    return client;
+  } catch (error) {
+    console.error("Error creating connection:", error);
+    throw error;
+  }
+}
+
+async function getConnection() {
+  let connection;
+
+  if (connectionPool.length === 0) {
+    connection = await createConnection();
+  } else {
+    connection = connectionPool.pop();
+  }
+
+  return connection;
+}
+
+function releaseConnection(connection) {
+  connectionPool.push(connection);
+}
 
 async function run() {
+  let client;
   try {
-    await client.connect();
+    client = await getConnection();
     await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
-    );
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
   }
 }
 
@@ -37,6 +66,7 @@ app.options('*', (req, res) => {
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(200).send();
 });
+
 
 const hashPassword = async (password) => {
   try {
@@ -73,8 +103,10 @@ const verifyToken = (req, res, next) => {
 app.post("/admin/register", async (req, res) => {
   const newUser = req.body;
   console.log(newUser);
+  let client
 
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
@@ -100,6 +132,10 @@ app.post("/admin/register", async (req, res) => {
       .json({
         message: "Ett fel inträffade vid försök att lägga till användare",
       });
+  } finally  {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
@@ -108,8 +144,10 @@ app.post("/admin/register", async (req, res) => {
 app.post("/register", async (req, res) => {
   const newUser = req.body;
   console.log(newUser);
+  let client
 
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
@@ -137,12 +175,17 @@ app.post("/register", async (req, res) => {
       .json({
         message: "Ett fel inträffade vid försök att lägga till användare",
       });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.post("/login", async (req, res) => {
   const credentials = req.body;
   console.log(credentials);
+  let client
 
   const resObj = {
     success: false,
@@ -150,6 +193,7 @@ app.post("/login", async (req, res) => {
   };
 
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
@@ -178,14 +222,20 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     return res.status(500).json({ error: "Error during login" });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.get("/get-user", verifyToken, async (req, res) => {
+  let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
-
+  
     const user = await usersCollection.findOne({ email: req.decoded.email });
     if (user) {
       res.status(200).json({ success: true, user: user });
@@ -202,11 +252,17 @@ app.get("/get-user", verifyToken, async (req, res) => {
         success: false,
         message: "Ett fel inträffade vid hämtning av användare",
       });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.get("/get-all-users", verifyToken, async (req, res) => {
+  let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
@@ -227,14 +283,19 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
         success: false,
         message: "Ett fel inträffade vid hämtning av alla användare",
       });
+  } finally {
+    if (client) {
+      releaseConnection()
+    }
   }
 });
 
 app.post("/add-excercise", async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
-
+ let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const exerciseCollection = database.collection("exercises");
 
@@ -252,11 +313,17 @@ app.post("/add-excercise", async (req, res) => {
       .json({ message: "Övning tillagd", exerciseId: result.insertedId });
   } catch (err) {
     console.error("Något gick fel, kunde inte spara övning", err);
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.get("/get-exercises", async (req, res) => {
+  let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const exerciseCollection = database.collection("exercises");
 
@@ -268,12 +335,16 @@ app.get("/get-exercises", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching exercises" });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.post("/admin/post-global-message", async (req, res) => {
   const globalMessage = req.body;
-
+  let client
   try {
     const database = client.db("Coachapp");
     const globalMessageCollection = database.collection("globalmessage");
@@ -297,11 +368,17 @@ app.post("/admin/post-global-message", async (req, res) => {
     res
       .status(500)
       .json({ error: "Något gick fel vid hantering av globalt meddelande" });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 app.get("/get-global-message", async (req, res) => {
+  let client
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const globalMessageCollection = database.collection("globalmessage");
     const result = await globalMessageCollection.findOne();
@@ -318,14 +395,20 @@ app.get("/get-global-message", async (req, res) => {
     res
       .status(500)
       .json({ error: "Något gick fel vid hämtning av meddelande" });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
 
 app.post("/post-session", async (req, res) => {
   const session = req.body
+  let client
 
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const sessionsCollection = database.collection("sessions");
 
@@ -341,14 +424,19 @@ app.post("/post-session", async (req, res) => {
     .json({
       message: "Ett fel inträffade vid försök att lägga till träningspass",
     });
+  } finally {
+    if (client) {
+      releaseConnection()
+    }
   }
 })
 
 app.post("/assign-session", async (req, res) => {
   const { email, session } = req.body; 
-
+let client
 
   try {
+    client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
@@ -368,6 +456,10 @@ app.post("/assign-session", async (req, res) => {
   } catch (error) {
     console.error("Fel vid tilldelning av träningspass:", error);
     res.status(500).json({ error: "Ett fel inträffade vid tilldelning av träningspass" });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
   }
 });
 
