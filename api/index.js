@@ -285,7 +285,7 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
       });
   } finally {
     if (client) {
-      releaseConnection()
+      releaseConnection(client)
     }
   }
 });
@@ -426,7 +426,7 @@ app.post("/post-session", async (req, res) => {
     });
   } finally {
     if (client) {
-      releaseConnection()
+      releaseConnection(client)
     }
   }
 })
