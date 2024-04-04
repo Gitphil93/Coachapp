@@ -88,7 +88,7 @@ const getToday = () => {
         })
         .catch((error) => console.error("Error fetching user:", error));
     }
-  }, [today]);
+  }, []);
 
   const message = async () => {
     setIsGlobalMessageModalOpen(false);
