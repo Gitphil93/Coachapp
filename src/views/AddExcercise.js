@@ -28,14 +28,16 @@ export default function AddExcercise() {
   };
 
   const addExcercise = async () => {
+    const token = localStorage.getItem("token")
     if (nameValue === "" || categoryValue === "") {
       return false;
     }
     try {
-      const response = await fetch("http://localhost:5000/add-excercise", {
+      const response = await fetch("http://192.168.0.36:5000/add-excercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           name: nameValue.trim(),

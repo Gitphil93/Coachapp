@@ -4,10 +4,12 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext";
 import Modal from "../components/Modal.js";
+import Loader from "../components/Loader.js"
 
 
 
 export default function AddSession() {
+  const [isLoading, setIsLoading] = useState(true)
   const hamburgerRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
@@ -26,6 +28,8 @@ export default function AddSession() {
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
+
+  let counter = 0 
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -137,11 +141,12 @@ export default function AddSession() {
 
   useEffect(() => {
     async function getUsers() {
+      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const response = await fetch(
-            "http://localhost:5000/get-all-users",
+            "http://192.168.0.36:5000/get-all-users",
             {
               method: "GET",
               headers: {
@@ -150,10 +155,16 @@ export default function AddSession() {
             },
           );
           const data = await response.json();
+          counter++
 
           setUsers(data.users);
         } catch (err) {
           console.log(err, "Kunde inte hämta användarna");
+        } finally {
+          if (counter === 2) {
+            counter = 0
+          setIsLoading(false)
+        }
         }
       }
     }
@@ -166,11 +177,12 @@ if (isPostSessionSuccess) {
 
   useEffect(() => {
     async function getExercises() {
+      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const response = await fetch(
-            "http://localhost:5000/get-exercises",
+            "http://192.168.0.36:5000/get-exercises",
             {
               method: "GET",
               headers: {
@@ -178,6 +190,7 @@ if (isPostSessionSuccess) {
               },
             },
           );
+          counter++
           const data = await response.json();
           console.log(data);
           setExerciseArray(data);
@@ -187,6 +200,12 @@ if (isPostSessionSuccess) {
           setExerciseCategories(categories);
         } catch (err) {
           console.log(err, "Kunde inte hämta övningarna");
+        } finally {
+          if (counter === 2) {
+            counter = 0
+            setIsLoading(false)
+          }
+          
         }
       }
     }
@@ -217,21 +236,25 @@ if (isPostSessionSuccess) {
 
 
   const postSession = async () => {
+    setIsLoading(true)
+
+    const token = localStorage.getItem("token")
       if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
           return false
       }
       try{
-        const response = await fetch("http://localhost:5000/post-session", {
+        const response = await fetch("http://192.168.0.36:5000/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
             attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email })),
-              date: selectedDate,
-              time: selectedTime,
-              place: selectedPlace,
+              date: selectedDate.trim(),
+              time: selectedTime.trim(),
+              place: selectedPlace.trim(),
               exercises: selectedExercises
             }),
           });
@@ -262,15 +285,19 @@ if (isPostSessionSuccess) {
   
       } catch (err) {
           console.error("Något gickfel vid postning av träningspass" , err)
+      } finally {
+        setIsLoading(false)
       }
   }
 
   const assignSessionToUser = async (email, data) => {
+    const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://localhost:5000/assign-session", {
+      const response = await fetch("http://192.168.0.36:5000/assign-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           email: email,
@@ -290,6 +317,9 @@ if (isPostSessionSuccess) {
 
   return (
     <div>
+      {isLoading && 
+        <Loader/>
+      }
       <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
       <Menu
         isOpen={isMenuOpen}

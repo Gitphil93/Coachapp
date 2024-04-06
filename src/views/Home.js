@@ -5,6 +5,7 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext.js";
 import Modal from "../components/Modal.js";
+import Loader from "../components/Loader.js"
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -19,7 +20,9 @@ export default function Home() {
   const [initials, setInitials] = useState("");
   const [user, setUser] = useState(null)
   const [todaysSessions, setTodaysSessions] = useState([])
-console.log(2,todaysSessions )
+  const [isLoading, setIsLoading] = useState(true)
+console.log(todaysSessions )
+console.log(isLoading)
 
 
 
@@ -68,25 +71,31 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:5000/get-user", {
+      fetch("http://192.168.0.36:5000/get-user", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
         },
       })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            setName(data.user.name);
-            setInitials(data.user.name[0] + data.user.lastname[0]);
-            setUserRole(data.user.role);
-            setUser(data.user)
-            const todaySessions = data.user.sessions.filter(session => session.date === today);
-            setTodaysSessions(todaySessions);
-            console.log(todaySessions)
-          }
-        })
-        .catch((error) => console.error("Error fetching user:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          setName(data.user.name);
+          setInitials(data.user.name[0] + data.user.lastname[0]);
+          setUserRole(data.user.role);
+          setUser(data.user);
+          const todaySessions = data.user.sessions.filter(session => session.date === today);
+          setTodaysSessions(todaySessions);
+          console.log(todaySessions);
+        }
+      })
+      .then(() => {
+         setIsLoading(false); // Stäng loader när data har hämtats 
+      })
+      .catch((error) => {
+        console.error("Error fetching user:", error);
+      setIsLoading(false)
+      });
     }
   }, [today]);
 
@@ -105,13 +114,15 @@ const getToday = () => {
   };
 
   const postMessage = async (message) => {
+    const token = localStorage.getItem("token")
     try {
       const response = await fetch(
-        "http://localhost:5000/post-global-message",
+        "http://192.168.0.36:5000/admin/post-global-message",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
             globalMessage: message,
@@ -135,10 +146,22 @@ const getToday = () => {
     getToday()
   }, []);
 
+
+const getDayOfWeek = (dateString) => {
+ 
+  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
+  
+
+  const date = new Date(dateString);
+  
+ 
+  return days[date.getDay()];
+}
+
+
   const fetchGlobalMessage = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/get-global-message",
+      const response = await fetch("http://192.168.0.36:5000/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
@@ -151,8 +174,11 @@ const getToday = () => {
       } else {
         console.error("Failed to fetch global message");
       }
+      setIsLoading(false) 
     } catch (error) {
       console.error("Error fetching global message:", error);
+    } finally{
+       setIsLoading(false) 
     }
   };
 
@@ -177,12 +203,16 @@ const getToday = () => {
 
   return (
     <div>
+            {isLoading &&
+       <Loader/>
+}
       <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
       <Menu
         isOpen={isMenuOpen}
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+
 
       <div
         className="home-wrapper"
@@ -235,8 +265,8 @@ const getToday = () => {
           </div>
         )}
 
-{todaysSessions.length > 0 ? (
-  <div className="sessions-wrapper">
+{!isLoading && todaysSessions.length > 0 ? (
+  <Link to="my-sessions" className="sessions-wrapper">
     <div className="sessions-header">
       <h2>Dagens Pass</h2>
     </div>
@@ -247,7 +277,7 @@ const getToday = () => {
           <div className="sessions-content">
             <div className="session-top">
               <h2>
-                {session.date} {session.time}
+                {getDayOfWeek(session.date)} {session.time}
               </h2>
             </div>
             <div className="session-bottom">
@@ -255,7 +285,7 @@ const getToday = () => {
               <div className="session-initials">
                 {attendeesInitials.map((initials, attendeeIndex) => (
                   <span key={attendeeIndex} className="initials-wrapper">
-                    <h3>{initials}</h3>
+                    <h3 id="initials">{initials}</h3>
                   </span>
                 ))}
               </div>
@@ -264,7 +294,7 @@ const getToday = () => {
         </div>
       );
     })}
-  </div>
+  </Link>
 ) : (
   
   <div className="if-no-sessions">
@@ -301,11 +331,6 @@ const getToday = () => {
         return dateATime - dateBTime;
       })
       .map((session, index) => {
-        const sessionDateTime = new Date(`${session.date}T${session.time}`);
-        let dayOfWeek = sessionDateTime.toLocaleDateString("sv-SE", { weekday: "long" });
-        dayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-
-        // Skapa en array med initialer för varje deltagare på passet
         const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
 
         return (
@@ -313,7 +338,7 @@ const getToday = () => {
             <div className="sessions-content">
               <div className="session-top">
               <h2>
-                {dayOfWeek} {session.date} {session.time} 
+                {getDayOfWeek(session.date)} {session.date} {session.time} 
               </h2>
               </div>
               <div className="session-bottom">

@@ -99,8 +99,25 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const verifyRole = (requiredRole) => (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token missing" });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    if (decoded.role < requiredRole) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
-app.post("/admin/register", async (req, res) => {
+app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
   console.log(newUser);
   let client
@@ -212,7 +229,7 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Fel lösenord" });
     }
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ email: user.email, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: 120000,
     });
     resObj.success = true;
@@ -290,7 +307,7 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/add-excercise", async (req, res) => {
+app.post("/add-excercise", verifyRole(2000), async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
   let client 
@@ -342,7 +359,7 @@ app.get("/get-exercises", async (req, res) => {
   }
 });
 
-app.post("/admin/post-global-message", async (req, res) => {
+app.post("/admin/post-global-message", verifyRole(2000), async (req, res) => {
   const globalMessage = req.body;
   let client
   try {
@@ -404,7 +421,7 @@ app.get("/get-global-message", async (req, res) => {
 });
 
 
-app.post("/post-session", async (req, res) => {
+app.post("/post-session",verifyRole(2000), async (req, res) => {
   const session = req.body
   let client
 
@@ -425,6 +442,30 @@ app.post("/post-session", async (req, res) => {
     .json({
       message: "Ett fel inträffade vid försök att lägga till träningspass",
     });
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
+  }
+})
+
+app.get("/get-sessions", verifyToken, async (req, res) => {
+  let client
+  try{
+    client = await getConnection()
+    const database = client.db("Coachapp")
+    const sessionCollection = database.collection("sessions")
+    const allSessions = await sessionCollection.find().toArray();
+
+    if (allSessions.length > 0) {
+      res.status(200).json({ success: true, sessions: allSessions });
+    } else {
+      res
+        .status(404)
+        .json({ success: false, message: "Inga pass hittades" });
+    }
+  } catch(err) {
+    console.err("something went wrong when getting sessions:" , err)
   } finally {
     if (client) {
       releaseConnection(client)

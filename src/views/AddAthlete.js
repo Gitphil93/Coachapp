@@ -22,7 +22,7 @@ export default function AddAthlete() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("http://localhost:5000/get-user", {
+          const response = await fetch("http://192.168.0.36:5000/get-user", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -59,12 +59,13 @@ export default function AddAthlete() {
       setShowWarning(true);
       return false;
     }
-
+    const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://localhost:5000/admin/register", {
+      const response = await fetch("http://192.168.0.36:5000/admin/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           name: name,

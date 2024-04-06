@@ -1,0 +1,44 @@
+
+
+.sessions-expandable {
+    margin-top: 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    width: 80%;
+    min-height: 20vh;
+    border-radius: 10px;
+    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+    background-color: white;
+    transition: min-height 0.3s ease-in-out;
+  
+  }
+
+  .sessions-expandable.expanded {
+    min-height: 70vh;
+    transition: min-height 0.3s ease-in-out;
+
+  }
+
+  .expanded-session-content{
+      height: auto;
+      width: 100%;
+      display:flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      max-height: 60vh;
+      align-items:center;
+      text-align: center;
+      overflow-y: scroll;
+  }
+
+  #exercise-name{
+      font-weight: 600;
+      color: rgb(39, 38, 38)
+  }
+  #exercise-comment{
+    font-style: italic;
+    font-size: 0.9rem;
+    color: rgb(37, 37, 37)
+  }
+ 
