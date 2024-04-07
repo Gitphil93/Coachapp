@@ -10,6 +10,7 @@ import Login from "./views/Login";
 import Register from "./views/Register";
 import AddSession from "./views/AddSession";
 import { MenuProvider } from "./context/MenuContext.js";
+import MySessions from "./views/MySessions";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="add-excercise" element={<AddExcercise />} />
             <Route path="add-athlete" element={<AddAthlete />} />
             <Route path="add-session" element={<AddSession />} />
+            <Route path="my-sessions" element={<MySessions />} />
             <Route path="timer" element={<Timer />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />

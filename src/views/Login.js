@@ -21,7 +21,7 @@ export default function Login() {
 
   const login = async () => {
     try {
-      const response = await fetch("https://appleet-backend.vercel.app/login", {
+      const response = await fetch("http://192.168.0.36:5000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export default function Login() {
         localStorage.setItem("token", data.token); // lagrar token i localstorage för att lätt kunna hämta det
         navigate("/");
       }
-      console.log(response);
+
     } catch (err) {
       console.log(err, "Något gick fel");
     }

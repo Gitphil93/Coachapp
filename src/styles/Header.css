@@ -21,6 +21,7 @@
 
 .runner > h1 {
   font-family: "Racing Sans One", sans-serif;
+  text-shadow: 2px 2px 1px rgb(27, 7, 7);
   font-size: 1.5rem;
   color: white;
   font-weight: 800;

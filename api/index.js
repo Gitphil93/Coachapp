@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const { MongoClient } = require("mongodb");
+const { ObjectId } = require('mongodb');
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -32,7 +33,11 @@ async function getConnection() {
   } else {
     connection = connectionPool.pop();
   }
+<<<<<<< HEAD
   console.log(connection)
+=======
+  
+>>>>>>> dev
   return connection;
 }
 
@@ -99,10 +104,30 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const verifyRole = (requiredRole) => (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token missing" });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    if (decoded.role < requiredRole) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
-app.post("/admin/register", async (req, res) => {
+app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
+<<<<<<< HEAD
   console.log(newUser);
+=======
+>>>>>>> dev
   let client
 
   try {
@@ -143,7 +168,11 @@ app.post("/admin/register", async (req, res) => {
 // användarobjektet
 app.post("/register", async (req, res) => {
   const newUser = req.body;
+<<<<<<< HEAD
   console.log(newUser);
+=======
+
+>>>>>>> dev
   let client
 
   try {
@@ -212,7 +241,7 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Fel lösenord" });
     }
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: 120000,
     });
     resObj.success = true;
@@ -290,7 +319,7 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
   }
 });
 
-app.post("/add-excercise", async (req, res) => {
+app.post("/add-excercise", verifyRole(2000), async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
   let client 
@@ -342,7 +371,7 @@ app.get("/get-exercises", async (req, res) => {
   }
 });
 
-app.post("/admin/post-global-message", async (req, res) => {
+app.post("/admin/post-global-message", verifyRole(2000), async (req, res) => {
   const globalMessage = req.body;
   let client
   try {
@@ -404,7 +433,7 @@ app.get("/get-global-message", async (req, res) => {
 });
 
 
-app.post("/post-session", async (req, res) => {
+app.post("/post-session",verifyRole(2000), async (req, res) => {
   const session = req.body
   let client
 
@@ -429,6 +458,33 @@ app.post("/post-session", async (req, res) => {
     if (client) {
       releaseConnection(client)
     }
+<<<<<<< HEAD
+=======
+  }
+})
+
+app.get("/get-sessions", verifyToken, async (req, res) => {
+  let client
+  try{
+    client = await getConnection()
+    const database = client.db("Coachapp")
+    const sessionCollection = database.collection("sessions")
+    const allSessions = await sessionCollection.find().toArray();
+
+    if (allSessions.length > 0) {
+      res.status(200).json({ success: true, sessions: allSessions });
+    } else {
+      res
+        .status(404)
+        .json({ success: false, message: "Inga pass hittades" });
+    }
+  } catch(err) {
+    console.err("something went wrong when getting sessions:" , err)
+  } finally {
+    if (client) {
+      releaseConnection(client)
+    }
+>>>>>>> dev
   }
 })
 
@@ -460,6 +516,84 @@ app.post("/assign-session", async (req, res) => {
     if (client) {
       releaseConnection(client)
     }
+<<<<<<< HEAD
+=======
+  }
+});
+
+app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const exerciseId = req.params.exerciseId;
+  const author = req.body.author
+  const comment = req.body.userComment;
+
+  let client;
+
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const sessionsCollection = database.collection("sessions");
+
+    const { ObjectId } = require('mongodb');
+    const sessionObjectId = new ObjectId(sessionId);
+
+    // Uppdatera sessionen i databasen och använd $addToSet för att lägga till kommentaren
+    const result = await sessionsCollection.updateOne(
+      { 
+        _id: sessionObjectId, 
+        "exercises._id": exerciseId
+      },
+      { 
+        $addToSet: { "exercises.$.userComment": {author: author, comment: comment} } 
+      }
+    );
+
+    // Kontrollera om ingen uppdatering gjordes (kommentaren redan finns)
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ error: "Kommentaren finns redan" });
+    }
+
+    // Skicka ett svar
+    res.status(200).json({ message: "Kommentaren har lagts till" });
+  } catch (error) {
+    console.error("Ett fel uppstod vid hantering av kommentaren:", error);
+    res.status(500).json({ error: "Ett fel uppstod vid hantering av kommentaren" });
+  } finally {
+    if (client) {
+      client.close();
+    }
+  }
+});
+
+app.delete("/delete-session/:sessionId", verifyRole(2000), async (req, res) => {
+  const sessionId = req.params.sessionId;
+  let client;
+
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const sessionsCollection = database.collection("sessions");
+
+    const { ObjectId } = require('mongodb');
+    const sessionObjectId = new ObjectId(sessionId);
+
+    // Ta bort passet från databasen baserat på dess ID
+    const result = await sessionsCollection.deleteOne({ _id: sessionObjectId });
+
+    // Kontrollera om passet togs bort framgångsrikt
+    if (result.deletedCount === 1) {
+      res.status(200).json({ message: "Passet har tagits bort" });
+    } else {
+      res.status(404).json({ error: "Kunde inte hitta passet att ta bort" });
+    }
+  } catch (error) {
+    console.error("Ett fel uppstod vid borttagning av passet:", error);
+    res.status(500).json({ error: "Ett fel uppstod vid borttagning av passet" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+>>>>>>> dev
   }
 });
 

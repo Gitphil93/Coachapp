@@ -34,3 +34,12 @@ input, textarea {
   touch-action: none; 
 }
 
+.modal-h2{
+  font-weight: 500;
+}
+
+
+.modal-content{
+  margin-top: 1rem;
+  width: 100%;
+}
