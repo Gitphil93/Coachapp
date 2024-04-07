@@ -33,11 +33,7 @@ async function getConnection() {
   } else {
     connection = connectionPool.pop();
   }
-<<<<<<< HEAD
-  console.log(connection)
-=======
   
->>>>>>> dev
   return connection;
 }
 
@@ -124,10 +120,6 @@ const verifyRole = (requiredRole) => (req, res, next) => {
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
-<<<<<<< HEAD
-  console.log(newUser);
-=======
->>>>>>> dev
   let client
 
   try {
@@ -168,11 +160,6 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
 // användarobjektet
 app.post("/register", async (req, res) => {
   const newUser = req.body;
-<<<<<<< HEAD
-  console.log(newUser);
-=======
-
->>>>>>> dev
   let client
 
   try {
@@ -458,8 +445,6 @@ app.post("/post-session",verifyRole(2000), async (req, res) => {
     if (client) {
       releaseConnection(client)
     }
-<<<<<<< HEAD
-=======
   }
 })
 
@@ -484,7 +469,6 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
     if (client) {
       releaseConnection(client)
     }
->>>>>>> dev
   }
 })
 
@@ -516,8 +500,6 @@ app.post("/assign-session", async (req, res) => {
     if (client) {
       releaseConnection(client)
     }
-<<<<<<< HEAD
-=======
   }
 });
 
@@ -593,7 +575,6 @@ app.delete("/delete-session/:sessionId", verifyRole(2000), async (req, res) => {
     if (client) {
       releaseConnection(client);
     }
->>>>>>> dev
   }
 });
 
