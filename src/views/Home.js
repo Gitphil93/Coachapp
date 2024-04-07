@@ -90,11 +90,11 @@ const getToday = () => {
         }
       })
       .then(() => {
-         setIsLoading(false); // Stäng loader när data har hämtats 
+     setIsLoading(false);  
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
-      setIsLoading(false)
+     setIsLoading(false); 
       });
     }
   }, [today]);
@@ -174,11 +174,11 @@ const getDayOfWeek = (dateString) => {
       } else {
         console.error("Failed to fetch global message");
       }
-      setIsLoading(false) 
+        setIsLoading(false)
     } catch (error) {
       console.error("Error fetching global message:", error);
     } finally{
-       setIsLoading(false) 
+    setIsLoading(false)  
     }
   };
 

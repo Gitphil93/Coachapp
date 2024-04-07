@@ -22,14 +22,23 @@
 
   .expanded-session-content{
       height: auto;
-      width: 100%;
+      width: 90%;
       display:flex;
       flex-direction: column;
       justify-content: flex-start;
       max-height: 60vh;
-      align-items:center;
+      align-items:flex-start;
       text-align: center;
-      overflow-y: scroll;
+      overflow-y: auto;
+  }
+
+  .exercise-item{
+      text-align: left;
+      width: 100%;
+      display: flex;
+      align-items:flex-start;
+      flex-direction: column;
+      padding-bottom:0.5rem;
   }
 
   #exercise-name{
@@ -39,6 +48,6 @@
   #exercise-comment{
     font-style: italic;
     font-size: 0.9rem;
-    color: rgb(37, 37, 37)
+    color: rgb(37, 37, 37);
   }
- 
+

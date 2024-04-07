@@ -163,7 +163,7 @@ export default function AddSession() {
         } finally {
           if (counter === 2) {
             counter = 0
-          setIsLoading(false)
+           setIsLoading(false) 
         }
         }
       }
@@ -203,7 +203,7 @@ if (isPostSessionSuccess) {
         } finally {
           if (counter === 2) {
             counter = 0
-            setIsLoading(false)
+             setIsLoading(false) 
           }
           
         }
@@ -286,7 +286,7 @@ if (isPostSessionSuccess) {
       } catch (err) {
           console.error("Något gickfel vid postning av träningspass" , err)
       } finally {
-        setIsLoading(false)
+         setIsLoading(false) 
       }
   }
 
@@ -333,6 +333,7 @@ if (isPostSessionSuccess) {
             ? "blur(4px) brightness(40%)"
             : "blur(0) brightness(100%)",
         }}
+       
       >
         <h1 className="view-header">Skapa pass</h1>
 
@@ -510,7 +511,7 @@ if (isPostSessionSuccess) {
         <div id="modal-root">
           <Modal isOpen={isModalOpen} onClose={closeModal}>
             <div className="modal-wrapper">
-              <div className="modal-header">
+              <div className="">
                 <h2>Ta bort eller kommentera övning</h2>
               </div>
 
