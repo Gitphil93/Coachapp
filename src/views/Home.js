@@ -23,20 +23,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 console.log(todaysSessions )
 console.log(isLoading)
+console.log(today)
 
 
-const logCurrentTime = () => {
-  const now = new Date();
-  const hours = now.getHours().toString().padStart(2, '0'); // Formaterar timmen till en sträng med två siffror, t.ex. '07' eller '17'
-  const minutes = now.getMinutes().toString().padStart(2, '0'); // Formaterar minuterna på samma sätt
-  const seconds = now.getSeconds().toString().padStart(2, '0'); // Formaterar sekunderna på samma sätt
-
-  const time = `${hours}:${minutes}:${seconds}`;
-  console.log("Aktuell tid:", time);
-}
-
-// Anropa funktionen för att logga den aktuella tiden
-logCurrentTime();
 
 const getToday = () => {
   const dateObj = new Date();
