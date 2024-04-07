@@ -71,7 +71,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://192.168.0.36:5000/get-user", {
+      fetch("https://appleet.vercel.app/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -117,7 +117,7 @@ const getToday = () => {
     const token = localStorage.getItem("token")
     try {
       const response = await fetch(
-        "http://192.168.0.36:5000/admin/post-global-message",
+        "https://appleet.vercel.app/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -161,7 +161,7 @@ const getDayOfWeek = (dateString) => {
 
   const fetchGlobalMessage = async () => {
     try {
-      const response = await fetch("http://192.168.0.36:5000/get-global-message",
+      const response = await fetch("https://appleet.vercel.app/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
