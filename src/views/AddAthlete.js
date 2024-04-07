@@ -61,7 +61,7 @@ export default function AddAthlete() {
     }
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch("https://appleet.vercel.app/admin/register", {
+      const response = await fetch("https://appleet-backend.vercel.app/admin/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

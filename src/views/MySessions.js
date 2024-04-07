@@ -64,7 +64,7 @@ export default function MySessions() {
         if (token) {
             try {
                 const response = await fetch(
-                    "https://appleet.vercel.app/get-sessions",
+                    "https://appleet-backend.vercel.app/get-sessions",
                     {
                         method: "GET",
                         headers: {
@@ -102,7 +102,7 @@ export default function MySessions() {
     const postComment = async () => {
         const token = localStorage.getItem("token");
         try {
-          const response = await fetch(`https://appleet.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`https://appleet-backend.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -134,7 +134,7 @@ export default function MySessions() {
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await fetch(`https://appleet.vercel.app/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
