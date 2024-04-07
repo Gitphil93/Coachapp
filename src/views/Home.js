@@ -71,7 +71,7 @@ const getToday = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    if (token && today) {
       fetch("https://appleet-backend.vercel.app/get-user", {
         method: "GET",
         headers: {
