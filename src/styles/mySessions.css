@@ -4,7 +4,6 @@
     margin-top: 1rem;
     font-size: 1rem;
     display: flex;
-    align-items: center;
     width: 80%;
     min-height: 20vh;
     border-radius: 10px;
@@ -15,7 +14,8 @@
   }
 
   .sessions-expandable.expanded {
-    min-height: 70vh;
+    min-height: 30vh;
+    max-height: 90vh;
     transition: min-height 0.3s ease-in-out;
 
   }
@@ -32,7 +32,7 @@
       overflow-y: auto;
   }
 
-  .exercise-item{
+  #exercise-item{
       text-align: left;
       width: 100%;
       display: flex;
@@ -51,3 +51,37 @@
     color: rgb(37, 37, 37);
   }
 
+
+  .session-brief-wrapper{
+    width:100%;
+    margin-top: 2rem;
+  }
+  .slider-input {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 75%; /* Full-width */
+    height: 0.1rem; /* Specified height */
+    background: linear-gradient(to right, rgb(255, 255, 255) 40%, rgb(0, 255, 0)) ;
+    outline: none; /* Remove outline */
+    transition: opacity .2s;
+  }
+
+  .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; 
+    height: 25px; 
+    border-radius: 50%;
+    background: rgb(4, 52, 85);
+    cursor: pointer; 
+  }
+
+  .session-brief-slider{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .submit-session {
+    margin-top: 2rem;
+  }

@@ -475,6 +475,8 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
 
 app.post("/assign-session", async (req, res) => {
   const { email, session } = req.body; 
+
+  console.log(session)
   let client
   try {
      client = await getConnection()

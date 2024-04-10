@@ -265,7 +265,7 @@ if (isPostSessionSuccess) {
 
             selectedAttendees.forEach(async (attendee) => {
                 console.log(1,data.session)
-                await assignSessionToUser(attendee.email, data.session);
+             /*    await assignSessionToUser(attendee.email, data.session); */
               });
         
               setComment("")
@@ -290,7 +290,7 @@ if (isPostSessionSuccess) {
       }
   }
 
-  const assignSessionToUser = async (email, data) => {
+  /* const assignSessionToUser = async (email, data) => {
     const token = localStorage.getItem("token")
     try {
       const response = await fetch("http://192.168.0.36:5000/assign-session", {
@@ -313,7 +313,7 @@ if (isPostSessionSuccess) {
     } catch (error) {
       console.error("Något gick fel vid tilldelning av träningspass:", error);
     }
-  };
+  }; */
 
   return (
     <div>
