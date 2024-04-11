@@ -1,25 +1,34 @@
 import React, { useEffect, useState } from "react";
 
-const Weather = ({ sessionDate }) => {
+const Weather = ({sessionDate,sessionTime}) => {
   const [userLocation, setUserLocation] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const API_KEY = '19c737dffbd944c5114401ce4fb6d57a';
+  const sessionDateTime = new Date(`${sessionDate}T${sessionTime}`);
+  const sessionTimestamp = Math.round(sessionDateTime.getTime() / 1000);
 
+
+console.log("user location",userLocation)
   console.log("väderdata",weatherData)
 
   useEffect(() => {
     const fetchWeatherData = async () => {
+        console.log(userLocation)
       try {
+ 
         if (!userLocation) return;
         
         const { latitude, longitude } = userLocation;
+     
         
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`
         );
-        
+     
         if (response.ok) {
-          const data = await response.json();
+            const data = await response.json();
+        console.log(data)
+          console.log("data",data)
           setWeatherData(data);
         } else {
           console.error("Failed to fetch weather data");
@@ -29,10 +38,10 @@ const Weather = ({ sessionDate }) => {
       }
     };
 
-    if (userLocation && sessionDate) {
+    if (userLocation) {
       fetchWeatherData();
     }
-  }, [userLocation, sessionDate]);
+  }, [userLocation]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -71,9 +80,8 @@ const Weather = ({ sessionDate }) => {
 
   return (
     <div>
-      <p>Weather for {sessionDate}: {getWeatherEmoji()}</p>
-      <p>Temperature: {weatherData.main.temp}°C</p>
-      <p>Description: {weatherData.weather[0].description}</p>
+      <p>{/* {getWeatherEmoji()} */} {userLocation.latitude}</p>
+
     </div>
   );
 };

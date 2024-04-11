@@ -30,7 +30,7 @@ export default function Home() {
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
 
-  console.log(isMenuOpen)
+  console.log(today)
 
 
 const getToday = () => {
@@ -301,7 +301,7 @@ const getDayOfWeek = (dateString) => {
         <div className="view-header">
           <h1>
             {" "}
-            {greeting} {name}! <Weather/>
+            {greeting} {name}! 
           </h1>
         </div>
         {globalMessage && typeof globalMessage === "object" && (
@@ -355,6 +355,8 @@ const getDayOfWeek = (dateString) => {
               <h2>
                 {getDayOfWeek(session.date)} {session.time}
               </h2>
+              <h2><Weather sessionDate={session.date ? session.date : ""}
+                sessionTime={session.time ? session.time : "12:00"} /></h2>
             </div>
             <div className="session-bottom">
               <h2>{session.place}</h2>
@@ -401,7 +403,8 @@ const getDayOfWeek = (dateString) => {
             <div className="sessions-content" onClick={() => handleSessionClick(session)}>
               <div className="session-top">
               <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
-                <h2></h2>
+                <h2><Weather sessionDate={session.date ? session.date : ""}
+                sessionTime={session.time ? session.time : "12:00"} /></h2>
 
               </div>
               <div className="session-bottom">
