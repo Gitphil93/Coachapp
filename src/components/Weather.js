@@ -5,12 +5,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faCloud, faCloudShowersHeavy, faSnowflake } from '@fortawesome/free-solid-svg-icons';
 
 const Weather = ({ sessionDate, sessionTime }) => {
- /*  const [userLocation, setUserLocation] = useState({latitude:57.708870, longitude: 11.974560}); */
- const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState({latitude:57.708870, longitude: 11.974560}); 
+
   const [weatherData, setWeatherData] = useState(null);
   const API_KEY = '19c737dffbd944c5114401ce4fb6d57a';
-  console.log(weatherData)
-    console.log("userLocation",userLocation)
+
+
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
@@ -74,19 +74,18 @@ const Weather = ({ sessionDate, sessionTime }) => {
 
   // Hitta det närmaste väderdataobjektet i listan
   const closestWeatherData = weatherData.list.reduce((closest, current) => {
+  
     const closestTimeDiff = Math.abs(new Date(closest.dt_txt) - new Date(`${sessionDate}T${sessionTime}`));
     const currentTimeDiff = Math.abs(new Date(current.dt_txt) - new Date(`${sessionDate}T${sessionTime}`));
 
     return currentTimeDiff < closestTimeDiff ? current : closest;
   });
-
+  console.log(closestWeatherData)
   return (
     <div>
       <div className="weather-wrapper" key={closestWeatherData.dt}>
         <p>{getWeatherEmoji(closestWeatherData.weather[0].main)}</p>
         <p id="weather-celsius">{Math.round(closestWeatherData.main.temp)} ºC</p>
-
-        {/* Add more weather information as needed */}
       </div>
     </div>
   );

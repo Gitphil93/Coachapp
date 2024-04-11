@@ -7,10 +7,12 @@ import Menu from '../components/Menu';
 import {jwtDecode} from "jwt-decode"; 
 import Modal from "../components/Modal"
 import Loader from "../components/Loader"
+import Weather from "../components/Weather"
 
 export default function MySessions() {
     const location = useLocation();
     const selectedSession = location.state ? location.state.selectedSession : null;
+    const [today, setToday] = useState("")
     const [isLoading, setIsLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -36,8 +38,9 @@ export default function MySessions() {
     const [sessionToRemoveId, setSessionToRemoveId] = useState('');
     const [sliderValue, setSliderValue] = useState(0)
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
+    const [summaryComment, setSummaryComment] = useState("")
  
-
+   
     console.log(notSignedSessions)
 
 
@@ -61,9 +64,23 @@ export default function MySessions() {
       const handleComment = (e) => {
         setComment(e.target.value)
       }
+
+      const handleSummaryCommentChange = (e) => {
+          setSummaryComment(e.target.value)
+      }
+    
+      const getToday = () => {
+        const dateObj = new Date();
+        const year = dateObj.getFullYear().toString();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0'); 
+        const day = dateObj.getDate().toString().padStart(2, '0'); 
+        const date = `${year}-${month}-${day}`; 
+        setToday(date)
+      }
       
 
       const getSessions = async () => {
+          getToday()
         setIsLoading(true);
         const token = localStorage.getItem("token");
         const decodedToken = jwtDecode(token);
@@ -97,10 +114,12 @@ export default function MySessions() {
                     setAllPastSessions(sortedSessions.filter(session => session.date < currentDate));
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
-                    setUserUpcomingSessions(userSessions.filter(session => session.date >= currentDate));
-                    setUserPastSessions(userSessions.filter(session => session.date < currentDate));
-                    setAllUpcomingSessions(sortedSessions.filter(session => session.date >= currentDate));
-                    setAllPastSessions(sortedSessions.filter(session => session.date < currentDate));
+                    setUserUpcomingSessions(userSessions.filter(session => session.date >= currentDate && !session.signed));
+                    setUserPastSessions(userSessions.filter(session => session.date < currentDate && session.signed));
+                    setAllUpcomingSessions(sortedSessions.filter(session => session.date >= currentDate && !session.signed));
+                    setAllPastSessions(sortedSessions.filter(session => session.date < currentDate && session.signed));
+                    const notSignedSessions = sortedSessions.filter(session => session.date < currentDate && !session.signed);
+                    setNotSignedSessions(notSignedSessions);
                 }
             } catch (err) {
                 console.error("Couldn't get sessions", err);
@@ -164,12 +183,47 @@ export default function MySessions() {
             console.error("Ett fel uppstod vid hantering av borttagning av passet:", error);
         }
     };
+
+
+    const submitSession = async (sessionId) => {
+        console.log(sessionId)
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch(`http://192.168.0.30:5000/sign-session/${sessionId}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    summaryComment: summaryComment,
+                    email: user.email,
+                    howDidSessionGo: sliderValue,
+                    signed: true
+
+                  }),
+            });
+    
+            if (response.ok) {
+                console.log("Passet har färdigmarkerats framgångsrikt!");
+                getSessions(); 
+            } else {
+                console.error("Något gick fel när du försökte färdigmarkera passet.");
+            }
+        } catch (error) {
+            console.error("Ett fel uppstod vid hantering av färdigmarkering av passet:", error);
+        }
+    };
+    
       
     const isAnyContentExpanded = () => {
         return allSessions.some(session => isContentExpanded(session));
     };
 
-    const toggleExpandContent = (session) => {
+    const toggleExpandContent = (session, e) => {
+        if (e?.target?.tagName.toLowerCase() === 'input' || e?.target?.tagName.toLowerCase() === 'button' || e?.target?.tagName.toLowerCase() === 'h3') {
+            return; // Avbryt funktionen om det är en input
+        }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
                 return false; 
@@ -183,10 +237,10 @@ export default function MySessions() {
     useEffect(() => {
         if (expandedContent) {
             if (expandedContent._id) {
-                console.log("Expanded content id:", expandedContent._id);
+
                 setTimeout(() => {
                     const selectedSessionElement = document.querySelector(".sessions-expandable.expanded");
-                    console.log(selectedSessionElement);
+                   
                     if (selectedSessionElement) {
                         selectedSessionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
@@ -199,26 +253,16 @@ export default function MySessions() {
         }
     }, [expandedContent]);
 
-    const moveSessionsToNotSigned = () => {
-        const currentDate = new Date().toISOString().slice(0, 10);
-        const sessionsToMove = allSessions.filter(session => {
-            const sessionDate = new Date(session.date).toISOString().slice(0, 10);
-            return sessionDate < currentDate;
-        });
-        setNotSignedSessions(sessionsToMove);
-    };
-
-    
     useEffect(() => {
-        getSessions()
-        moveSessionsToNotSigned()
+        getSessions();
         if (selectedSession) {
             toggleExpandContent(selectedSession);
         } else {
             setExpandedContent(null);
         }
     }, [selectedSession]);
-    
+
+  
 
     const isContentExpanded = (session) => {
         const isExpanded = expandedContent && expandedContent._id === session._id;
@@ -310,8 +354,6 @@ export default function MySessions() {
                              placeholder="Skriv kommentar">
                      </input>
                 </div>
-                
-
               <div className="modal-buttons">
                 <button className="modal-button" onClick={postComment}>Kommentera</button>
               </div>
@@ -338,6 +380,7 @@ export default function MySessions() {
           </Modal>
         </div>
 
+
             {isLoading &&
             <Loader/>
         }
@@ -362,7 +405,7 @@ export default function MySessions() {
                             style={{
                                 transform: `translateX(${sessionXValues[session._id]}px)`,
                             }}
-                            onClick={() => toggleExpandContent(session)}
+                            onClick={(e) => toggleExpandContent(session, e)}
                             onTouchStart={(e) => handleTouchStart(session._id, e)}
                             onTouchMove={(e) => handleTouchMove(session._id, e)}
                             onTouchEnd={() => handleTouchEnd(session._id)}// Uppdatera sessionens position baserat på sessionX
@@ -370,6 +413,8 @@ export default function MySessions() {
                                 <div className="sessions-content" style={{ background: calculateSwipeColor(session._id)}}>
                                     <div className="session-top">
                                         <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                                        <h2><Weather sessionDate={session.date ? session.date : today}
+                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
 
                                     
@@ -384,32 +429,6 @@ export default function MySessions() {
                                         ))}
                                     </div>
                                     ))}
-
-                                    <div className="session-brief-wrapper">
-                                        <div className="session-brief-header">
-                                            <p id="exercise-comment">Hur gick passet?</p>
-                                        </div>
-                                        <div className="session-brief-slider">
-                                        <input 
-                                        className='slider-input'
-                                             type="range" 
-                                             min="0" 
-                                             max="10"
-                                             value={sliderValue}
-                                             onChange={handleSliderValue}
-                                        />
-                                        <p>{sliderValue}</p>
-                                   
-                                        </div>
-
-                                  
-                                        <div className="submit-session">
-                                            <button className="modal-button">Färdigmarkera</button>
-                                        </div>
-                                        
-                                      
-                                        
-                                    </div>
                                 </div>
                                 )}
 
@@ -428,10 +447,12 @@ export default function MySessions() {
                         ))
                     ) : (
                         userUpcomingSessions.map((session, index) => (
-                            <div id={expandedContent._id} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={() => toggleExpandContent(session)}> 
+                            <div id={expandedContent._id} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={(e) => toggleExpandContent(session, e)}> 
                                 <div className="sessions-content">
                                     <div className="session-top">
                                         <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                                        <h2><Weather sessionDate={session.date ? session.date : today}
+                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
 
                                     {isContentExpanded(session) && (
@@ -464,13 +485,100 @@ export default function MySessions() {
                     )}
                 </div>
 
+
+                <div className="sessions-wrapper">
+    <div className="sessions-header">
+        <h2>Ej färdigmarkerade</h2>
+    </div>
+    {role === 1000 && 
+        notSignedSessions.map((session, index) => (
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
+                <div className="sessions-content">
+                    <div className="session-top">
+                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                    </div>
+
+                    {isContentExpanded(session) && (
+                                <div className="expanded-session-content">
+                                    {session.exercises.map((exercise, exerciseIndex) => (
+                                    <div id="exercise-item" key={exerciseIndex}>
+                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                        <p id="exercise-comment">{exercise.comment}</p>
+                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
+                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
+                                        ))}
+                                    </div>
+                                    ))}
+
+
+                                    <div className="session-brief-wrapper">
+                                        <div className="session-brief-header">
+                                            <p id="exercise-comment">Hur gick passet?</p>
+                                        </div>
+                                        <div className="session-brief-slider">
+                                        <input 
+                                        className='slider-input'
+                                             type="range" 
+                                             min="0" 
+                                             max="10"
+                                             value={sliderValue}
+                                             onChange={handleSliderValue}
+                                        />
+                                        <p>{sliderValue}</p>
+                                   
+                                        </div>
+
+                                            <div>
+                                                <input
+                                                className="input-name"
+                                                type="text"
+                                                placeholder="Lägg till kommentar"
+                                                value={summaryComment}
+                                                onChange={handleSummaryCommentChange}
+                                                />
+                                            </div>
+
+                                        <div className="submit-session">
+                                            <button className="submit-button" onClick={() => submitSession(session._id)}>Färdigmarkera</button>
+                                        </div>
+                                        
+                                      
+                                        
+                                    </div>
+                                </div>
+                                )}
+
+                    <div className="session-bottom">
+                        <h2>{session.place}</h2>
+                        <div className="session-initials">
+                            {session.attendees.map((initials, attendeeIndex) => (
+                                <span key={attendeeIndex} className="initials-wrapper">
+                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ))
+    
+
+            
+        
+    }
+  
+</div>
+
+
+                 
+
                 <div className="sessions-wrapper">
     <div className="sessions-header">
         <h2>Tidigare pass</h2>
     </div>
     {role >= 2000 ? (
         allPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={() => toggleExpandContent(session)}> 
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
                 <div className="sessions-content">
                     <div className="session-top">
                         <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
@@ -505,7 +613,7 @@ export default function MySessions() {
         ))
     ) : (
         userPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={() => toggleExpandContent(session)}> 
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
                 <div className="sessions-content">
                     <div className="session-top">
                         <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>

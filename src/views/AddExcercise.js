@@ -1,9 +1,10 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import "../styles/addExcercise.css";
 import Success from "../components/Success";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext";
+import {jwtDecode} from "jwt-decode"
 
 export default function AddExcercise() {
   const [nameValue, setNameValue] = useState("");
@@ -13,8 +14,9 @@ export default function AddExcercise() {
   const [showWarning, setShowWarning] = useState(false);
   const [isAdded, setIsAdded] = useState(true);
   const hamburgerRef = useRef(null);
+  const [user, setUser] = useState({})
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
-
+  console.log(user)
   const handleNameChange = (event) => {
     setNameValue(event.target.value);
   };
@@ -26,6 +28,12 @@ export default function AddExcercise() {
   const handleCategoryChange = (event) => {
     setCategoryValue(event.target.value);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const decodedToken = jwtDecode(token)
+    setUser(decodedToken)
+  }, [])
 
   const addExcercise = async () => {
     const token = localStorage.getItem("token")
@@ -40,8 +48,8 @@ export default function AddExcercise() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          name: nameValue.trim(),
-          description: descriptionValue,
+          name: nameValue.trim().charAt(0).toUpperCase() + nameValue.trim().slice(1),
+          description: descriptionValue.trim().charAt(0).toUpperCase() + descriptionValue.trim().slice(1),
           category: categoryValue,
         }),
       });
@@ -120,6 +128,12 @@ export default function AddExcercise() {
             <option value="Hoppträning">Hoppträning</option>
             <option value="Löpning">Löpning</option>
             <option value="Uppvärmning">Uppvärmning</option>
+
+            {user.name === "Yannick" ?  (
+            <option value="Uppvärmning">Bös</option>
+            ) : 
+            <option value="Uppvärmning">Övrigt</option>
+             }
           </select>
         </div>
 

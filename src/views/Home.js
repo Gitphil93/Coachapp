@@ -25,12 +25,11 @@ export default function Home() {
   const [userUpcomingSessions, setUserUpcomingSessions] = useState([]);
   const [userTodaysSession, setUserTodaysSession] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
 
-  console.log(today)
 
 
 const getToday = () => {
@@ -71,7 +70,7 @@ const getToday = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log(token);
+    
     if (!token) {
       window.location.href = "/login";
     }
@@ -102,7 +101,7 @@ const getToday = () => {
         console.error("Error fetching user:", error);
      setIsLoading(false); 
       });
-    }
+    } 
   }, [today]);
 
 
@@ -112,7 +111,7 @@ const getToday = () => {
               const decodedToken = jwtDecode(token);
               setRole(decodedToken.role);
               setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
-              console.log(decodedToken.email);
+ 
 
           if (token && today) {
               try {
@@ -153,7 +152,7 @@ const getToday = () => {
               } finally {
                   setIsLoading(false);
               }
-          }
+          } 
       };
 
 
@@ -178,6 +177,7 @@ const getToday = () => {
   const postMessage = async (message) => {
     setIsLoading(true)
     const token = localStorage.getItem("token")
+    if (token) {
     try {
       const response = await fetch(
         "http://192.168.0.30:5000/admin/post-global-message",
@@ -203,6 +203,9 @@ const getToday = () => {
       console.error("Något gick fel vid postning av meddelande", err);
     } finally {
       setIsLoading(false)
+     }
+    } else {
+      navigate("/login")
     }
   };
 
@@ -223,6 +226,21 @@ const getDayOfWeek = (dateString) => {
   return days[date.getDay()];
 }
 
+const formatDate = (dateString) => {
+  const dateObj = new Date(dateString);
+  const formattedDate = dateObj.toLocaleDateString('sv-SE', {
+    day: '2-digit',
+    month: '2-digit'
+  });
+
+  // Ta bort inledande nollor från månad och dag
+  const [month, day] = formattedDate.split('/').map(part => parseInt(part, 10));
+  const formattedMonth = month < 10 ? month.toString() : month;
+  const formattedDay = day < 10 ? day.toString() : day;
+
+  return `${formattedMonth}/${formattedDay}`;
+};
+
 
   const fetchGlobalMessage = async () => {
     try {
@@ -230,7 +248,7 @@ const getDayOfWeek = (dateString) => {
       );
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+
         if (data.globalMessage.globalMessage === "") {
           setGlobalMessage("");
         } else {
@@ -355,7 +373,7 @@ const getDayOfWeek = (dateString) => {
                 {getDayOfWeek(session.date)} {session.time}
               </h2>
               <h2><Weather sessionDate={session.date ? session.date : today}
-                sessionTime={session.time ? session.time : "12:00"} /></h2>
+                sessionTime={session.time ? session.time : "12:00"}/></h2>
             </div>
             <div className="session-bottom">
               <h2>{session.place}</h2>
@@ -401,7 +419,7 @@ const getDayOfWeek = (dateString) => {
           <div className="sessions" key={index}>
             <div className="sessions-content" onClick={() => handleSessionClick(session)}>
               <div className="session-top">
-              <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+              <h2>{getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
                 <h2><Weather sessionDate={session.date ? session.date : ""}
                 sessionTime={session.time ? session.time : "12:00"} /></h2>
 

@@ -34,6 +34,9 @@ input, textarea {
   touch-action: none; 
 }
 
+input::placeholder{
+  padding-left:0.2rem; 
+}
 .modal-h2{
   font-weight: 500;
 }

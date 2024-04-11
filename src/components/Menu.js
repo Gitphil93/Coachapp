@@ -16,9 +16,7 @@ export default function Menu({ hamburgerRef }) {
   useEffect(() => { 
       const token = localStorage.getItem("token")
       const decodedToken = jwtDecode(token)
-      console.log(decodedToken)
       setRole(decodedToken.role)
-  console.log(role)
 }, [])
 
 

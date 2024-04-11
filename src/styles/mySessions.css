@@ -42,12 +42,13 @@
   }
 
   #exercise-name{
-      font-weight: 600;
-      color: rgb(39, 38, 38)
+    font-size: 1rem;
+      font-weight: 500;
+      color: rgb(71, 70, 70);
   }
   #exercise-comment{
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: rgb(37, 37, 37);
   }
 
@@ -84,4 +85,17 @@
 
   .submit-session {
     margin-top: 2rem;
+  }
+
+
+  .submit-button{
+    height: 2.5rem;
+    width:10rem;
+    border-radius: 10px;
+    border:none;
+    background-color: green;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
   }
