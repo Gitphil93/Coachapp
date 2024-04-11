@@ -267,7 +267,6 @@
   margin: 0.3rem;
   width: 46%;
   height: 10rem;
-
   border-radius: 10px;
   font-size: 0.8rem;
   box-shadow: 1px 1px 5px 1px rgb(223, 221, 221);
@@ -276,3 +275,4 @@
 .admin-modal-item > h2 {
   font-weight: 500;
 }
+

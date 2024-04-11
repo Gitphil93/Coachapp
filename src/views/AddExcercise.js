@@ -33,7 +33,7 @@ export default function AddExcercise() {
       return false;
     }
     try {
-      const response = await fetch("http://192.168.0.36:5000/add-excercise", {
+      const response = await fetch("http://192.168.0.30:5000/add-excercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

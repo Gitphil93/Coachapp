@@ -25,7 +25,7 @@ export default function Home() {
   const [userUpcomingSessions, setUserUpcomingSessions] = useState([]);
   const [userTodaysSession, setUserTodaysSession] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
@@ -40,7 +40,6 @@ const getToday = () => {
   const day = dateObj.getDate().toString().padStart(2, '0'); 
   const date = `${year}-${month}-${day}`; 
   setToday(date)
-  console.log(date);
 }
 
   const openGlobalMessageModal = () => {
@@ -81,7 +80,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://192.168.0.36:5000/get-user", {
+      fetch("http://192.168.0.30:5000/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -117,7 +116,7 @@ const getToday = () => {
 
           if (token && today) {
               try {
-                  const response = await fetch("http://192.168.0.36:5000/get-sessions", {
+                  const response = await fetch("http://192.168.0.30:5000/get-sessions", {
                       method: "GET",
                       headers: {
                           Authorization: `Bearer ${token}`,
@@ -181,7 +180,7 @@ const getToday = () => {
     const token = localStorage.getItem("token")
     try {
       const response = await fetch(
-        "http://192.168.0.36:5000/admin/post-global-message",
+        "http://192.168.0.30:5000/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -227,7 +226,7 @@ const getDayOfWeek = (dateString) => {
 
   const fetchGlobalMessage = async () => {
     try {
-      const response = await fetch("http://192.168.0.36:5000/get-global-message",
+      const response = await fetch("http://192.168.0.30:5000/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
@@ -355,7 +354,7 @@ const getDayOfWeek = (dateString) => {
               <h2>
                 {getDayOfWeek(session.date)} {session.time}
               </h2>
-              <h2><Weather sessionDate={session.date ? session.date : ""}
+              <h2><Weather sessionDate={session.date ? session.date : today}
                 sessionTime={session.time ? session.time : "12:00"} /></h2>
             </div>
             <div className="session-bottom">

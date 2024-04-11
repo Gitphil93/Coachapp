@@ -73,7 +73,7 @@ export default function MySessions() {
     
         if (token) {
             try {
-                const response = await fetch("http://192.168.0.36:5000/get-sessions", {
+                const response = await fetch("http://192.168.0.30:5000/get-sessions", {
                     method: "GET",
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ export default function MySessions() {
     const postComment = async () => {
         const token = localStorage.getItem("token");
         try {
-          const response = await fetch(`http://192.168.0.36:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -145,7 +145,7 @@ export default function MySessions() {
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await fetch(`http://192.168.0.36:5000/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,

@@ -1,0 +1,10 @@
+.weather-wrapper {
+    display: flex;
+    align-items: center;
+  /*   font-size: 1rem; */
+  }
+  
+  #weather-celsius {
+  margin-left: 6px;
+  
+  }

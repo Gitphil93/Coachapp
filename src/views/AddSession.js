@@ -146,7 +146,7 @@ export default function AddSession() {
       if (token) {
         try {
           const response = await fetch(
-            "http://192.168.0.36:5000/get-all-users",
+            "http://192.168.0.30:5000/get-all-users",
             {
               method: "GET",
               headers: {
@@ -182,7 +182,7 @@ if (isPostSessionSuccess) {
       if (token) {
         try {
           const response = await fetch(
-            "http://192.168.0.36:5000/get-exercises",
+            "http://192.168.0.30:5000/get-exercises",
             {
               method: "GET",
               headers: {
@@ -244,7 +244,7 @@ if (isPostSessionSuccess) {
           return false
       }
       try{
-        const response = await fetch("http://192.168.0.36:5000/post-session", {
+        const response = await fetch("http://192.168.0.30:5000/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -293,7 +293,7 @@ if (isPostSessionSuccess) {
   /* const assignSessionToUser = async (email, data) => {
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://192.168.0.36:5000/assign-session", {
+      const response = await fetch("http://192.168.0.30:5000/assign-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

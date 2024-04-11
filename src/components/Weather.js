@@ -1,34 +1,33 @@
 import React, { useEffect, useState } from "react";
+import LoaderSpinner from "../components/LoaderSpinner.js"
+import "../styles/weather.css"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faCloud, faCloudShowersHeavy, faSnowflake } from '@fortawesome/free-solid-svg-icons';
 
-const Weather = ({sessionDate,sessionTime}) => {
-  const [userLocation, setUserLocation] = useState(null);
+const Weather = ({ sessionDate, sessionTime }) => {
+ /*  const [userLocation, setUserLocation] = useState({latitude:57.708870, longitude: 11.974560}); */
+ const [userLocation, setUserLocation] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const API_KEY = '19c737dffbd944c5114401ce4fb6d57a';
-  const sessionDateTime = new Date(`${sessionDate}T${sessionTime}`);
-  const sessionTimestamp = Math.round(sessionDateTime.getTime() / 1000);
-
-
-console.log("user location",userLocation)
-  console.log("väderdata",weatherData)
-
+  console.log(weatherData)
+    console.log("userLocation",userLocation)
   useEffect(() => {
     const fetchWeatherData = async () => {
-        console.log(userLocation)
       try {
- 
-        if (!userLocation) return;
+        
+        if (!userLocation) {
+            setUserLocation({latitude:57.708870, longitude: 11.974560}) 
+            console.log("jag går in här")
+        };
         
         const { latitude, longitude } = userLocation;
-     
-        
+  
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`
         );
-     
+  
         if (response.ok) {
-            const data = await response.json();
-        console.log(data)
-          console.log("data",data)
+          const data = await response.json();
           setWeatherData(data);
         } else {
           console.error("Failed to fetch weather data");
@@ -54,34 +53,41 @@ console.log("user location",userLocation)
     }
   }, []);
 
-  const getWeatherEmoji = () => {
-    if (!weatherData || !weatherData.weather || weatherData.weather.length === 0) {
-      return "";
-    }
-
-    const weather = weatherData.weather[0].main.toLowerCase();
+  const getWeatherEmoji = (weather) => {
     switch (weather) {
-      case "clear":
-        return "☀️";
-      case "clouds":
-        return "☁️";
-      case "rain":
-        return "🌧️";
-      case "snow":
-        return "❄️";
+      case "Clear":
+        return <FontAwesomeIcon icon={faSun} />;
+      case "Clouds":
+        return <FontAwesomeIcon icon={faCloud} />;
+      case "Rain":
+        return <FontAwesomeIcon icon={faCloudShowersHeavy} />;
+      case "Snow":
+        return <FontAwesomeIcon icon={faSnowflake} />;
       default:
-        return "";
+        return null;
     }
   };
 
   if (!weatherData) {
-    return <p>Loading weather...</p>;
+    return <LoaderSpinner/>;
   }
+
+  // Hitta det närmaste väderdataobjektet i listan
+  const closestWeatherData = weatherData.list.reduce((closest, current) => {
+    const closestTimeDiff = Math.abs(new Date(closest.dt_txt) - new Date(`${sessionDate}T${sessionTime}`));
+    const currentTimeDiff = Math.abs(new Date(current.dt_txt) - new Date(`${sessionDate}T${sessionTime}`));
+
+    return currentTimeDiff < closestTimeDiff ? current : closest;
+  });
 
   return (
     <div>
-      <p>{/* {getWeatherEmoji()} */} {userLocation.latitude}</p>
+      <div className="weather-wrapper" key={closestWeatherData.dt}>
+        <p>{getWeatherEmoji(closestWeatherData.weather[0].main)}</p>
+        <p id="weather-celsius">{Math.round(closestWeatherData.main.temp)} ºC</p>
 
+        {/* Add more weather information as needed */}
+      </div>
     </div>
   );
 };
