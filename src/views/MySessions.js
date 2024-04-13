@@ -37,8 +37,7 @@ export default function MySessions() {
     const [sliderValue, setSliderValue] = useState(0)
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
- 
-    console.log(userPastSessions)
+
 
 
     const openModal = (session, exercise) => {
@@ -119,14 +118,10 @@ export default function MySessions() {
                     setAllPastSessions(sortedSessions.filter(sessionIsPast));
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-                
                     setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                
                     setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
                     setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)));
-                
                     const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed);
                     setNotSignedSessions(notSignedSessions);
                 }
@@ -237,7 +232,7 @@ export default function MySessions() {
         }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
-                return false; 
+                return null; 
             } else {
                 return session;
             }
@@ -246,22 +241,13 @@ export default function MySessions() {
 
 
     useEffect(() => {
-        if (expandedContent) {
-            if (expandedContent._id) {
-
-                setTimeout(() => {
-                    const selectedSessionElement = document.querySelector(".sessions-expandable.expanded");
-                   
+        setTimeout(() => {
+            const selectedSessionElement = document.querySelector(".sessions-expandable.expanded");                
                     if (selectedSessionElement) {
                         selectedSessionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100); // Vänta 100 millisekunder innan vi försöker hitta det expanderade elementet
-            } else {
-                console.log("Expanded content id is null or undefined");
-            }
-        } else {
-            console.log("Expanded content is null or undefined");
-        }
+                        console.log("scrolled")
+                    }        
+    }, 1000)
     }, [expandedContent]);
 
     useEffect(() => {
@@ -271,7 +257,7 @@ export default function MySessions() {
         } else {
             setExpandedContent(null);
         }
-    }, [selectedSession]);
+    }, []);
 
   
 

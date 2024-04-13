@@ -94,9 +94,6 @@ const getToday = () => {
           setUser(data.user);
         }
       })
-      .then(() => {
-     setIsLoading(false);  
-      })
       .catch((error) => {
         console.error("Error fetching user:", error);
   
