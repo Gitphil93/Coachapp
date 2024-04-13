@@ -473,7 +473,7 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
   }
 })
 
-app.post("/assign-session", async (req, res) => {
+/* app.post("/assign-session", async (req, res) => {
   const { email, session } = req.body; 
 
   console.log(session)
@@ -504,7 +504,7 @@ app.post("/assign-session", async (req, res) => {
       releaseConnection(client)
     }
   }
-});
+}); */
 
 app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) => {
   const sessionId = req.params.sessionId;
@@ -581,6 +581,46 @@ app.delete("/delete-session/:sessionId", verifyRole(2000), async (req, res) => {
   }
 });
 
+app.put("/update-session/:sessionId", verifyToken, async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const userEmail = req.body.email; // E-posten som skickas med förfrågan
+  const summaryComment = req.body.summaryComment;
+  const howDidSessionGo = req.body.howDidSessionGo;
+
+  let client;
+
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const sessionsCollection = database.collection("sessions");
+
+    const { ObjectId } = require('mongodb');
+    const sessionObjectId = new ObjectId(sessionId);
+
+    // Uppdatera endast den specifika deltagaren i sessionen
+    const result = await sessionsCollection.updateOne(
+      { _id: sessionObjectId, "attendees.email": userEmail },
+      { $set: { 
+          "attendees.$.signed": true, 
+          "attendees.$.summaryComment": summaryComment,
+          "attendees.$.howDidSessionGo": howDidSessionGo
+      } }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: "Sessionen och deltagarstatus har uppdaterats" });
+    } else {
+      res.status(404).json({ error: "Kunde inte hitta sessionen eller deltagaren att uppdatera" });
+    }
+  } catch (error) {
+    console.error("Ett fel uppstod vid uppdatering av sessionen:", error);
+    res.status(500).json({ error: "Ett fel uppstod vid uppdatering av sessionen" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+});
 
 
 app.listen(port, () => {

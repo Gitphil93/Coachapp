@@ -1,8 +1,10 @@
 import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import LoaderSpinner from "../components/LoaderSpinner";
 
 export default function Login() {
+  const [isLoading, setIsLoading] = useState(false)
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
 
@@ -12,14 +14,8 @@ export default function Login() {
     setter(event.target.value);
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/");
-    }
-  }, []);
-
   const login = async () => {
+    setIsLoading(true)
     try {
       const response = await fetch("http://192.168.0.30:5000/login", {
         method: "POST",
@@ -40,6 +36,8 @@ export default function Login() {
 
     } catch (err) {
       console.log(err, "Något gick fel");
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -81,7 +79,9 @@ export default function Login() {
 
         <div className="button-wrapper">
           <button className="login-button" id="login-button" onClick={login}>
-            Logga in
+          {isLoading && <LoaderSpinner/>}
+          {!isLoading &&  "Logga in" }
+           
           </button>
         </div>
       </div>

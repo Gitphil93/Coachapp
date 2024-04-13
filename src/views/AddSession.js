@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function AddSession() {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const hamburgerRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
@@ -157,16 +157,12 @@ export default function AddSession() {
             },
           );
           const data = await response.json();
-          counter++
 
           setUsers(data.users);
         } catch (err) {
           console.log(err, "Kunde inte hämta användarna");
         } finally {
-          if (counter === 2) {
-            counter = 0
            setIsLoading(false) 
-        }
         }
       }
     }
@@ -192,7 +188,6 @@ if (isPostSessionSuccess) {
               },
             },
           );
-          counter++
           const data = await response.json();
           console.log(data);
           setExerciseArray(data);
@@ -203,11 +198,7 @@ if (isPostSessionSuccess) {
         } catch (err) {
           console.log(err, "Kunde inte hämta övningarna");
         } finally {
-          if (counter === 2) {
-            counter = 0
              setIsLoading(false) 
-          }
-          
         }
       }
     }

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext} from "react";
-import { Link , useNavigate} from "react-router-dom"; 
+import { Link , useNavigate } from "react-router-dom"; 
 import "../styles/Home.css";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
@@ -72,7 +72,7 @@ const getToday = () => {
     const token = localStorage.getItem("token");
     
     if (!token) {
-      window.location.href = "/login";
+      navigate("/login")
     }
   }, []);
 
@@ -99,61 +99,71 @@ const getToday = () => {
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
-     setIsLoading(false); 
-      });
-    } 
+  
+      })
+      .finally(() => {
+        setIsLoading(false); 
+      }
+  )} 
   }, [today]);
 
 
   const getSessions = async () => {
-              setIsLoading(true);
-              const token = localStorage.getItem("token");
-              const decodedToken = jwtDecode(token);
-              setRole(decodedToken.role);
-              setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
- 
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+    const decodedToken = jwtDecode(token);
+    setRole(decodedToken.role);
+    setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
 
-          if (token && today) {
-              try {
-                  const response = await fetch("http://192.168.0.30:5000/get-sessions", {
-                      method: "GET",
-                      headers: {
-                          Authorization: `Bearer ${token}`,
-                      },
-                  });
-                  const data = await response.json();
-                  const sessions = data.sessions;
-                  const currentDate = new Date().toISOString().slice(0, 10);
+    if (token && today) {
+        try {
+            const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            const sessions = data.sessions;
+            const currentDate = new Date().toISOString().slice(0, 10);
 
-                  // Sortera alla pass baserat på tid och datum
-                  const sortedSessions = sessions.sort((a, b) => {
-                      const dateA = new Date(`${a.date}T${a.time}`);
-                      const dateB = new Date(`${b.date}T${b.time}`);
-                      return dateA - dateB;
-                  });
+            // Sortera alla pass baserat på tid och datum
+            const sortedSessions = sessions.sort((a, b) => {
+                const dateA = new Date(`${a.date}T${a.time}`);
+                const dateB = new Date(`${b.date}T${b.time}`);
+                return dateA - dateB;
+            });
 
-                  
+            // Alla pass som inträffar idag
+            const todaySessions = sortedSessions.filter(session => session.date === today);
+            setAllTodaysSessions(todaySessions);
 
-                  
-                 
-                
-                  const todaySessions = sortedSessions.filter(session => session.date === today);
-                  setAllTodaysSessions(todaySessions);
-                  if (role >= 2000) {
-                      setAllUpcomingSessions(sortedSessions.filter(session => session.date > currentDate));
-                  } else {
-                      const userTodaysSession = allTodaysSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email))
-                      setUserTodaysSession(userTodaysSession)
-                      const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
-                      setAllUpcomingSessions(userSessions.filter(session => session.date > currentDate))
-                  }
-              } catch (err) {
-                  console.error("Couldn't get sessions", err);
-              } finally {
-                  setIsLoading(false);
-              }
-          } 
-      };
+            if (role >= 2000) {
+                // Alla kommande pass om användaren är en administratör
+                setAllUpcomingSessions(sortedSessions.filter(session => session.date > currentDate));
+            } else {
+                // Alla kommande pass för användaren
+                const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
+                setAllUpcomingSessions(userSessions.filter(session => session.date > currentDate));
+
+                // Alla pass idag där användaren är närvarande men inte har signerat
+                const userTodaysSession = todaySessions.filter(session =>
+                    session.attendees.some(attendee =>
+                        attendee.email === decodedToken.email && !attendee.signed
+                    )
+                   
+                );
+                console.log(userTodaysSession)
+                setAllTodaysSessions(userTodaysSession);
+            }
+        } catch (err) {
+            console.error("Couldn't get sessions", err);
+        } finally {
+            setIsLoading(false);
+        }
+    } 
+};
+
 
 
       useEffect(() => {

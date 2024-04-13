@@ -10,7 +10,6 @@
   flex-direction: column;
   align-items: center;
   font-size: 1rem;
-
   z-index: 1;
   box-sizing: border-box;
   height: calc(100vh - var(--header-height));                          
@@ -23,22 +22,51 @@
 }
 
 .view-header {
-
+  font-size: .8rem;
   margin-top: 1rem;
 }
 .view-header > h1{
-  font-size: 1.5rem;
+  
   font-weight: 400;
 }
 .sessions-header {
   margin-top: 2rem;
   width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
+}
+
+.sessions-number {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgb(71, 70, 70);
+  text-align: center;
+  border-radius: 50%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(71, 70, 70);
+}
+
+.sessions-number-red {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgb(255, 0, 0);
+  text-align: center;
+  border-radius: 50%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255, 255, 255);
+  background-color: red;
 }
 
 .sessions-header > h3 {
   font-weight: 500;
-
 
 }
 
@@ -208,7 +236,8 @@
 }
 
 #author {
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .modal-wrapper {

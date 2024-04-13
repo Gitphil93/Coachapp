@@ -7,7 +7,7 @@
     width: 80%;
     min-height: 20vh;
     border-radius: 10px;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+    box-shadow: 1px 1px 5px 1px rgb(172, 172, 172);
     background-color: white;
     transition: min-height 0.3s ease-in-out;
   
@@ -56,19 +56,20 @@
   .session-brief-wrapper{
     width:100%;
     margin-top: 2rem;
+    min-height: 10rem;
   }
   .slider-input {
-    -webkit-appearance: none;  /* Override default CSS styles */
+    -webkit-appearance: none;  
     appearance: none;
-    width: 75%; /* Full-width */
-    height: 0.1rem; /* Specified height */
-    background: linear-gradient(to right, rgb(255, 255, 255) 40%, rgb(0, 255, 0)) ;
-    outline: none; /* Remove outline */
+    width: 75%; 
+    height: 0.2rem; 
+    background: linear-gradient(to right, rgb(255, 255, 255) 50%, rgb(7, 173, 7) 60%) ;
+    outline: none; 
     transition: opacity .2s;
   }
 
   .slider-input::-webkit-slider-thumb {
-    -webkit-appearance: none; /* Override default look */
+    -webkit-appearance: none; 
     appearance: none;
     width: 25px; 
     height: 25px; 
@@ -99,3 +100,30 @@
     font-weight: 500;
     margin-bottom: 2rem;
   }
+
+  .session-summary-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    align-items: center;
+  }
+
+  .session-summary-wrapper {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+  justify-content: flex-start;
+   height: auto;
+    width: 100%;
+    align-items: center;
+
+  }
+
+  #summary-comment{
+    width: 80%;
+    display: flex;
+    justify-content: center;
+  }
+
+  

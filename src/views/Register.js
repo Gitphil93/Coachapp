@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Register.css";
+import LoaderSpinner from "../components/LoaderSpinner";
+import Loader from "../components/Loader";
 
 export default function Register() {
+  const [isLoading, setIsLoading] = useState(false)
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [passwordRepeatValue, setPasswordRepeatValue] = useState("");
@@ -13,6 +16,8 @@ export default function Register() {
   };
 
   const register = async () => {
+    setIsLoading(true)
+  
     if (passwordValue === passwordRepeatValue) {
       try {
         const response = await fetch("http://192.168.0.30:5000/register", {
@@ -33,6 +38,8 @@ export default function Register() {
         }
       } catch (err) {
         console.log(err, "Något gick fel");
+      } finally {
+        setIsLoading(false)
       }
     } else {
       console.log("Lösenorden matchade ej");
@@ -95,7 +102,10 @@ export default function Register() {
             id="login-button"
             onClick={register}
           >
-            Registrera
+            {isLoading && <LoaderSpinner/>}
+            {!isLoading 
+            && "Registrera"}
+            
           </button>
         </div>
       </div>

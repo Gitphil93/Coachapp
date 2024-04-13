@@ -26,12 +26,10 @@ export default function MySessions() {
     const [allPastSessions, setAllPastSessions] = useState([]);
     const [role, setRole] = useState(0);
     const [user, setUser] = useState({});
-    const [email, setEmail]= useState("");
     const [expandedContent, setExpandedContent] = useState(selectedSession);
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [comment, setComment] = useState("")
     const [currentSessionId, setCurrentSessionId] = useState("")
-    const sessionSwipeRefs = useRef([]);
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchEndX, setTouchEndX] = useState(0);
     const [sessionXValues, setSessionXValues] = useState({});
@@ -40,8 +38,7 @@ export default function MySessions() {
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
  
-   
-    console.log(notSignedSessions)
+    console.log(userPastSessions)
 
 
     const openModal = (session, exercise) => {
@@ -80,13 +77,12 @@ export default function MySessions() {
       
 
       const getSessions = async () => {
-          getToday()
         setIsLoading(true);
         const token = localStorage.getItem("token");
         const decodedToken = jwtDecode(token);
-        const role = decodedToken.role
-        setRole(decodedToken.role);
-        setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
+        const role = decodedToken.role;
+        setRole(role);
+        setUser({ name: decodedToken.name, lastname: decodedToken.lastname, email: decodedToken.email });
     
         if (token) {
             try {
@@ -98,7 +94,7 @@ export default function MySessions() {
                 });
                 const data = await response.json();
                 const sessions = data.sessions;
-                const currentDate = new Date().toISOString().slice(0, 10);
+                const currentTime = new Date();
     
                 // Sortera alla sessioner baserat på tid och datum
                 const sortedSessions = sessions.sort((a, b) => {
@@ -109,16 +105,26 @@ export default function MySessions() {
     
                 setAllSessions(sortedSessions);
     
+                const sessionIsPast = (session) => {
+                    const sessionTime = new Date(`${session.date}T${session.time}`);
+                    const oneHourPast = new Date(sessionTime.getTime() + 60 * 60 * 1000); // Add one hour to session start time
+                    return currentTime > oneHourPast;
+                };
+    
                 if (role >= 2000) {
-                    setAllUpcomingSessions(sortedSessions.filter(session => session.date >= currentDate));
-                    setAllPastSessions(sortedSessions.filter(session => session.date < currentDate));
+                    setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session)));
+                    setAllPastSessions(sortedSessions.filter(sessionIsPast));
                 } else {
-                    const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
-                    setUserUpcomingSessions(userSessions.filter(session => session.date >= currentDate && !session.signed));
-                    setUserPastSessions(userSessions.filter(session => session.date < currentDate && session.signed));
-                    setAllUpcomingSessions(sortedSessions.filter(session => session.date >= currentDate && !session.signed));
-                    setAllPastSessions(sortedSessions.filter(session => session.date < currentDate && session.signed));
-                    const notSignedSessions = sortedSessions.filter(session => session.date < currentDate && !session.signed);
+                    const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
+                
+                    setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
+                
+                    setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
+                
+                    setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
+                    setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)));
+                
+                    const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed);
                     setNotSignedSessions(notSignedSessions);
                 }
             } catch (err) {
@@ -128,7 +134,7 @@ export default function MySessions() {
             }
         }
     };
-
+    
 
 
     const postComment = async () => {
@@ -188,11 +194,12 @@ export default function MySessions() {
     const submitSession = async (sessionId) => {
         console.log(sessionId)
         const token = localStorage.getItem("token");
-
+        console.log(user.email)
         try {
-            const response = await fetch(`http://192.168.0.30:5000/sign-session/${sessionId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
@@ -221,6 +228,7 @@ export default function MySessions() {
     };
 
     const toggleExpandContent = (session, e) => {
+        console.log(session)
         if (e?.target?.tagName.toLowerCase() === 'input' || e?.target?.tagName.toLowerCase() === 'button' || e?.target?.tagName.toLowerCase() === 'h3') {
             return; // Avbryt funktionen om det är en input
         }
@@ -394,6 +402,9 @@ export default function MySessions() {
                 <div  className="sessions-wrapper" >
                     <div className="sessions-header">
                         <h2>Kommande pass</h2>
+                        {allUpcomingSessions.length > 0 &&
+                        <h3 className="sessions-number">{allUpcomingSessions.length}</h3>
+                    }
                     </div>
                     {role >= 2000 ? (
                         allUpcomingSessions.map((session, index) => (
@@ -447,7 +458,8 @@ export default function MySessions() {
                         ))
                     ) : (
                         userUpcomingSessions.map((session, index) => (
-                            <div id={expandedContent._id} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={(e) => toggleExpandContent(session, e)}> 
+                        <div id={expandedContent ? expandedContent._id : ""} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={(e) => toggleExpandContent(session, e)}>
+
                                 <div className="sessions-content">
                                     <div className="session-top">
                                         <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
@@ -485,68 +497,66 @@ export default function MySessions() {
                     )}
                 </div>
 
+                {role === 1000 && notSignedSessions.length > 0 && (
+    <div className="sessions-wrapper">
+        <div className="sessions-header">
+        
+                    <h2>Ej färdigmarkerade</h2>
+                    <h3 className="sessions-number-red">{notSignedSessions.length}</h3>
 
-                <div className="sessions-wrapper">
-    <div className="sessions-header">
-        <h2>Ej färdigmarkerade</h2>
-    </div>
-    {role === 1000 && 
-        notSignedSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
+       
+        </div>
+        {notSignedSessions.map((session, index) => (
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index} onClick={(e) => toggleExpandContent(session, e)}> 
                 <div className="sessions-content">
                     <div className="session-top">
-                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                        <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
                     </div>
 
                     {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
+                        <div className="expanded-session-content">
+                            {session.exercises.map((exercise, exerciseIndex) => (
+                                <div id="exercise-item" key={exerciseIndex}>
+                                    <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                    <p id="exercise-comment">{exercise.comment}</p>
+                                    {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
                                         <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
                                     ))}
-
-
-                                    <div className="session-brief-wrapper">
-                                        <div className="session-brief-header">
-                                            <p id="exercise-comment">Hur gick passet?</p>
-                                        </div>
-                                        <div className="session-brief-slider">
-                                        <input 
-                                        className='slider-input'
-                                             type="range" 
-                                             min="0" 
-                                             max="10"
-                                             value={sliderValue}
-                                             onChange={handleSliderValue}
-                                        />
-                                        <p>{sliderValue}</p>
-                                   
-                                        </div>
-
-                                            <div>
-                                                <input
-                                                className="input-name"
-                                                type="text"
-                                                placeholder="Lägg till kommentar"
-                                                value={summaryComment}
-                                                onChange={handleSummaryCommentChange}
-                                                />
-                                            </div>
-
-                                        <div className="submit-session">
-                                            <button className="submit-button" onClick={() => submitSession(session._id)}>Färdigmarkera</button>
-                                        </div>
-                                        
-                                      
-                                        
-                                    </div>
                                 </div>
-                                )}
+                            ))}
+
+                            <div className="session-brief-wrapper">
+                                <div className="session-brief-header">
+                                    <p id="exercise-comment">Hur gick passet?</p>
+                                </div>
+                                <div className="session-brief-slider">
+                                    <input 
+                                        className='slider-input'
+                                        type="range" 
+                                        min="0" 
+                                        max="10"
+                                        value={sliderValue}
+                                        onChange={handleSliderValue}
+                                    />
+                                    <p>{sliderValue}</p>
+                                </div>
+
+                                <div>
+                                    <input
+                                        className="input-name"
+                                        type="text"
+                                        placeholder="Lägg till kommentar"
+                                        value={summaryComment}
+                                        onChange={handleSummaryCommentChange}
+                                    />
+                                </div>
+
+                                <div className="submit-session">
+                                    <button className="submit-button" onClick={() => submitSession(session._id)}>Färdigmarkera</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="session-bottom">
                         <h2>{session.place}</h2>
@@ -560,14 +570,10 @@ export default function MySessions() {
                     </div>
                 </div>
             </div>
-        ))
-    
+        ))}
+    </div>
+)}
 
-            
-        
-    }
-  
-</div>
 
 
                  
@@ -595,6 +601,34 @@ export default function MySessions() {
                                         ))}
                                     </div>
                                     ))}
+
+<div className="session-brief-wrapper">
+                                <div className="session-brief-header">
+                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
+                                </div>
+                        
+                  <div className="session-summary-container">
+                  {session.attendees.map((attendee, attendeeIndex) => (
+            <div className="session-summary-wrapper" key={attendeeIndex}>
+                <span className="initials-wrapper">
+                <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
+                </span>
+                <span id="summary-comment">
+                <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd'} </p>
+                </span>
+                <span id="score">
+                <p id="exercise-comment"> {attendee.howDidSessionGo || 0}/10</p>
+                </span>
+
+            </div>
+            
+              ))}
+            </div>
+      
+
+                            </div>
+
+                            
                                 </div>
                                 )}
 
@@ -630,8 +664,36 @@ export default function MySessions() {
                                         ))}
                                     </div>
                                     ))}
+                                        <div className="session-brief-wrapper">
+                                <div className="session-brief-header">
+                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
+                                </div>
+                        
+                  <div className="session-summary-container">
+                  {session.attendees.map((attendee, attendeeIndex) => (
+             user.email === attendee.email && (
+                <div className="session-summary-wrapper" key={attendeeIndex}>
+                    <span className="initials-wrapper">
+                        <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
+                    </span>
+                    <span id="summary-comment">
+                        <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd men jag testar att bryta raden'} </p>
+                    </span>
+                    <span id="score">
+                        <p id="exercise-comment">{attendee.howDidSessionGo || 0}/10</p>
+                    </span>
+                </div>
+            )
+            
+              ))}
+            </div>
+      
+
+                            </div>
                                 </div>
                                 )}
+
+                                
 
                     <div className="session-bottom">
                         <h2>{session.place}</h2>

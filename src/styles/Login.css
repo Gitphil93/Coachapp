@@ -27,6 +27,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: .8rem;
+
+}
+.login-header > h1 {
+  font-weight: 400;
 }
 
 .form-wrapper {
@@ -67,6 +72,9 @@
 }
 
 .login-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 3rem;
   width: 80%;
   border: none;
