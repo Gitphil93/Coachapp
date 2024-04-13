@@ -199,7 +199,7 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         console.log(user.email)
         try {
-            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

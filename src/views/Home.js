@@ -117,7 +117,7 @@ const getToday = () => {
 
     if (token && today) {
         try {
-            const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+            const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
