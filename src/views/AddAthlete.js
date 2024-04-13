@@ -4,6 +4,7 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext.js";
 import Success from "../components/Success.js";
+import { useNavigate } from "react-router-dom";
 
 export default function AddAthlete() {
   const [name, setName] = useState("");
@@ -16,13 +17,14 @@ export default function AddAthlete() {
   const hamburgerRef = useRef(null);
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [coach, setCoach ] = useState("")
+  const navigate = useNavigate()
 
   useEffect(() => {
     const getUser = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("https://appleet.vercel.app/get-user", {
+          const response = await fetch("https://appleet-backend.vercel.app/get-user", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -38,6 +40,7 @@ export default function AddAthlete() {
           console.error("Något gick fel vid hämtning av användare:", error);
         }
       } else {
+        navigate("/login")
         console.log("Token saknas");
       }
     };

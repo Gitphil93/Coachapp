@@ -1,0 +1,13 @@
+.weather-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 0.5rem;
+  /*   font-size: 1rem; */
+  }
+  
+  #weather-celsius {
+/*   margin-left: 6px; */
+  
+  }

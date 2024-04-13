@@ -1,11 +1,13 @@
-import React, { useRef, useEffect, useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useRef, useEffect, useState, useContext} from "react";
+import { Link , useNavigate } from "react-router-dom"; 
 import "../styles/Home.css";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext.js";
 import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
+import {jwtDecode} from "jwt-decode"
+import Weather from "../components/Weather.js"
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -19,11 +21,14 @@ export default function Home() {
   const [userRole, setUserRole] = useState(0);
   const [initials, setInitials] = useState("");
   const [user, setUser] = useState(null)
-  const [todaysSessions, setTodaysSessions] = useState([])
+  const [allTodaysSessions, setAllTodaysSessions] = useState([])
+  const [userUpcomingSessions, setUserUpcomingSessions] = useState([]);
+  const [userTodaysSession, setUserTodaysSession] = useState([])
+  const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true)
-console.log(todaysSessions )
-console.log(isLoading)
-console.log(today)
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [role, setRole] = useState(0)
+  const navigate = useNavigate()
 
 
 
@@ -34,10 +39,12 @@ const getToday = () => {
   const day = dateObj.getDate().toString().padStart(2, '0'); 
   const date = `${year}-${month}-${day}`; 
   setToday(date)
-  console.log(date);
 }
 
   const openGlobalMessageModal = () => {
+    if (isMenuOpen) {
+      return
+    }
     if (userRole > 1000) {
       setIsGlobalMessageModalOpen(true);
     }
@@ -63,9 +70,9 @@ const getToday = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log(token);
+    
     if (!token) {
-      window.location.href = "/login";
+      navigate("/login")
     }
   }, []);
 
@@ -85,9 +92,6 @@ const getToday = () => {
           setInitials(data.user.name[0] + data.user.lastname[0]);
           setUserRole(data.user.role);
           setUser(data.user);
-          const todaySessions = data.user.sessions.filter(session => session.date === today);
-          setTodaysSessions(todaySessions);
-          console.log(todaySessions);
         }
       })
       .then(() => {
@@ -95,10 +99,76 @@ const getToday = () => {
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
-     setIsLoading(false); 
-      });
-    }
+  
+      })
+      .finally(() => {
+        setIsLoading(false); 
+      }
+  )} 
   }, [today]);
+
+
+  const getSessions = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+    const decodedToken = jwtDecode(token);
+    setRole(decodedToken.role);
+    setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
+
+    if (token && today) {
+        try {
+            const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            const sessions = data.sessions;
+            const currentDate = new Date().toISOString().slice(0, 10);
+
+            // Sortera alla pass baserat på tid och datum
+            const sortedSessions = sessions.sort((a, b) => {
+                const dateA = new Date(`${a.date}T${a.time}`);
+                const dateB = new Date(`${b.date}T${b.time}`);
+                return dateA - dateB;
+            });
+
+            // Alla pass som inträffar idag
+            const todaySessions = sortedSessions.filter(session => session.date === today);
+            setAllTodaysSessions(todaySessions);
+
+            if (role >= 2000) {
+                // Alla kommande pass om användaren är en administratör
+                setAllUpcomingSessions(sortedSessions.filter(session => session.date > currentDate));
+            } else {
+                // Alla kommande pass för användaren
+                const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
+                setAllUpcomingSessions(userSessions.filter(session => session.date > currentDate));
+
+                // Alla pass idag där användaren är närvarande men inte har signerat
+                const userTodaysSession = todaySessions.filter(session =>
+                    session.attendees.some(attendee =>
+                        attendee.email === decodedToken.email && !attendee.signed
+                    )
+                   
+                );
+                console.log(userTodaysSession)
+                setAllTodaysSessions(userTodaysSession);
+            }
+        } catch (err) {
+            console.error("Couldn't get sessions", err);
+        } finally {
+            setIsLoading(false);
+        }
+    } 
+};
+
+
+
+      useEffect(() => {
+          getSessions();
+      }, [role, today]);
 
   const message = async () => {
     setIsGlobalMessageModalOpen(false);
@@ -106,16 +176,18 @@ const getToday = () => {
     const message = prompt("Skriv globalt meddelande");
 
     if (message === null || message.trim() === "") {
-      setGlobalMessage("");
+      /* setGlobalMessage(""); */
+      return false
     }
 
     setGlobalMessage(message);
-
     await postMessage(message);
   };
 
   const postMessage = async (message) => {
+    setIsLoading(true)
     const token = localStorage.getItem("token")
+    if (token) {
     try {
       const response = await fetch(
         "https://appleet-backend.vercel.app/admin/post-global-message",
@@ -126,7 +198,7 @@ const getToday = () => {
             "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
-            globalMessage: message,
+            globalMessage: message.trim(),
             author: initials,
           }),
         },
@@ -139,6 +211,11 @@ const getToday = () => {
       console.log(response);
     } catch (err) {
       console.error("Något gick fel vid postning av meddelande", err);
+    } finally {
+      setIsLoading(false)
+     }
+    } else {
+      navigate("/login")
     }
   };
 
@@ -159,6 +236,21 @@ const getDayOfWeek = (dateString) => {
   return days[date.getDay()];
 }
 
+const formatDate = (dateString) => {
+  const dateObj = new Date(dateString);
+  const formattedDate = dateObj.toLocaleDateString('sv-SE', {
+    day: '2-digit',
+    month: '2-digit'
+  });
+
+  // Ta bort inledande nollor från månad och dag
+  const [month, day] = formattedDate.split('/').map(part => parseInt(part, 10));
+  const formattedMonth = month < 10 ? month.toString() : month;
+  const formattedDay = day < 10 ? day.toString() : day;
+
+  return `${formattedMonth}/${formattedDay}`;
+};
+
 
   const fetchGlobalMessage = async () => {
     try {
@@ -166,7 +258,7 @@ const getDayOfWeek = (dateString) => {
       );
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+
         if (data.globalMessage.globalMessage === "") {
           setGlobalMessage("");
         } else {
@@ -188,20 +280,30 @@ const getDayOfWeek = (dateString) => {
     setIsGlobalMessageModalOpen(false);
   };
 
+ 
+  
+  const handleSessionClick = (sessionId) => {
+    if (isMenuOpen) {
+      return;
+    }
+    setSelectedSession(sessionId);
+    navigate('/my-sessions', { state: { selectedSession: sessionId } });
+  };
+
   let hour = new Date().getHours();
   let greeting = "";
   
 
-  if (hour < 10) {
+  if (hour <= 10) {
     greeting = "God morgon";
-  } else if (hour >= 10 && hour < 14) {
-    greeting = "Hej";
-  } else if (hour >= 14 && hour < 18) {
-    greeting = "Hej";
   } else if (hour >= 18 && hour < 23) {
     greeting = "God kväll";
+  } else {
+    greeting = "Hej"
   }
 
+
+   
   return (
     <div>
             {isLoading &&
@@ -214,7 +316,7 @@ const getDayOfWeek = (dateString) => {
         hamburgerRef={hamburgerRef}
       />
 
-
+    {!isLoading &&
       <div
         className="home-wrapper"
         style={{
@@ -226,7 +328,7 @@ const getDayOfWeek = (dateString) => {
         <div className="view-header">
           <h1>
             {" "}
-            {greeting} {name}!
+            {greeting} {name}! 
           </h1>
         </div>
         {globalMessage && typeof globalMessage === "object" && (
@@ -255,7 +357,7 @@ const getDayOfWeek = (dateString) => {
 
 
 
-{userRole > 1000 && (
+{userRole >= 2000 && (
           <div className="menu-icon">
             <img
               src="./plus-icon.svg"
@@ -266,20 +368,22 @@ const getDayOfWeek = (dateString) => {
           </div>
         )}
 
-{!isLoading && todaysSessions.length > 0 ? (
-  <Link to="my-sessions" className="sessions-wrapper">
+{!isLoading && allTodaysSessions.length > 0 ? (
+  <div to="my-sessions" className="sessions-wrapper">
     <div className="sessions-header">
       <h2>Dagens Pass</h2>
     </div>
-    {todaysSessions.map((session, sessionIndex) => {
+    {allTodaysSessions.map((session, sessionIndex) => {
       const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
       return (
         <div className="sessions" key={sessionIndex}>
-          <div className="sessions-content">
+          <div className="sessions-content" onClick={() => handleSessionClick(session)}>
             <div className="session-top">
               <h2>
                 {getDayOfWeek(session.date)} {session.time}
               </h2>
+              <h2><Weather sessionDate={session.date ? session.date : today}
+                sessionTime={session.time ? session.time : "12:00"}/></h2>
             </div>
             <div className="session-bottom">
               <h2>{session.place}</h2>
@@ -295,7 +399,7 @@ const getDayOfWeek = (dateString) => {
         </div>
       );
     })}
-  </Link>
+  </div>
 ) : (
   
   <div className="if-no-sessions">
@@ -313,34 +417,22 @@ const getDayOfWeek = (dateString) => {
 
 
 
-{user && user.sessions && user.sessions.length > 0 && (
+
   <div className="sessions-wrapper">
     <div className="sessions-header">
       <h2>Kommande Pass</h2>
     </div>
-    {user.sessions
-      .filter((session) => {
-        const sessionDateTime = new Date(`${session.date}T${session.time}`);
-        const todayDateTime = new Date();
-        const sessionDate = sessionDateTime.toDateString();
-        const todayDate = todayDateTime.toDateString();
-        return sessionDate !== todayDate && sessionDateTime > todayDateTime;
-      })
-      .sort((a, b) => {
-        const dateATime = new Date(`${a.date}T${a.time}`);
-        const dateBTime = new Date(`${b.date}T${b.time}`);
-        return dateATime - dateBTime;
-      })
-      .map((session, index) => {
+    {allUpcomingSessions.map((session, index) => {
         const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
 
         return (
           <div className="sessions" key={index}>
-            <div className="sessions-content">
+            <div className="sessions-content" onClick={() => handleSessionClick(session)}>
               <div className="session-top">
-              <h2>
-                {getDayOfWeek(session.date)} {session.date} {session.time} 
-              </h2>
+              <h2>{getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
+                <h2><Weather sessionDate={session.date ? session.date : ""}
+                sessionTime={session.time ? session.time : "12:00"} /></h2>
+
               </div>
               <div className="session-bottom">
               <h2>{session.place}</h2>
@@ -357,7 +449,7 @@ const getDayOfWeek = (dateString) => {
         );
       })}
   </div>
-)}
+      
 
 
 
@@ -432,6 +524,7 @@ const getDayOfWeek = (dateString) => {
           </Modal>
         </div>
       </div>
+      } 
     </div>
   );
 }

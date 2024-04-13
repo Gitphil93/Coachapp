@@ -1,20 +1,31 @@
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Menu.css";
 import MenuContext from "../context/MenuContext.js";
+import {jwtDecode} from "jwt-decode"
 
 export default function Menu({ hamburgerRef }) {
   const { isMenuOpen, toggleMenu } = useContext(MenuContext);
   const menuRef = useRef(null);
+  const [role, setRole] = useState(0)
 
   const closeMenu = () => {
     toggleMenu();
   };
+  
+  useEffect(() => { 
+      const token = localStorage.getItem("token")
+      const decodedToken = jwtDecode(token)
+      setRole(decodedToken.role)
+}, [])
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     closeMenu();
   };
+
+  
   useEffect(() => {
     const handleClickOutsideMenu = (event) => {
       if (
@@ -37,9 +48,24 @@ export default function Menu({ hamburgerRef }) {
 
   return (
     <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}>
-      <div className="menu-item">
+
+
+      {role >= 2000 &&
+      <Link to="/my-athletes" className="menu-item" onClick={closeMenu}>
+        <h2 className="menu-item-h2">Mina Atleter</h2>
+      </Link>
+    }
+
+      {role >= 2000 &&
+            <Link to="/exercises" className="menu-item" onClick={closeMenu}>
+              <h2 className="menu-item-h2">Hantera övningar</h2>
+            </Link>
+          }
+
+
+      <Link to="/my-sessions" className="menu-item" onClick={closeMenu}>
         <h2 className="menu-item-h2">Mina pass</h2>
-      </div>
+      </Link>
 
       <div className="menu-item">
         <h2 className="menu-item-h2">Mina tävlingar</h2>

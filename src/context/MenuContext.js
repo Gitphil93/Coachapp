@@ -6,8 +6,13 @@ export const MenuProvider = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen((prevState) => !prevState);
-    console.log(isMenuOpen);
+    setTimeout(() => {
+      setIsMenuOpen((prevState) => !prevState);
+    }, 10); //väntar 10ms här så att jag ska kunna använda isMenuOpen i andra komponenter som kontroll
+            //för att inte kunna klicka på de underliggande elementen.
+            //på så vis hinner den inte toggla om isMenuOpen
+    
+    
   };
 
   return (

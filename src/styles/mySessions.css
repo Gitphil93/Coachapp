@@ -4,18 +4,18 @@
     margin-top: 1rem;
     font-size: 1rem;
     display: flex;
-    align-items: center;
     width: 80%;
     min-height: 20vh;
     border-radius: 10px;
-    box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
+    box-shadow: 1px 1px 5px 1px rgb(172, 172, 172);
     background-color: white;
     transition: min-height 0.3s ease-in-out;
   
   }
 
   .sessions-expandable.expanded {
-    min-height: 70vh;
+    min-height: 30vh;
+    max-height: 90vh;
     transition: min-height 0.3s ease-in-out;
 
   }
@@ -32,7 +32,7 @@
       overflow-y: auto;
   }
 
-  .exercise-item{
+  #exercise-item{
       text-align: left;
       width: 100%;
       display: flex;
@@ -42,12 +42,88 @@
   }
 
   #exercise-name{
-      font-weight: 600;
-      color: rgb(39, 38, 38)
+    font-size: 1rem;
+      font-weight: 500;
+      color: rgb(71, 70, 70);
   }
   #exercise-comment{
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: rgb(37, 37, 37);
   }
 
+
+  .session-brief-wrapper{
+    width:100%;
+    margin-top: 2rem;
+    min-height: 10rem;
+  }
+  .slider-input {
+    -webkit-appearance: none;  
+    appearance: none;
+    width: 75%; 
+    height: 0.2rem; 
+    background: linear-gradient(to right, rgb(255, 255, 255) 50%, rgb(7, 173, 7) 60%) ;
+    outline: none; 
+    transition: opacity .2s;
+  }
+
+  .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none; 
+    appearance: none;
+    width: 25px; 
+    height: 25px; 
+    border-radius: 50%;
+    background: rgb(4, 52, 85);
+    cursor: pointer; 
+  }
+
+  .session-brief-slider{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .submit-session {
+    margin-top: 2rem;
+  }
+
+
+  .submit-button{
+    height: 2.5rem;
+    width:10rem;
+    border-radius: 10px;
+    border:none;
+    background-color: green;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+  }
+
+  .session-summary-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    align-items: center;
+  }
+
+  .session-summary-wrapper {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+  justify-content: flex-start;
+   height: auto;
+    width: 100%;
+    align-items: center;
+
+  }
+
+  #summary-comment{
+    width: 80%;
+    display: flex;
+    justify-content: center;
+  }
+
+  

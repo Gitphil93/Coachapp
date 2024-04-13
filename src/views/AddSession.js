@@ -5,11 +5,13 @@ import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext";
 import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
+import { useNavigate } from "react-router-dom";
 
 
 
 export default function AddSession() {
-  const [isLoading, setIsLoading] = useState(true)
+  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
   const hamburgerRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
@@ -29,7 +31,6 @@ export default function AddSession() {
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
 
-  let counter = 0 
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -155,16 +156,12 @@ export default function AddSession() {
             },
           );
           const data = await response.json();
-          counter++
 
           setUsers(data.users);
         } catch (err) {
           console.log(err, "Kunde inte hämta användarna");
         } finally {
-          if (counter === 2) {
-            counter = 0
            setIsLoading(false) 
-        }
         }
       }
     }
@@ -190,7 +187,6 @@ if (isPostSessionSuccess) {
               },
             },
           );
-          counter++
           const data = await response.json();
           console.log(data);
           setExerciseArray(data);
@@ -201,11 +197,7 @@ if (isPostSessionSuccess) {
         } catch (err) {
           console.log(err, "Kunde inte hämta övningarna");
         } finally {
-          if (counter === 2) {
-            counter = 0
              setIsLoading(false) 
-          }
-          
         }
       }
     }
@@ -243,6 +235,8 @@ if (isPostSessionSuccess) {
           console.log("Fyll i alla fält")
           return false
       }
+
+      if (token) {
       try{
         const response = await fetch("https://appleet-backend.vercel.app/post-session", {
             method: "POST",
@@ -251,10 +245,10 @@ if (isPostSessionSuccess) {
               "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-            attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email })),
+              attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email, signed: false })),
               date: selectedDate.trim(),
               time: selectedTime.trim(),
-              place: selectedPlace.trim(),
+              place: selectedPlace.trim().charAt(0).toUpperCase() + selectedPlace.trim().slice(1),
               exercises: selectedExercises
             }),
           });
@@ -265,7 +259,7 @@ if (isPostSessionSuccess) {
 
             selectedAttendees.forEach(async (attendee) => {
                 console.log(1,data.session)
-                await assignSessionToUser(attendee.email, data.session);
+             /*    await assignSessionToUser(attendee.email, data.session); */
               });
         
               setComment("")
@@ -288,12 +282,19 @@ if (isPostSessionSuccess) {
       } finally {
          setIsLoading(false) 
       }
+    } else {
+      navigate("/login")
+    }
   }
 
-  const assignSessionToUser = async (email, data) => {
+  /* const assignSessionToUser = async (email, data) => {
     const token = localStorage.getItem("token")
     try {
+<<<<<<< HEAD
       const response = await fetch("https://appleet-backend.vercel.app/assign-session", {
+=======
+      const response = await fetch("http://192.168.0.30:5000/assign-session", {
+>>>>>>> dev
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -313,7 +314,7 @@ if (isPostSessionSuccess) {
     } catch (error) {
       console.error("Något gick fel vid tilldelning av träningspass:", error);
     }
-  };
+  }; */
 
   return (
     <div>
