@@ -11,7 +11,7 @@ import Weather from "../components/Weather"
 
 export default function MySessions() {
     const location = useLocation();
-    const selectedSession = location.state ? location.state.selectedSession : null;
+    const selectedSession = location.state ? location.state.selectedSession : "";
     const [today, setToday] = useState("")
     const [isLoading, setIsLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -37,8 +37,8 @@ export default function MySessions() {
     const [sliderValue, setSliderValue] = useState(0)
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
- 
-    console.log(userPastSessions)
+
+        console.log(expandedContent._id)
 
 
     const openModal = (session, exercise) => {
@@ -77,7 +77,7 @@ export default function MySessions() {
       
 
       const getSessions = async () => {
-        setIsLoading(true);
+ 
         const token = localStorage.getItem("token");
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
@@ -86,12 +86,16 @@ export default function MySessions() {
     
         if (token) {
             try {
-                const response = await fetch("http://192.168.0.30:5000/get-sessions", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
+                setIsLoading(true);
+                const response = await fetch(
+                    "https://appleet-backend.vercel.app/get-sessions",
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
                     },
-                });
+                );
                 const data = await response.json();
                 const sessions = data.sessions;
                 const currentTime = new Date();
@@ -116,14 +120,10 @@ export default function MySessions() {
                     setAllPastSessions(sortedSessions.filter(sessionIsPast));
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-                
                     setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                
                     setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
                     setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)));
-                
                     const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed);
                     setNotSignedSessions(notSignedSessions);
                 }
@@ -140,7 +140,7 @@ export default function MySessions() {
     const postComment = async () => {
         const token = localStorage.getItem("token");
         try {
-          const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`https://appleet-backend.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default function MySessions() {
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -196,7 +196,7 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         console.log(user.email)
         try {
-            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -230,7 +230,7 @@ export default function MySessions() {
     const toggleExpandContent = (session, e) => {
         console.log(session)
         if (e?.target?.tagName.toLowerCase() === 'input' || e?.target?.tagName.toLowerCase() === 'button' || e?.target?.tagName.toLowerCase() === 'h3') {
-            return; // Avbryt funktionen om det är en input
+            return; 
         }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
@@ -243,32 +243,23 @@ export default function MySessions() {
 
 
     useEffect(() => {
-        if (expandedContent) {
-            if (expandedContent._id) {
-
-                setTimeout(() => {
-                    const selectedSessionElement = document.querySelector(".sessions-expandable.expanded");
-                   
+        setTimeout(() => {
+            const selectedSessionElement = document.querySelector(".sessions-expandable.expanded");                
                     if (selectedSessionElement) {
                         selectedSessionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100); // Vänta 100 millisekunder innan vi försöker hitta det expanderade elementet
-            } else {
-                console.log("Expanded content id is null or undefined");
-            }
-        } else {
-            console.log("Expanded content is null or undefined");
-        }
+                        console.log("scrolled")
+                    }        
+    }, 500)
     }, [expandedContent]);
 
     useEffect(() => {
         getSessions();
-        if (selectedSession) {
+    /*     if (selectedSession) {
             toggleExpandContent(selectedSession);
         } else {
             setExpandedContent(null);
-        }
-    }, [selectedSession]);
+        } */
+    }, []);
 
   
 
@@ -410,7 +401,7 @@ export default function MySessions() {
                         allUpcomingSessions.map((session, index) => (
                             
                             <div
-                            id={expandedContent._id}
+                            id={expandedContent ? expandedContent._id : ""} 
                             key={session._id}
                             className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
                             style={{

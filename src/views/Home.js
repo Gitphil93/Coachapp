@@ -78,8 +78,9 @@ const getToday = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      fetch("http://192.168.0.30:5000/get-user", {
+    if (token && today) {
+      setIsLoading(true)
+      fetch("https://appleet-backend.vercel.app/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -94,9 +95,6 @@ const getToday = () => {
           setUser(data.user);
         }
       })
-      .then(() => {
-     setIsLoading(false);  
-      })
       .catch((error) => {
         console.error("Error fetching user:", error);
   
@@ -109,7 +107,6 @@ const getToday = () => {
 
 
   const getSessions = async () => {
-    setIsLoading(true);
     const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
     setRole(decodedToken.role);
@@ -117,7 +114,8 @@ const getToday = () => {
 
     if (token && today) {
         try {
-            const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+          setIsLoading(true);
+            const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -185,12 +183,12 @@ const getToday = () => {
   };
 
   const postMessage = async (message) => {
-    setIsLoading(true)
     const token = localStorage.getItem("token")
     if (token) {
     try {
+      setIsLoading(true)
       const response = await fetch(
-        "http://192.168.0.30:5000/admin/post-global-message",
+        "https://appleet-backend.vercel.app/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -254,7 +252,8 @@ const formatDate = (dateString) => {
 
   const fetchGlobalMessage = async () => {
     try {
-      const response = await fetch("http://192.168.0.30:5000/get-global-message",
+      setIsLoading(true)
+      const response = await fetch("https://appleet-backend.vercel.app/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
@@ -309,6 +308,7 @@ const formatDate = (dateString) => {
             {isLoading &&
        <Loader/>
 }
+      
       <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
       <Menu
         isOpen={isMenuOpen}

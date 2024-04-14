@@ -31,7 +31,6 @@ export default function AddSession() {
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
 
-  let counter = 0 
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -143,12 +142,12 @@ export default function AddSession() {
 
   useEffect(() => {
     async function getUsers() {
-      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
+          setIsLoading(true)
           const response = await fetch(
-            "http://192.168.0.30:5000/get-all-users",
+            "https://appleet-backend.vercel.app/get-all-users",
             {
               method: "GET",
               headers: {
@@ -175,12 +174,12 @@ if (isPostSessionSuccess) {
 
   useEffect(() => {
     async function getExercises() {
-      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
+          setIsLoading(true)
           const response = await fetch(
-            "http://192.168.0.30:5000/get-exercises",
+            "https://appleet-backend.vercel.app/get-exercises",
             {
               method: "GET",
               headers: {
@@ -229,8 +228,6 @@ if (isPostSessionSuccess) {
 
 
   const postSession = async () => {
-    setIsLoading(true)
-
     const token = localStorage.getItem("token")
       if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
@@ -239,7 +236,8 @@ if (isPostSessionSuccess) {
 
       if (token) {
       try{
-        const response = await fetch("http://192.168.0.30:5000/post-session", {
+        setIsLoading(true)
+        const response = await fetch("https://appleet-backend.vercel.app/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -291,7 +289,8 @@ if (isPostSessionSuccess) {
   /* const assignSessionToUser = async (email, data) => {
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://192.168.0.30:5000/assign-session", {
+      setIsLoading(true)
+      const response = await fetch("https://appleet-backend.vercel.app/assign-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

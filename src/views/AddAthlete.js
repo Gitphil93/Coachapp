@@ -24,7 +24,7 @@ export default function AddAthlete() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("http://192.168.0.30:5000/get-user", {
+          const response = await fetch("https://appleet-backend.vercel.app/get-user", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export default function AddAthlete() {
     }
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://192.168.0.30:5000/admin/register", {
+      const response = await fetch("https://appleet-backend.vercel.app/admin/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

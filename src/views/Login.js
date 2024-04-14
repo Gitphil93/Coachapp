@@ -15,9 +15,9 @@ export default function Login() {
   };
 
   const login = async () => {
-    setIsLoading(true)
     try {
-      const response = await fetch("http://192.168.0.30:5000/login", {
+      setIsLoading(true)
+      const response = await fetch("https://appleet-backend.vercel.app/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
