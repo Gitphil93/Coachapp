@@ -5,8 +5,9 @@ const { ObjectId } = require('mongodb');
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const transporter = require('./nodemailer.js');
 dotenv.config();
+
 
 const app = express();
 const port = process.env.PORT;
@@ -120,12 +121,24 @@ const verifyRole = (requiredRole) => (req, res, next) => {
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
+  console.log(newUser)
   let client
-
+  
   try {
     client = await getConnection()
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
+
+    
+      const emailResult = await transporter.sendMail({
+        from: 'philipjansson1027@hotmail.com',
+        to: 'philipjansson1027@hotmail.com',
+        subject: 'Testmeddelande',
+        text: 'Detta är ett testmeddelande från nodemailer.'
+      });
+    
+      console.log('E-postmeddelande skickat:', emailResult);
+   
 
     //Kolla om användare finns
     const existingUser = await usersCollection.findOne({
