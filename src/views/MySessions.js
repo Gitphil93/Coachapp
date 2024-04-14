@@ -252,11 +252,11 @@ export default function MySessions() {
 
     useEffect(() => {
         getSessions();
-        if (selectedSession) {
+    /*     if (selectedSession) {
             toggleExpandContent(selectedSession);
         } else {
             setExpandedContent(null);
-        }
+        } */
     }, []);
 
   
