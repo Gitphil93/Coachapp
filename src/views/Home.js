@@ -308,6 +308,7 @@ const formatDate = (dateString) => {
             {isLoading &&
        <Loader/>
 }
+      
       <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
       <Menu
         isOpen={isMenuOpen}

@@ -11,7 +11,7 @@ import Weather from "../components/Weather"
 
 export default function MySessions() {
     const location = useLocation();
-    const selectedSession = location.state ? location.state.selectedSession : null;
+    const selectedSession = location.state ? location.state.selectedSession : "";
     const [today, setToday] = useState("")
     const [isLoading, setIsLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -38,6 +38,7 @@ export default function MySessions() {
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
 
+        console.log(expandedContent._id)
 
 
     const openModal = (session, exercise) => {
@@ -229,11 +230,11 @@ export default function MySessions() {
     const toggleExpandContent = (session, e) => {
         console.log(session)
         if (e?.target?.tagName.toLowerCase() === 'input' || e?.target?.tagName.toLowerCase() === 'button' || e?.target?.tagName.toLowerCase() === 'h3') {
-            return; // Avbryt funktionen om det är en input
+            return; 
         }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
-                return null; 
+                return false; 
             } else {
                 return session;
             }
@@ -400,7 +401,7 @@ export default function MySessions() {
                         allUpcomingSessions.map((session, index) => (
                             
                             <div
-                            id={expandedContent._id}
+                            id={expandedContent ? expandedContent._id : ""} 
                             key={session._id}
                             className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
                             style={{
