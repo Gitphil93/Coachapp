@@ -247,7 +247,7 @@ export default function MySessions() {
                         selectedSessionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         console.log("scrolled")
                     }        
-    }, 1000)
+    }, 500)
     }, [expandedContent]);
 
     useEffect(() => {
