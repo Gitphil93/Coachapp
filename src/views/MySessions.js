@@ -76,7 +76,7 @@ export default function MySessions() {
       
 
       const getSessions = async () => {
-        setIsLoading(true);
+ 
         const token = localStorage.getItem("token");
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
@@ -85,6 +85,7 @@ export default function MySessions() {
     
         if (token) {
             try {
+                setIsLoading(true);
                 const response = await fetch(
                     "https://appleet-backend.vercel.app/get-sessions",
                     {

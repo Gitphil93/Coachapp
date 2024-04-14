@@ -79,6 +79,7 @@ const getToday = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token && today) {
+      setIsLoading(true)
       fetch("https://appleet-backend.vercel.app/get-user", {
         method: "GET",
         headers: {
@@ -106,7 +107,6 @@ const getToday = () => {
 
 
   const getSessions = async () => {
-    setIsLoading(true);
     const token = localStorage.getItem("token");
     const decodedToken = jwtDecode(token);
     setRole(decodedToken.role);
@@ -114,6 +114,7 @@ const getToday = () => {
 
     if (token && today) {
         try {
+          setIsLoading(true);
             const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
                 method: "GET",
                 headers: {
@@ -182,10 +183,10 @@ const getToday = () => {
   };
 
   const postMessage = async (message) => {
-    setIsLoading(true)
     const token = localStorage.getItem("token")
     if (token) {
     try {
+      setIsLoading(true)
       const response = await fetch(
         "https://appleet-backend.vercel.app/admin/post-global-message",
         {
@@ -251,6 +252,7 @@ const formatDate = (dateString) => {
 
   const fetchGlobalMessage = async () => {
     try {
+      setIsLoading(true)
       const response = await fetch("https://appleet-backend.vercel.app/get-global-message",
       );
       if (response.ok) {

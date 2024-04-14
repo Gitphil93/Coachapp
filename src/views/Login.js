@@ -15,8 +15,8 @@ export default function Login() {
   };
 
   const login = async () => {
-    setIsLoading(true)
     try {
+      setIsLoading(true)
       const response = await fetch("https://appleet-backend.vercel.app/login", {
         method: "POST",
         headers: {

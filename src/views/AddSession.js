@@ -142,10 +142,10 @@ export default function AddSession() {
 
   useEffect(() => {
     async function getUsers() {
-      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
+          setIsLoading(true)
           const response = await fetch(
             "https://appleet-backend.vercel.app/get-all-users",
             {
@@ -174,10 +174,10 @@ if (isPostSessionSuccess) {
 
   useEffect(() => {
     async function getExercises() {
-      setIsLoading(true)
       const token = localStorage.getItem("token");
       if (token) {
         try {
+          setIsLoading(true)
           const response = await fetch(
             "https://appleet-backend.vercel.app/get-exercises",
             {
@@ -228,8 +228,6 @@ if (isPostSessionSuccess) {
 
 
   const postSession = async () => {
-    setIsLoading(true)
-
     const token = localStorage.getItem("token")
       if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
@@ -238,6 +236,7 @@ if (isPostSessionSuccess) {
 
       if (token) {
       try{
+        setIsLoading(true)
         const response = await fetch("https://appleet-backend.vercel.app/post-session", {
             method: "POST",
             headers: {
@@ -290,11 +289,8 @@ if (isPostSessionSuccess) {
   /* const assignSessionToUser = async (email, data) => {
     const token = localStorage.getItem("token")
     try {
-<<<<<<< HEAD
+      setIsLoading(true)
       const response = await fetch("https://appleet-backend.vercel.app/assign-session", {
-=======
-      const response = await fetch("http://192.168.0.30:5000/assign-session", {
->>>>>>> dev
         method: "POST",
         headers: {
           "Content-Type": "application/json",
