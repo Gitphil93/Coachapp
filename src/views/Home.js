@@ -8,6 +8,7 @@ import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
 import {jwtDecode} from "jwt-decode"
 import Weather from "../components/Weather.js"
+import Footer from "../components/Footer.js"
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -80,7 +81,7 @@ const getToday = () => {
     const token = localStorage.getItem("token");
     if (token && today) {
       setIsLoading(true)
-      fetch("https://appleet-backend.vercel.app/get-user", {
+      fetch("http://192.168.0.30:5000/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -108,60 +109,55 @@ const getToday = () => {
 
   const getSessions = async () => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+  
     const decodedToken = jwtDecode(token);
     setRole(decodedToken.role);
     setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
-
-    if (token && today) {
-        try {
-          setIsLoading(true);
-            const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            const sessions = data.sessions;
-            const currentDate = new Date().toISOString().slice(0, 10);
-
-            // Sortera alla pass baserat på tid och datum
-            const sortedSessions = sessions.sort((a, b) => {
-                const dateA = new Date(`${a.date}T${a.time}`);
-                const dateB = new Date(`${b.date}T${b.time}`);
-                return dateA - dateB;
-            });
-
-            // Alla pass som inträffar idag
-            const todaySessions = sortedSessions.filter(session => session.date === today);
-            setAllTodaysSessions(todaySessions);
-
-            if (role >= 2000) {
-                // Alla kommande pass om användaren är en administratör
-                setAllUpcomingSessions(sortedSessions.filter(session => session.date > currentDate));
-            } else {
-                // Alla kommande pass för användaren
-                const userSessions = sortedSessions.filter(session => session.attendees.map(attendee => attendee.email).includes(decodedToken.email));
-                setAllUpcomingSessions(userSessions.filter(session => session.date > currentDate));
-
-                // Alla pass idag där användaren är närvarande men inte har signerat
-                const userTodaysSession = todaySessions.filter(session =>
-                    session.attendees.some(attendee =>
-                        attendee.email === decodedToken.email && !attendee.signed
-                    )
-                   
-                );
-                console.log(userTodaysSession)
-                setAllTodaysSessions(userTodaysSession);
-            }
-        } catch (err) {
-            console.error("Couldn't get sessions", err);
-        } finally {
-            setIsLoading(false);
-        }
-    } 
-};
-
+  
+    try {
+      setIsLoading(true);
+      const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      const sessions = data.sessions;
+      const currentTime = new Date();
+  
+      // Filter and sort sessions
+      const sortedSessions = sessions.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateA - dateB;
+      });
+  
+      // Filtering today's sessions considering the time constraint
+      const todaySessions = sortedSessions.filter(session => {
+        const sessionDateTime = new Date(`${session.date}T${session.time}`);
+        const twoHoursLater = new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000);
+        return session.date === today && twoHoursLater > currentTime;
+      });
+      setAllTodaysSessions(todaySessions);
+  
+      if (role >= 2000) {
+        setAllUpcomingSessions(sortedSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime));
+      } else {
+        const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
+        setUserUpcomingSessions(userSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime));
+      }
+    } catch (err) {
+      console.error("Couldn't get sessions", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
 
       useEffect(() => {
@@ -188,7 +184,7 @@ const getToday = () => {
     try {
       setIsLoading(true)
       const response = await fetch(
-        "https://appleet-backend.vercel.app/admin/post-global-message",
+        "http://192.168.0.30:5000/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -253,7 +249,7 @@ const formatDate = (dateString) => {
   const fetchGlobalMessage = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("https://appleet-backend.vercel.app/get-global-message",
+      const response = await fetch("http://192.168.0.30:5000/get-global-message",
       );
       if (response.ok) {
         const data = await response.json();
@@ -327,7 +323,6 @@ const formatDate = (dateString) => {
       >
         <div className="view-header">
           <h1>
-            {" "}
             {greeting} {name}! 
           </h1>
         </div>
@@ -408,7 +403,7 @@ const formatDate = (dateString) => {
       </div>
 
       <div className="no-sessions">
-    <h2>Du har inga pass idag</h2>
+    <h2>Du har inga kommande pass idag</h2>
     </div>
   </div>
 )}
@@ -523,6 +518,7 @@ const formatDate = (dateString) => {
             </div>
           </Modal>
         </div>
+        <Footer />
       </div>
       } 
     </div>

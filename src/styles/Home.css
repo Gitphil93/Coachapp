@@ -12,10 +12,11 @@
   font-size: 1rem;
   z-index: 1;
   box-sizing: border-box;
-  height: calc(100vh - var(--header-height));                          
+  /* height: calc(100vh - var(--header-height));    */
+  height:100dvh;
   background: linear-gradient(
     to bottom right,
-    rgba(241, 241, 241, 1),
+    rgb(238, 237, 237)10%,
     rgb(178, 182, 245, 0.3)
   );
   overflow-y: auto;
@@ -26,10 +27,11 @@
   margin-top: 1rem;
 }
 .view-header > h1{
-  
+  font-size: 1.5rem;
   font-weight: 400;
 }
 .sessions-header {
+  position: relative;
   margin-top: 2rem;
   width: 80%;
   display: flex;
@@ -76,6 +78,8 @@
   align-items: center;
   flex-direction: column;
   width: 100%;
+  height:auto;
+  margin-bottom: 2rem;
 }
 
 .sessions {
@@ -98,7 +102,7 @@
   align-items: center;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(to bottom right, rgb(235, 233, 233) 50%, rgb(4, 52, 85));
+  background: linear-gradient(to bottom right, rgb(238, 237, 237) 50%, rgb(4, 52, 85));
   border-radius: 10px;
 
 }
@@ -176,6 +180,7 @@
   margin-top: 1rem ;
   font-size: 1rem;
   text-align: center;
+  font-weight: 200;
 }
 
 .sessions-header > h2 {
@@ -258,9 +263,9 @@
 
 .modal-delete-button {
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
   color: white;
-  width: 7rem;
+  width: 8rem;
   height: 2.5rem;
   background-color: rgb(250, 44, 44);
   font-size: 1rem;
@@ -268,9 +273,9 @@
 
 .modal-button {
   border: none;
-  border-radius: 20px;
+  border-radius: 10px;
   color: white;
-  width: 7rem;
+  width: 8rem;
   height: 2.5rem;
   background-color: rgb(38, 42, 56);
   font-size: 1rem;
@@ -291,13 +296,15 @@
   background-color: white;
   padding: 0.5rem;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
   align-items: center;
   margin: 0.3rem;
   width: 46%;
   height: 10rem;
   border-radius: 10px;
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   box-shadow: 1px 1px 5px 1px rgb(223, 221, 221);
 }
 

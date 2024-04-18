@@ -126,4 +126,13 @@
     justify-content: center;
   }
 
-  
+ #date-filter {
+    width:35%;
+    height: 1.4rem;
+    background: inherit;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    border-bottom: 1px solid black;
+    border-radius: 0%;
+  }

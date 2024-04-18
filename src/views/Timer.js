@@ -53,7 +53,9 @@ export default function Timer() {
             : "blur(0) brightness(100%)",
         }}
       >
-        <h1 className="view-header">Timer</h1>
+         <div className="view-header">
+        <h1>Timer</h1>
+        </div>
 
         <div className="timer">
           <div className="counter">

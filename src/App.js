@@ -1,7 +1,6 @@
-import "./App.css";
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import "./App.css"
 import Home from "./views/Home";
 import AddExcercise from "./views/AddExcercise";
 import AddAthlete from "./views/AddAthlete";
@@ -11,8 +10,10 @@ import Register from "./views/Register";
 import AddSession from "./views/AddSession";
 import { MenuProvider } from "./context/MenuContext.js";
 import MySessions from "./views/MySessions";
+import Profile from "./views/Profile";
 
 function App() {
+
   return (
     <div className="App">
       <MenuProvider>
@@ -26,6 +27,7 @@ function App() {
             <Route path="timer" element={<Timer />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
           </Routes>
         </Router>
       </MenuProvider>

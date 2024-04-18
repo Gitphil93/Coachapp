@@ -92,3 +92,12 @@
 .login-button:active {
   transform: scale(0.98);
 }
+
+.form-icon{
+position: absolute;
+left: -25px;
+top: 4px;
+color:rgb(83, 82, 82);
+
+z-index: 2;
+}

@@ -24,7 +24,7 @@ export default function AddAthlete() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("https://appleet-backend.vercel.app/get-user", {
+          const response = await fetch("http://192.168.0.30:5000/get-user", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -64,15 +64,15 @@ export default function AddAthlete() {
     }
     const token = localStorage.getItem("token")
     try {
-      const response = await fetch("https://appleet-backend.vercel.app/admin/register", {
+      const response = await fetch("http://192.168.0.30:5000/admin/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          name: name,
-          lastname: lastName,
+          name: name.trim().charAt(0).toUpperCase() + name.trim().slice(1),
+          lastname: lastName.trim().charAt(0).toUpperCase() + lastName.trim().slice(1),
           email: email,
           key: key,
           role: 1000,
@@ -133,7 +133,10 @@ export default function AddAthlete() {
             : "blur(0) brightness(100%)",
         }}
       >
-        <h1 className="view-header">Lägg till atlet</h1>
+         <div className="view-header">
+        <h1>Lägg till atlet</h1>
+        </div>
+
         <div className="input-wrapper">
           <div className="input-name">
             <label htmlFor="name">Namn</label>

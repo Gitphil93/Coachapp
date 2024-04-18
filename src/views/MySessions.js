@@ -8,6 +8,8 @@ import {jwtDecode} from "jwt-decode";
 import Modal from "../components/Modal"
 import Loader from "../components/Loader"
 import Weather from "../components/Weather"
+import Footer from "../components/Footer"
+
 
 export default function MySessions() {
     const location = useLocation();
@@ -15,6 +17,7 @@ export default function MySessions() {
     const [today, setToday] = useState("")
     const [isLoading, setIsLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [currentExercise, setCurrentExercise] = useState('');
     const modalRef = useRef();
@@ -37,8 +40,12 @@ export default function MySessions() {
     const [sliderValue, setSliderValue] = useState(0)
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
+    const [showPastSessions, setShowPastSessions] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredPastSessions, setFilteredPastSessions] = useState([]);
+    console.log(showPastSessions)
 
-        console.log(expandedContent._id)
+        console.log(filteredPastSessions)
 
 
     const openModal = (session, exercise) => {
@@ -57,6 +64,7 @@ export default function MySessions() {
       const closeDeleteModal = () => {
         setIsDeleteModalOpen(false);
       };
+
 
       const handleComment = (e) => {
         setComment(e.target.value)
@@ -77,7 +85,6 @@ export default function MySessions() {
       
 
       const getSessions = async () => {
- 
         const token = localStorage.getItem("token");
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
@@ -88,7 +95,7 @@ export default function MySessions() {
             try {
                 setIsLoading(true);
                 const response = await fetch(
-                    "https://appleet-backend.vercel.app/get-sessions",
+                    "http://192.168.0.30:5000/get-sessions",
                     {
                         method: "GET",
                         headers: {
@@ -100,11 +107,11 @@ export default function MySessions() {
                 const sessions = data.sessions;
                 const currentTime = new Date();
     
-                // Sortera alla sessioner baserat på tid och datum
+                // Sort all sessions based on time and date (most recent first)
                 const sortedSessions = sessions.sort((a, b) => {
                     const dateA = new Date(`${a.date}T${a.time}`);
                     const dateB = new Date(`${b.date}T${b.time}`);
-                    return dateA - dateB;
+                    return dateB - dateA; // Reversed the order here to sort from most recent to oldest
                 });
     
                 setAllSessions(sortedSessions);
@@ -135,12 +142,13 @@ export default function MySessions() {
         }
     };
     
+    
 
 
     const postComment = async () => {
         const token = localStorage.getItem("token");
         try {
-          const response = await fetch(`https://appleet-backend.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -170,7 +178,7 @@ export default function MySessions() {
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await fetch(`https://appleet-backend.vercel.app/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -196,7 +204,7 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         console.log(user.email)
         try {
-            const response = await fetch(`https://appleet-backend.vercel.app/update-session/${sessionId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -325,7 +333,7 @@ export default function MySessions() {
         
 
         if (Math.abs(deltaX) <= 100) {
-            return 'linear-gradient(to bottom right, rgb(235, 233, 233) 50%, rgb(4, 52, 85))'
+            return 'linear-gradient(to bottom right, rgb(238, 237, 237) 50%, rgb(4, 52, 85))'
         } else{
         return `rgba(${red}, ${green}, ${blue}, ${alpha})`
     }
@@ -335,6 +343,32 @@ export default function MySessions() {
     const handleSliderValue = (e) => {
         setSliderValue(e.target.value)
     }
+
+    const toggleShowPastSessions = () => {
+        setShowPastSessions(prevShow => !prevShow); // Växla mellan true och false
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value.trim();
+        setSearchTerm(value);
+    
+        if (value) {
+            
+            const filteredSessions = allPastSessions.filter(session => {
+                const sessionDate = new Date(session.date);
+                const sessionDateString = sessionDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+                const sessionYearMonth = sessionDate.toISOString().slice(0, 7); // 'YYYY-MM'
+    
+               
+                return sessionDateString === value || sessionYearMonth === value;
+            });
+            setFilteredPastSessions(filteredSessions);
+        } else {
+            setFilteredPastSessions(allPastSessions);
+        }
+    };
+    
+    
 
     return (
         <div>
@@ -379,6 +413,9 @@ export default function MySessions() {
           </Modal>
         </div>
 
+        
+        
+
 
             {isLoading &&
             <Loader/>
@@ -388,7 +425,10 @@ export default function MySessions() {
 
          
             <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
-                <h1 className="view-header">Mina pass</h1>
+             <div className="view-header">
+                 <h1>Mina Pass</h1>
+              </div>
+
 
                 <div  className="sessions-wrapper" >
                     <div className="sessions-header">
@@ -569,60 +609,46 @@ export default function MySessions() {
 
                  
 
-                <div className="sessions-wrapper">
+<div className="sessions-wrapper">
     <div className="sessions-header">
-        <h2>Tidigare pass</h2>
+        <h2 onClick={() => toggleShowPastSessions()}>Tidigare pass</h2>
+        {showPastSessions &&
+            <input
+                id="date-filter"
+                type="text"  // Change this to 'date' for easier input handling
+                value={searchTerm}
+                onChange={handleSearch}
+                placeholder="YYYY-MM-DD"
+            />
+        }
+        <img
+            id="arrow"
+            src="/arrow.png"
+            alt="arrow-icon"
+            onClick={() => toggleShowPastSessions()}
+            style={{ transform: showPastSessions ? "rotate(90deg)" : "rotate(-90deg)" }}
+        />
     </div>
-    {role >= 2000 ? (
-        allPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
+    {showPastSessions && (
+        (searchTerm ? filteredPastSessions : allPastSessions).map((session, index) => (
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index} onClick={(e) => toggleExpandContent(session, e)}>
                 <div className="sessions-content">
                     <div className="session-top">
-                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                        <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
                     </div>
-
                     {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
+                        <div className="expanded-session-content">
+                            {session.exercises.map((exercise, exerciseIndex) => (
+                                <div id="exercise-item" key={exerciseIndex}>
+                                    <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                    <p id="exercise-comment">{exercise.comment}</p>
+                                    {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
                                         <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
                                     ))}
-
-<div className="session-brief-wrapper">
-                                <div className="session-brief-header">
-                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
                                 </div>
-                        
-                  <div className="session-summary-container">
-                  {session.attendees.map((attendee, attendeeIndex) => (
-            <div className="session-summary-wrapper" key={attendeeIndex}>
-                <span className="initials-wrapper">
-                <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
-                </span>
-                <span id="summary-comment">
-                <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd'} </p>
-                </span>
-                <span id="score">
-                <p id="exercise-comment"> {attendee.howDidSessionGo || 0}/10</p>
-                </span>
-
-            </div>
-            
-              ))}
-            </div>
-      
-
-                            </div>
-
-                            
-                                </div>
-                                )}
-
+                            ))}
+                        </div>
+                    )}
                     <div className="session-bottom">
                         <h2>{session.place}</h2>
                         <div className="session-initials">
@@ -635,80 +661,15 @@ export default function MySessions() {
                     </div>
                 </div>
             </div>
-        ))
-    ) : (
-        userPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
-                <div className="sessions-content">
-                    <div className="session-top">
-                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
-                    </div>
-
-                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item"key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
-                                    ))}
-                                        <div className="session-brief-wrapper">
-                                <div className="session-brief-header">
-                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
-                                </div>
-                        
-                  <div className="session-summary-container">
-                  {session.attendees.map((attendee, attendeeIndex) => (
-             user.email === attendee.email && (
-                <div className="session-summary-wrapper" key={attendeeIndex}>
-                    <span className="initials-wrapper">
-                        <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
-                    </span>
-                    <span id="summary-comment">
-                        <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd men jag testar att bryta raden'} </p>
-                    </span>
-                    <span id="score">
-                        <p id="exercise-comment">{attendee.howDidSessionGo || 0}/10</p>
-                    </span>
-                </div>
-            )
-            
-              ))}
-            </div>
-      
-
-                            </div>
-                                </div>
-                                )}
-
-                                
-
-                    <div className="session-bottom">
-                        <h2>{session.place}</h2>
-                        <div className="session-initials">
-                            {session.attendees.map((initials, attendeeIndex) => (
-                                <span key={attendeeIndex} className="initials-wrapper">
-                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                    
-                </div>
-            
-            </div>
-            
         ))
     )}
-  
 </div>
 
 
 
 
+
+                                    <Footer/>
             </div>
         </div>
     );

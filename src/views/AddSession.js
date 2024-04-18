@@ -18,6 +18,7 @@ export default function AddSession() {
   const [searchTerm, setSearchTerm] = useState("")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [selectedName, setSelectedName] = useState("")
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedPlace, setSelectedPlace] = useState("");
@@ -44,6 +45,9 @@ export default function AddSession() {
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
+  const handleNameChange = (e) => {
+    setSelectedName(e.target.value)
+  }
 
   const handleTimeChange = (e) => {
     setSelectedTime(e.target.value);
@@ -147,7 +151,7 @@ export default function AddSession() {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-all-users",
+            "http://192.168.0.30:5000/get-all-users",
             {
               method: "GET",
               headers: {
@@ -179,7 +183,7 @@ if (isPostSessionSuccess) {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-exercises",
+            "http://192.168.0.30:5000/get-exercises",
             {
               method: "GET",
               headers: {
@@ -237,7 +241,7 @@ if (isPostSessionSuccess) {
       if (token) {
       try{
         setIsLoading(true)
-        const response = await fetch("https://appleet-backend.vercel.app/post-session", {
+        const response = await fetch("http://192.168.0.30:5000/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -245,6 +249,7 @@ if (isPostSessionSuccess) {
             },
             body: JSON.stringify({
               attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email, signed: false })),
+              title: selectedName.trim().charAt(0).toUpperCase() + selectedName.trim().slice(1),
               date: selectedDate.trim(),
               time: selectedTime.trim(),
               place: selectedPlace.trim().charAt(0).toUpperCase() + selectedPlace.trim().slice(1),
@@ -267,6 +272,7 @@ if (isPostSessionSuccess) {
               setSelectedDate("")
               setSelectedTime("")
               setSelectedPlace("")
+              setSelectedName("")
               setIsPostSessionSuccess(true);
               setExpandedCategory(false)
               window.scrollTo({
@@ -290,7 +296,7 @@ if (isPostSessionSuccess) {
     const token = localStorage.getItem("token")
     try {
       setIsLoading(true)
-      const response = await fetch("https://appleet-backend.vercel.app/assign-session", {
+      const response = await fetch("http://192.168.0.30:5000assign-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -332,12 +338,15 @@ if (isPostSessionSuccess) {
         }}
        
       >
-        <h1 className="view-header">Skapa pass</h1>
+        <div className="view-header">
+        <h1>Skapa pass</h1>
+        </div>
+
 
         
 
         <div className="input-wrapper">
-          <h2 className="header-text">Lägg till deltagare</h2>
+          <h2 className="header-text">LÄGG TILL DELTAGARE</h2>
 
           {users.length !== 0 && (
           <div className="attendees">
@@ -353,30 +362,40 @@ if (isPostSessionSuccess) {
           </div>
 )}
 
+          <div className="input-name">
+                <h2 className="header-text">NAMN (FRIVILLIGT)</h2>
+                <input
+                 type="text"
+                 value={selectedName}
+                 onChange={handleNameChange}
+             />
+           </div>
+
           <div className="date-time-header">
-            <h2 className="header-text">Datum</h2>
-            <h2 className="header-text">Tid</h2>
+            <h2 className="header-text">DATUM</h2>
+            <h2 className="header-text">TID</h2>
           </div>
 
           <div className="datetime-wrapper">
             <div className="datetime-picker">
               <input
+                id="date-input"
                 type="text"
                 placeholder="YYYY-MM-DD"
                 value={selectedDate}
                 onChange={handleDateChange}
               />
               <input
-                type="text"
-                placeholder="HH:MM"
-                value={selectedTime}
+                id="time-input"
+                type="time"
+                value={selectedTime || "00:00"}
                 onChange={handleTimeChange}
               />
             </div>
           </div>
 
           <div className="input-name">
-            <h2 className="header-text">Plats</h2>
+            <h2 className="header-text">PLATS</h2>
             <input
               type="text"
               value={selectedPlace}
@@ -386,7 +405,7 @@ if (isPostSessionSuccess) {
 
           <div className="add-exercises">
             <div className="add-exercises-header">
-              <h2 className="header-text">Lägg till övningar</h2>
+              <h2 className="header-text">LÄGG TILL ÖVNINGAR</h2>
               <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
             </div>
 
@@ -397,7 +416,7 @@ if (isPostSessionSuccess) {
                     className="expand"
                     onClick={() => toggleExpand(category)}
                   >
-                    <h3>{category}</h3>
+                    <h3 id="category-header">{category}</h3>
                     <img
                       id="arrow"
                       src="/arrow.png"
@@ -440,7 +459,7 @@ if (isPostSessionSuccess) {
             {selectedAttendees.length > 0 && (
   <div className="session-summary">
     <div className="session-summary-attendees">
-      <h2 className="header-text">Deltagare</h2>
+      <h2 className="header-text">DELTAGARE</h2>
       <div className="attendees">
         {selectedAttendees.map((attendee) => (
           <button
@@ -456,7 +475,7 @@ if (isPostSessionSuccess) {
       </div>
     </div>
     <div className="session-summary-time-place">
-      <h2 className="header-text">Tid och plats</h2>
+      <h2 className="header-text">TID OCH PLATS</h2>
       <div className="selected-time-place">
         <h3>
           {selectedDate} {selectedTime} {selectedPlace}
@@ -464,7 +483,7 @@ if (isPostSessionSuccess) {
       </div>
     </div>
     <div className="session-summary-exercises">
-      <h2 className="header-text">Övningar</h2>
+      <h2 className="header-text">ÖVNINGAR</h2>
       <div className="selected-exercises">
         {selectedExercises.map((exercise, index) => (
           <div key={exercise.name} className="exercise-item">

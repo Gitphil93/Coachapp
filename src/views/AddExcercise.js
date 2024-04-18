@@ -42,7 +42,7 @@ export default function AddExcercise() {
       return false;
     }
     try {
-      const response = await fetch("https://appleet-backend.vercel.app/add-excercise", {
+      const response = await fetch("http://192.168.0.30:5000/add-excercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,10 @@ export default function AddExcercise() {
             : "blur(0) brightness(100%)",
         }}
       >
-        <h1 className="view-header">Lägg till övning</h1>
+         <div className="view-header">
+        <h1>Skapa övning</h1>
+        </div>
+
 
         <div className="input-wrapper">
           <div className="input-name">

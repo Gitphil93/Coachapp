@@ -6,8 +6,17 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const transporter = require('./nodemailer.js');
-dotenv.config();
+const webPush = require('web-push');
 
+
+dotenv.config();
+console.log(  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY)
+webPush.setVapidDetails(
+  'mailto:philipjansson1027@hotmail.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 const app = express();
 const port = process.env.PORT;
@@ -121,7 +130,7 @@ const verifyRole = (requiredRole) => (req, res, next) => {
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
-
+  console.log(newUser)
   let client
   
   try {
@@ -131,10 +140,12 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
 
     
       const emailResult = await transporter.sendMail({
-        from: 'philipjansson1027@hotmail.com',
-        to: 'philipjansson1027@hotmail.com',
-        subject: 'Testmeddelande',
-        text: 'Detta är ett testmeddelande från nodemailer.'
+        from: 'Appleet <philipjansson1027@hotmail.com>',
+        to: newUser.email,
+        subject: 'Välkommen Till Appleet!',
+        text: `Hej ${newUser.name}! ${newUser.coach} har lagt till dig som användare på Appleet. din användarnyckel är: ${newUser.key}. Kopiera nyckeln och klicka på länken för att registrera dig. http://appleet.vercel.app/register.
+        
+        Detta meddelande går ej att besvara.`,
       });
     
       console.log('E-postmeddelande skickat:', emailResult);
@@ -633,6 +644,8 @@ app.put("/update-session/:sessionId", verifyToken, async (req, res) => {
     }
   }
 });
+
+
 
 
 app.listen(port, () => {
