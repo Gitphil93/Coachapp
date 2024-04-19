@@ -31,6 +31,8 @@ export default function Home() {
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
 
+  console.log(userUpcomingSessions)
+
 
 
 const getToday = () => {
@@ -144,10 +146,10 @@ const getToday = () => {
       setAllTodaysSessions(todaySessions);
   
       if (role >= 2000) {
-        setAllUpcomingSessions(sortedSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime));
+        setAllUpcomingSessions(sortedSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime && session.date > today));
       } else {
         const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-        setUserUpcomingSessions(userSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime));
+         setAllUpcomingSessions(userSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime && session.date > today));
       }
     } catch (err) {
       console.error("Couldn't get sessions", err);

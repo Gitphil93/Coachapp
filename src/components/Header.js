@@ -1,14 +1,24 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 
+
 export default function Header({ onMenuToggle, hamburgerRef }) {
+  const location = useLocation();
+
+  const handleLogoClick = () => {
+    if (location.pathname !== "/") {
+      window.location.href = "/";
+    } else {
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="header">
-      <Link to="/">
+      <Link to="/" onClick={handleLogoClick}>
         <div className="runner">
         <h1>appleet.</h1>
-{/*           <img src="./runner-logo.svg" id="runner-logo" alt="runner-logo" /> */}
         </div>
       </Link>
 

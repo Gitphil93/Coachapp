@@ -83,12 +83,10 @@ export default function MySessions() {
         setToday(date)
       }
       
-
       const getSessions = async () => {
         const token = localStorage.getItem("token");
-        if (!token) return
-            
-        
+        if (!token) return;
+    
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
         setRole(role);
@@ -110,31 +108,37 @@ export default function MySessions() {
                 const sessions = data.sessions;
                 const currentTime = new Date();
     
-                // Sort all sessions based on time and date (most recent first)
+                // Sort all sessions based on time and date
                 const sortedSessions = sessions.sort((a, b) => {
                     const dateA = new Date(`${a.date}T${a.time}`);
                     const dateB = new Date(`${b.date}T${b.time}`);
-                    return dateB - dateA; // Reversed the order here to sort from most recent to oldest
+                    return dateA - dateB; // Sortera i stigande ordning (äldsta först)
                 });
     
-                setAllSessions(sortedSessions);
-    
+                // Funktion för att kontrollera om en session är förfluten
                 const sessionIsPast = (session) => {
                     const sessionTime = new Date(`${session.date}T${session.time}`);
-                    const oneHourPast = new Date(sessionTime.getTime() + 60 * 60 * 1000); // Add one hour to session start time
-                    return currentTime > oneHourPast;
+                    const twoHourPast = new Date(sessionTime.getTime() + 120 * 60 * 1000);
+                    return currentTime > twoHourPast;
                 };
     
                 if (role >= 2000) {
+                    // Kommande pass (äldsta först)
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session)));
-                    setAllPastSessions(sortedSessions.filter(sessionIsPast));
+                    // Tidigare pass (nyaste först)
+                    setAllPastSessions(sortedSessions.filter(sessionIsPast).reverse());
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
+                    // Kommande pass för användaren (äldsta först)
                     setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                    setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
+                    // Tidigare pass för användaren (nyaste först)
+                    setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse());
+                    // Alla kommande pass (äldsta först)
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
-                    setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)));
-                    const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed);
+                    // Alla tidigare pass (nyaste först)
+                    setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)).reverse());
+                    // Sessions där användaren inte har signerat närvaro (nyaste först)
+                    const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse();
                     setNotSignedSessions(notSignedSessions);
                 }
             } catch (err) {
