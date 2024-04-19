@@ -15,7 +15,10 @@ export default function Profile() {
     const [image, setImage] = useState(); // Stores the file object
     const [imageUrl, setImageUrl] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZBRWavH_xKSiGgujWbvZOFI0lSClOPgX6M9f5sKj95w&s'); 
 
-
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (!token) return
+  },[])
     
 /*     const uploadImage = async () => {
       const formData = new FormData();

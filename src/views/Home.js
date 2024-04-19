@@ -71,14 +71,14 @@ const getToday = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    
-    if (!token) {
-      navigate("/login")
-    }
+    if (!token) return
+
+ 
   }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    if (!token) return
     if (token && today) {
       setIsLoading(true)
       fetch("http://192.168.0.30:5000/get-user", {
@@ -109,10 +109,8 @@ const getToday = () => {
 
   const getSessions = async () => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+    if (!token) return;
+
   
     const decodedToken = jwtDecode(token);
     setRole(decodedToken.role);
@@ -180,6 +178,7 @@ const getToday = () => {
 
   const postMessage = async (message) => {
     const token = localStorage.getItem("token")
+    if (!token) return
     if (token) {
     try {
       setIsLoading(true)

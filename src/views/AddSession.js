@@ -147,6 +147,7 @@ export default function AddSession() {
   useEffect(() => {
     async function getUsers() {
       const token = localStorage.getItem("token");
+      if (!token) return
       if (token) {
         try {
           setIsLoading(true)
@@ -178,7 +179,8 @@ if (isPostSessionSuccess) {
 
   useEffect(() => {
     async function getExercises() {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");    
+      if (!token) return
       if (token) {
         try {
           setIsLoading(true)
@@ -233,6 +235,7 @@ if (isPostSessionSuccess) {
 
   const postSession = async () => {
     const token = localStorage.getItem("token")
+    if (!token) return
       if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
           return false
@@ -263,7 +266,7 @@ if (isPostSessionSuccess) {
 
             selectedAttendees.forEach(async (attendee) => {
                 console.log(1,data.session)
-             /*    await assignSessionToUser(attendee.email, data.session); */
+            
               });
         
               setComment("")
@@ -292,32 +295,7 @@ if (isPostSessionSuccess) {
     }
   }
 
-  /* const assignSessionToUser = async (email, data) => {
-    const token = localStorage.getItem("token")
-    try {
-      setIsLoading(true)
-      const response = await fetch("http://192.168.0.30:5000assign-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          email: email,
-          session: data
-        }),
-      });
   
-      if (response.ok) {
-        console.log("Träningspass tillagt till användaren");
-      } else {
-        console.error("Kunde inte tilldela träningspass till användaren");
-      }
-    } catch (error) {
-      console.error("Något gick fel vid tilldelning av träningspass:", error);
-    }
-  }; */
-
   return (
     <div>
       {isLoading && 

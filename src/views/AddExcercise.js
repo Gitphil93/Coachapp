@@ -38,6 +38,7 @@ export default function AddExcercise() {
 
   const addExcercise = async () => {
     const token = localStorage.getItem("token")
+    if (!token) return
     if (nameValue === "" || categoryValue === "") {
       return false;
     }

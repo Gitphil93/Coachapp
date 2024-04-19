@@ -86,6 +86,9 @@ export default function MySessions() {
 
       const getSessions = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return
+            
+        
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
         setRole(role);
@@ -147,6 +150,7 @@ export default function MySessions() {
 
     const postComment = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return
         try {
           const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
@@ -177,6 +181,7 @@ export default function MySessions() {
 
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return
         try {
             const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
@@ -202,6 +207,7 @@ export default function MySessions() {
     const submitSession = async (sessionId) => {
         console.log(sessionId)
         const token = localStorage.getItem("token");
+        if (!token) return
         console.log(user.email)
         try {
             const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {

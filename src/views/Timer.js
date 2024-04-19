@@ -11,6 +11,7 @@ export default function Timer() {
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
   useEffect(() => {
+
     let intervalId;
 
     if (isRunning) {
@@ -21,6 +22,11 @@ export default function Timer() {
 
     return () => clearInterval(intervalId);
   }, [isRunning]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (!token) return
+  }, []);
 
   const minutes = Math.floor(time / (60 * 1000));
   const seconds = Math.floor((time % (60 * 1000)) / 1000);

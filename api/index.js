@@ -253,7 +253,7 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: 120000,
+      expiresIn: 12000,
     });
     resObj.success = true;
     resObj.token = token;
@@ -268,6 +268,23 @@ app.post("/login", async (req, res) => {
     }
   }
 });
+
+app.post("/refresh-token", verifyToken, async (req, res) => {
+  try {
+    const { email, role } = req.decoded;
+
+    // Skapa en ny JWT-token med samma användaruppgifter och en ny expirationstid
+    const token = jwt.sign({ email, role }, process.env.JWT_SECRET, {
+      expiresIn: 172800, // 48 timmar
+    });
+
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(500).json({ error: "Error refreshing token" });
+  }
+});
+
 
 app.get("/get-user", verifyToken, async (req, res) => {
   let client

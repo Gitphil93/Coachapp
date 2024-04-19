@@ -11,6 +11,7 @@ import AddSession from "./views/AddSession";
 import { MenuProvider } from "./context/MenuContext.js";
 import MySessions from "./views/MySessions";
 import Profile from "./views/Profile";
+import CheckToken from "./components/CheckToken";
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
     <div className="App">
       <MenuProvider>
         <Router>
+          <CheckToken />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="add-excercise" element={<AddExcercise />} />

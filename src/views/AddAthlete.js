@@ -22,6 +22,7 @@ export default function AddAthlete() {
   useEffect(() => {
     const getUser = async () => {
       const token = localStorage.getItem("token");
+      if(!token) return
       if (token) {
         try {
           const response = await fetch("http://192.168.0.30:5000/get-user", {
@@ -63,6 +64,7 @@ export default function AddAthlete() {
       return false;
     }
     const token = localStorage.getItem("token")
+    if (!token) return 
     try {
       const response = await fetch("http://192.168.0.30:5000/admin/register", {
         method: "POST",
