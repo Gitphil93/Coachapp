@@ -16,7 +16,7 @@ export default function AddExcercise() {
   const hamburgerRef = useRef(null);
   const [user, setUser] = useState({})
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
-  console.log(user)
+
   
   const handleNameChange = (event) => {
     setNameValue(event.target.value);
@@ -53,6 +53,7 @@ export default function AddExcercise() {
           name: nameValue.trim().charAt(0).toUpperCase() + nameValue.trim().slice(1),
           description: descriptionValue.trim().charAt(0).toUpperCase() + descriptionValue.trim().slice(1),
           category: categoryValue,
+          coach: user.name + " " + user.lastname
         }),
       });
 

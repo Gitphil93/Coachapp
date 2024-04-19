@@ -12,8 +12,7 @@
   font-size: 1rem;
   z-index: 1;
   box-sizing: border-box;
-  /* height: calc(100vh - var(--header-height));    */
-  height:100dvh;
+ height: calc(100dvh - var(--header-height));    
   background: linear-gradient(
     to bottom right,
     rgb(238, 237, 237)10%,
@@ -157,7 +156,6 @@
 
 .session-top > h2 {
   padding: 1rem;
-  color: black;
   font-weight: 500;
   font-size: 1rem;
   margin: 0;
@@ -165,7 +163,6 @@
 }
 .session-bottom > h2 {
   padding: 1rem;
-  color: black;
   font-weight: 500;
   font-size: 1rem;
   margin: 0;
@@ -312,3 +309,14 @@
   font-weight: 500;
 }
 
+.session-center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.session-center > h2{
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgb(71, 70, 70);
+}

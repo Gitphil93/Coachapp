@@ -6,6 +6,7 @@ import MenuContext from "../context/MenuContext";
 import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode"
 
 
 
@@ -22,6 +23,7 @@ export default function AddSession() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedPlace, setSelectedPlace] = useState("");
+  const [user, setUser] = useState({})
   const [users, setUsers] = useState([]);
   const [exerciseArray, setExerciseArray] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -31,7 +33,7 @@ export default function AddSession() {
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
-
+  console.log(user)
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -148,6 +150,8 @@ export default function AddSession() {
     async function getUsers() {
       const token = localStorage.getItem("token");
       if (!token) return
+      const decodedToken = jwtDecode(token)
+      setUser(decodedToken)
       if (token) {
         try {
           setIsLoading(true)
@@ -178,6 +182,9 @@ if (isPostSessionSuccess) {
 }, [isPostSessionSuccess]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token")
+      if (!token) return
+
     async function getExercises() {
       const token = localStorage.getItem("token");    
       if (!token) return
@@ -256,7 +263,8 @@ if (isPostSessionSuccess) {
               date: selectedDate.trim(),
               time: selectedTime.trim(),
               place: selectedPlace.trim().charAt(0).toUpperCase() + selectedPlace.trim().slice(1),
-              exercises: selectedExercises
+              exercises: selectedExercises,
+              coach: user.name + " " + user.lastname
             }),
           });
 

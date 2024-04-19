@@ -23,15 +23,14 @@ export default function Home() {
   const [initials, setInitials] = useState("");
   const [user, setUser] = useState(null)
   const [allTodaysSessions, setAllTodaysSessions] = useState([])
-  const [userUpcomingSessions, setUserUpcomingSessions] = useState([]);
   const [userTodaysSession, setUserTodaysSession] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
+console.log(globalMessage)
 
-  console.log(userUpcomingSessions)
 
 
 
@@ -195,6 +194,7 @@ const getToday = () => {
           body: JSON.stringify({
             globalMessage: message.trim(),
             author: initials,
+            coach: user.name + " " + user.lastname
           }),
         },
       );
@@ -247,29 +247,46 @@ const formatDate = (dateString) => {
 };
 
 
-  const fetchGlobalMessage = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch("http://192.168.0.30:5000/get-global-message",
-      );
-      if (response.ok) {
-        const data = await response.json();
+const fetchGlobalMessage = async () => {
+  const token = localStorage.getItem("token")
+  const decodedToken = jwtDecode(token)
+  const role = decodedToken.role
+  try {
+    setIsLoading(true);
 
-        if (data.globalMessage.globalMessage === "") {
-          setGlobalMessage("");
-        } else {
-          setGlobalMessage(data.globalMessage);
-        }
+    // Hämta JWT-token från lagring eller var den är tillgänglig
+    const token = localStorage.getItem('token'); // Justera detta beroende på var din token lagras
+
+    // Lägg till Authorization-header med token
+    const response = await fetch("http://192.168.0.30:5000/get-global-message", {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.globalMessage.globalMessage === "") {
+        setGlobalMessage("");
+      } else if (role > 2000){ // admin hämtar alla meddelanden, alltså i en array
+        // Därför tar vi det sista
+        setGlobalMessage(data.globalMessage[data.globalMessage.length -1])
       } else {
-        console.error("Failed to fetch global message");
+        setGlobalMessage(data.globalMessage);
       }
-        setIsLoading(false)
-    } catch (error) {
-      console.error("Error fetching global message:", error);
-    } finally{
-    setIsLoading(false)  
+    } else {
+      console.error("Failed to fetch global message");
     }
-  };
+
+  } catch (error) {
+    console.error("Error fetching global message:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const deleteGlobalMessage = async () => {
     setGlobalMessage("");
@@ -329,8 +346,8 @@ const formatDate = (dateString) => {
         </div>
         {globalMessage && typeof globalMessage === "object" && (
           <div className="global-message">
-            {globalMessage.globalMessage !== null &&
-              globalMessage.globalMessage !== "" && (
+            {globalMessage !== null &&
+              globalMessage !== "" && (
                 <>
                   <span className="global-message-author">
                     <h3 id="author">{globalMessage.author}</h3>
@@ -381,6 +398,12 @@ const formatDate = (dateString) => {
               <h2><Weather sessionDate={session.date ? session.date : today}
                 sessionTime={session.time ? session.time : "12:00"}/></h2>
             </div>
+
+            <div className="session-center">
+              <h2>{session.title}</h2>
+            </div>
+
+
             <div className="session-bottom">
               <h2>{session.place}</h2>
               <div className="session-initials">
@@ -430,6 +453,11 @@ const formatDate = (dateString) => {
                 sessionTime={session.time ? session.time : "12:00"} /></h2>
 
               </div>
+
+              <div className="session-center">
+              <h2>{session.title}</h2>
+            </div>
+
               <div className="session-bottom">
               <h2>{session.place}</h2>
               <div className="session-initials">

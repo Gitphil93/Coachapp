@@ -317,35 +317,65 @@ app.get("/get-user", verifyToken, async (req, res) => {
 });
 
 app.get("/get-all-users", verifyToken, async (req, res) => {
-  let client
+  let client;
   try {
-    client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
     const usersCollection = database.collection("users");
 
-    const allUsers = await usersCollection.find().toArray();
+    // Hämta den inloggade användarens e-post från token
+    const loggedInUserEmail = req.decoded.email;
+
+    // Hämta den inloggade användarens roll från dess användarobjekt
+    const loggedInUserRole = req.decoded.role;
+
+    // Kontrollera om användaren har rollen 3000 (admin)
+    if (loggedInUserRole === 3000) {
+      // Om användaren är admin, hämta alla användare oavsett coach
+      const allUsers = await usersCollection.find().toArray();
+      if (allUsers.length > 0) {
+        res.status(200).json({ success: true, users: allUsers });
+      } else {
+        res.status(404).json({ success: false, message: "Inga användare hittades" });
+      }
+      return;
+    }
+
+    // Hämta den inloggade användarens coach från dess användarobjekt
+    const loggedInUser = await usersCollection.findOne({ email: loggedInUserEmail });
+    const loggedInUserCoach = loggedInUser.coach;
+
+    // Kontrollera om användaren försöker hämta sig själv
+    const requestedUserEmail = req.query.email;
+    if (requestedUserEmail && requestedUserEmail === loggedInUserEmail) {
+      // Användaren försöker hämta sig själv, tillåt det oavsett coach-informationen
+      const user = await usersCollection.findOne({ email: loggedInUserEmail });
+      res.status(200).json({ success: true, user: user });
+      return;
+    }
+
+    // Hämta alla användare som har samma coach som den inloggade användaren
+    const allUsers = await usersCollection.find({ coach: loggedInUserCoach }).toArray();
 
     if (allUsers.length > 0) {
       res.status(200).json({ success: true, users: allUsers });
     } else {
-      res
-        .status(404)
-        .json({ success: false, message: "Inga användare hittades" });
+      res.status(404).json({ success: false, message: "Inga användare hittades" });
     }
   } catch (error) {
     console.error("Error retrieving all users:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Ett fel inträffade vid hämtning av alla användare",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Ett fel inträffade vid hämtning av alla användare",
+    });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
 });
+
+
 
 app.post("/add-excercise", verifyRole(2000), async (req, res) => {
   const newExercise = req.body;
@@ -377,88 +407,136 @@ app.post("/add-excercise", verifyRole(2000), async (req, res) => {
   }
 });
 
-app.get("/get-exercises", async (req, res) => {
-  let client
+app.get("/get-exercises", verifyToken, async (req, res) => {
+  let client;
   try {
-    client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
     const exerciseCollection = database.collection("exercises");
 
-    const exercises = await exerciseCollection.find().toArray();
+    // Hämta den inloggade användarens roll från token
+    const loggedInUserRole = req.decoded.role;
 
-    res.status(200).json(exercises);
-  } catch (err) {
-    console.error("Error fetching exercises:", err);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching exercises" });
+    // Om användarens roll är 3000 (admin), hämta alla övningar oavsett coach
+    if (loggedInUserRole === 3000) {
+      const exercises = await exerciseCollection.find().toArray();
+      if (exercises.length > 0) {
+        res.status(200).json({ success: true, exercises: exercises });
+      } else {
+        res.status(404).json({ success: false, message: "Inga övningar hittades" });
+      }
+      return;
+    }
+
+    // Hämta den inloggade användarens namn och efternamn från token
+    const loggedInUserName = req.decoded.name;
+    const loggedInUserLastName = req.decoded.lastname;
+    const loggedInUserFullName = `${loggedInUserName} ${loggedInUserLastName}`;
+
+    // Hämta övningar där coachen är sammanslagningen av namn och efternamn för den inloggade användaren
+    const exercises = await exerciseCollection.find({ coach: loggedInUserFullName }).toArray();
+    if (exercises.length > 0) {
+      res.status(200).json({ success: true, exercises: exercises });
+    } else {
+      res.status(404).json({ success: false, message: "Inga övningar hittades" });
+    }
+  } catch (error) {
+    console.error("Error fetching exercises:", error);
+    res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av övningar" });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
 });
 
-app.post("/admin/post-global-message", verifyRole(2000), async (req, res) => {
+app.post("/admin/post-global-message", verifyToken, verifyRole(2000), async (req, res) => {
   const globalMessage = req.body;
-  let client
+  let client;
   try {
-    client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
     const globalMessageCollection = database.collection("globalmessage");
 
-    const existingMessage = await globalMessageCollection.findOne();
+    // Hämta rollen för den inloggade användaren från dekrypterad token
+    const userRole = req.decoded.role;
+    
+    // Hämta användarens coach från dekrypterad token
+    const currentUserCoach = `${req.decoded.name} ${req.decoded.lastname}`;
 
-    if (existingMessage) {
-      await globalMessageCollection.updateOne({}, { $set: globalMessage });
-      res.status(200).json({ message: "Globalt meddelande uppdaterat" });
+    // Kontrollera användarens roll och tillåt endast tränare och admin att posta globala meddelanden
+    if (userRole === 2000 || userRole === 3000) {
+      // Kolla om det redan finns ett globalt meddelande från samma tränare
+      const existingMessage = await globalMessageCollection.findOne({ coach: currentUserCoach });
+      
+      if (existingMessage) {
+        // Uppdatera det befintliga globala meddelandet
+        await globalMessageCollection.updateOne({ coach: currentUserCoach }, { $set: globalMessage });
+        res.status(200).json({ message: "Globalt meddelande uppdaterat" });
+      } else {
+        // Om det inte finns ett befintligt meddelande, lägg till ett nytt
+        const result = await globalMessageCollection.insertOne(globalMessage);
+        res.status(200).json({ message: "Globalt meddelande tillagt", messageId: result.insertedId });
+      }
     } else {
-      const result = await globalMessageCollection.insertOne(globalMessage);
-      res
-        .status(200)
-        .json({
-          message: "Globalt meddelande tillagt",
-          messageId: result.insertedId,
-        });
+      // Om användaren inte har rätt behörighet, avvisa begäran
+      return res.status(403).json({ error: "Du har inte behörighet att posta globala meddelanden" });
     }
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: "Något gick fel vid hantering av globalt meddelande" });
+    res.status(500).json({ error: "Något gick fel vid hantering av globalt meddelande" });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
 });
 
-app.get("/get-global-message", async (req, res) => {
-  let client
+
+app.get("/get-global-message", verifyToken, async (req, res) => {
+  let client;
   try {
-    client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
     const globalMessageCollection = database.collection("globalmessage");
-    const result = await globalMessageCollection.findOne();
 
-    if (result) {
-      res
-        .status(200)
-        .json({ message: "Globalt meddelande hämtat", globalMessage: result });
-    } else {
-      res.status(404).json({ message: "Inget globalt meddelande hittades" });
+    // Hämta användarens roll från dekrypterad token
+    const userRole = req.decoded.role;
+    
+    let globalMessage;
+
+    if (userRole === 3000) {
+      globalMessage = await globalMessageCollection.find().toArray();
+    } else if (userRole === 2000) {
+      // Om användaren är tränare (2000), hämta det globala meddelandet som de har skrivit
+      const currentUser = `${req.decoded.name} ${req.decoded.lastname}`;
+      globalMessage = await globalMessageCollection.findOne({ coach: currentUser });
+    } else if (userRole === 1000) {
+      // Om användaren är användare (1000), hämta det globala meddelandet som deras coach har skrivit
+      const currentUserCoach = `${req.decoded.coach}`;
+      globalMessage = await globalMessageCollection.findOne({ coach: currentUserCoach });
     }
+
+    console.log(globalMessage)
+
+    if (!globalMessage) {
+      return res.status(404).json({ error: "Inget globalt meddelande hittades" });
+    }
+
+    // Returnera det globala meddelandet baserat på användarrollen
+    res.status(200).json({ globalMessage });
   } catch (err) {
-    console.error("Något gick fel vid hämtning av meddelande", err);
-    res
-      .status(500)
-      .json({ error: "Något gick fel vid hämtning av meddelande" });
+    console.error(err);
+    res.status(500).json({ error: "Något gick fel vid hämtning av globalt meddelande" });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
 });
+
+
+
 
 
 app.post("/post-session",verifyRole(2000), async (req, res) => {
@@ -490,61 +568,57 @@ app.post("/post-session",verifyRole(2000), async (req, res) => {
 })
 
 app.get("/get-sessions", verifyToken, async (req, res) => {
-  let client
-  try{
-    client = await getConnection()
-    const database = client.db("Coachapp")
-    const sessionCollection = database.collection("sessions")
-    const allSessions = await sessionCollection.find().toArray();
-
-    if (allSessions.length > 0) {
-      res.status(200).json({ success: true, sessions: allSessions });
-    } else {
-      res
-        .status(404)
-        .json({ success: false, message: "Inga pass hittades" });
-    }
-  } catch(err) {
-    console.err("something went wrong when getting sessions:" , err)
-  } finally {
-    if (client) {
-      releaseConnection(client)
-    }
-  }
-})
-
-/* app.post("/assign-session", async (req, res) => {
-  const { email, session } = req.body; 
-
-  console.log(session)
-  let client
+  let client;
   try {
-     client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
-    const usersCollection = database.collection("users");
+    const sessionCollection = database.collection("sessions");
 
-    const user = await usersCollection.findOne({ email: email });
+    // Hämta den inloggade användarens roll från token
+    const loggedInUserRole = req.decoded.role;
 
-    if (!user) {
-      return res.status(404).json({ error: "Användaren hittades inte" });
+    // Om användarens roll är 3000 (admin), hämta alla sessioner oavsett coach
+    if (loggedInUserRole === 3000) {
+      const sessions = await sessionCollection.find().toArray();
+      if (sessions.length > 0) {
+        res.status(200).json({ success: true, sessions: sessions });
+      } else {
+        res.status(404).json({ success: false, message: "Inga sessioner hittades" });
+      }
+      return;
     }
 
-    // Lägg till hela sessionen i användarens sessions-array
-    await usersCollection.updateOne(
-      { email: email },
-      { $push: { sessions: session } }
-    );
+    // Hämta den inloggade användarens coach från dess användarobjekt
+    const loggedInUserCoach = req.decoded.name + " " + req.decoded.lastname;
 
-    res.status(200).json({ message: "Träningspass tillagt till användaren" });
+    // Om användarens roll är 2000 (coach), hämta alla sessioner där coach matchar användarens coach
+    if (loggedInUserRole === 2000) {
+      const sessions = await sessionCollection.find({ coach: loggedInUserCoach }).toArray();
+      if (sessions.length > 0) {
+        res.status(200).json({ success: true, sessions: sessions });
+      } else {
+        res.status(404).json({ success: false, message: "Inga sessioner hittades" });
+      }
+      return;
+    }
+
+    // Om användarens roll är 1000 (user), hämta alla sessioner där coach matchar användarens coach
+    const sessions = await sessionCollection.find({ coach: loggedInUserCoach }).toArray();
+    if (sessions.length > 0) {
+      res.status(200).json({ success: true, sessions: sessions });
+    } else {
+      res.status(404).json({ success: false, message: "Inga sessioner hittades" });
+    }
   } catch (error) {
-    console.error("Fel vid tilldelning av träningspass:", error);
-    res.status(500).json({ error: "Ett fel inträffade vid tilldelning av träningspass" });
+    console.error("Error fetching sessions:", error);
+    res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av sessioner" });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
-}); */
+});
+
 
 app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) => {
   const sessionId = req.params.sessionId;

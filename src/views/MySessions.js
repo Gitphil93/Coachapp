@@ -469,6 +469,12 @@ export default function MySessions() {
                                               sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
 
+                                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
+
                                     
                                     {isContentExpanded(session) && (
                                 <div className="expanded-session-content">
@@ -507,6 +513,12 @@ export default function MySessions() {
                                         <h2><Weather sessionDate={session.date ? session.date : today}
                                               sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
+
+                                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
 
                                     {isContentExpanded(session) && (
                                 <div className="expanded-session-content">
@@ -553,6 +565,12 @@ export default function MySessions() {
                     <div className="session-top">
                         <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
                     </div>
+
+                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
 
                     {isContentExpanded(session) && (
                         <div className="expanded-session-content">
@@ -646,6 +664,13 @@ export default function MySessions() {
                     <div className="session-top">
                         <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
                     </div>
+
+                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
+                                    
                     {isContentExpanded(session) && (
                         <div className="expanded-session-content">
                             {session.exercises.map((exercise, exerciseIndex) => (
