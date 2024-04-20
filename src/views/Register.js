@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import "../styles/Register.css";
 import LoaderSpinner from "../components/LoaderSpinner";
 import Loader from "../components/Loader";
 
 export default function Register() {
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
@@ -34,6 +35,7 @@ export default function Register() {
         const data = response.status;
 
         if (data === 201) {
+          navigate("/login")
           console.log("Användare skapad");
         }
       } catch (err) {

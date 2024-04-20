@@ -12,6 +12,7 @@ import { MenuProvider } from "./context/MenuContext.js";
 import MySessions from "./views/MySessions";
 import Profile from "./views/Profile";
 import CheckToken from "./components/CheckToken";
+import LandingPage from "./views/LandingPage"
 
 function App() {
 
@@ -21,7 +22,8 @@ function App() {
         <Router>
           <CheckToken />
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="home" element={<Home />} />
             <Route path="add-excercise" element={<AddExcercise />} />
             <Route path="add-athlete" element={<AddAthlete />} />
             <Route path="add-session" element={<AddSession />} />

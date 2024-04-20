@@ -10,8 +10,7 @@ const webPush = require('web-push');
 
 
 dotenv.config();
-console.log(  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY)
+
 webPush.setVapidDetails(
   'mailto:philipjansson1027@hotmail.com',
   process.env.VAPID_PUBLIC_KEY,
@@ -83,7 +82,6 @@ const hashPassword = async (password) => {
   try {
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log(hashedPassword)
     return hashedPassword;
   } catch (error) {
     throw new Error("Kunde inte hasha lösenordet");
@@ -92,7 +90,6 @@ const hashPassword = async (password) => {
 
 const comparePassword = async (password, storedPassword) => {
   const isTheSame = await bcrypt.compare(password, storedPassword);
-  console.log(isTheSame);
   return isTheSame;
 };
 
@@ -130,7 +127,6 @@ const verifyRole = (requiredRole) => (req, res, next) => {
 //Här registrerar man atleten. Lägg in Email, namn och nyckel i databas
 app.post("/admin/register", verifyRole(2000), async (req, res) => {
   const newUser = req.body;
-  console.log(newUser)
   let client
   
   try {
@@ -146,6 +142,7 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
         text: `Hej ${newUser.name}! ${newUser.coach} har lagt till dig som användare på Appleet. din användarnyckel är: ${newUser.key}. Kopiera nyckeln och klicka på länken för att registrera dig. http://appleet.vercel.app/register.
         
         Detta meddelande går ej att besvara.`,
+        html:""
       });
     
       console.log('E-postmeddelande skickat:', emailResult);
@@ -224,7 +221,6 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const credentials = req.body;
-  console.log(credentials);
   let client
 
   const resObj = {
@@ -377,35 +373,41 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
 
 
 
-app.post("/add-excercise", verifyRole(2000), async (req, res) => {
+app.post("/add-exercise", verifyRole(2000), async (req, res) => {
   const newExercise = req.body;
   console.log(newExercise);
-  let client 
+  let client;
   try {
-     client = await getConnection()
+    client = await getConnection();
     const database = client.db("Coachapp");
     const exerciseCollection = database.collection("exercises");
 
-    const exercise = await exerciseCollection.findOne({
-      name: newExercise.name,
+    // Antag att coach informationen skickas med i request body
+    const { name, coach } = newExercise;
+
+    // Sök efter en befintlig övning med samma namn och samma coach
+    const existingExercise = await exerciseCollection.findOne({
+      name: name,
+      coach: coach
     });
 
-    if (exercise) {
-      return res.status(401).json({ error: "Övning finns redan" });
+    if (existingExercise) {
+      return res.status(401).json({ error: "En övning med detta namn finns redan registrerad av dig." });
     }
 
+    // Lägg till ny övning om ingen duplicering hittades
     const result = await exerciseCollection.insertOne(newExercise);
-    res
-      .status(200)
-      .json({ message: "Övning tillagd", exerciseId: result.insertedId });
+    res.status(200).json({ message: "Övning tillagd", exerciseId: result.insertedId });
   } catch (err) {
     console.error("Något gick fel, kunde inte spara övning", err);
+    res.status(500).json({ error: "Ett fel inträffade vid tilläggning av övningen" });
   } finally {
     if (client) {
-      releaseConnection(client)
+      releaseConnection(client);
     }
   }
 });
+
 
 app.get("/get-exercises", verifyToken, async (req, res) => {
   let client;
@@ -421,7 +423,7 @@ app.get("/get-exercises", verifyToken, async (req, res) => {
     if (loggedInUserRole === 3000) {
       const exercises = await exerciseCollection.find().toArray();
       if (exercises.length > 0) {
-        res.status(200).json({ success: true, exercises: exercises });
+        res.status(200).json(exercises);
       } else {
         res.status(404).json({ success: false, message: "Inga övningar hittades" });
       }
@@ -436,7 +438,7 @@ app.get("/get-exercises", verifyToken, async (req, res) => {
     // Hämta övningar där coachen är sammanslagningen av namn och efternamn för den inloggade användaren
     const exercises = await exerciseCollection.find({ coach: loggedInUserFullName }).toArray();
     if (exercises.length > 0) {
-      res.status(200).json({ success: true, exercises: exercises });
+      res.status(200).json(exercises);
     } else {
       res.status(404).json({ success: false, message: "Inga övningar hittades" });
     }
@@ -517,7 +519,6 @@ app.get("/get-global-message", verifyToken, async (req, res) => {
       globalMessage = await globalMessageCollection.findOne({ coach: currentUserCoach });
     }
 
-    console.log(globalMessage)
 
     if (!globalMessage) {
       return res.status(404).json({ error: "Inget globalt meddelande hittades" });

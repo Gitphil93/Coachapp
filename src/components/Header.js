@@ -7,8 +7,8 @@ export default function Header({ onMenuToggle, hamburgerRef }) {
   const location = useLocation();
 
   const handleLogoClick = () => {
-    if (location.pathname !== "/") {
-      window.location.href = "/";
+    if (location.pathname !== "/home") {
+      window.location.href = "/home";
     } else {
       window.location.reload();
     }
@@ -16,7 +16,7 @@ export default function Header({ onMenuToggle, hamburgerRef }) {
 
   return (
     <div className="header">
-      <Link to="/" onClick={handleLogoClick}>
+      <Link to="/home" onClick={handleLogoClick}>
         <div className="runner">
         <h1>appleet.</h1>
         </div>

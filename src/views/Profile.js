@@ -96,42 +96,42 @@ export default function Profile() {
           <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faTrophy} /></span>Nästa tävling</h3>
           <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faMountain} /></span>Nästa läger</h3>
         </div>
-{/* 
+{/*  
         <div>
           <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/jpg" onChange={handleImageChange} />
-          </div> */}
+          </div>  */}
 
           <div className="content-container">
             <div className="profile-item">
-              <h3>Personbästa</h3>
+              <h3>PERSONBÄSTA</h3>
               <span className="profile-icon">
               <FontAwesomeIcon icon={faPen} />
               </span>
               </div>
 
               <div className="profile-item">
-              <h3>Säsongsbästa</h3>
+              <h3>SÄSONGSBÄSTA</h3>
               <span className="profile-icon">
               <FontAwesomeIcon icon={faPen} />
               </span>
               </div>
 
               <div className="profile-item">
-              <h3>Tävlingar</h3>
+              <h3>TÄVLINGAR</h3>
               <span className="profile-icon">
               <FontAwesomeIcon icon={faPen} />
               </span>
               </div>
 
               <div className="profile-item">
-              <h3>Personbästa</h3>
+              <h3>RESULTAT</h3>
               <span className="profile-icon">
               <FontAwesomeIcon icon={faPen} />
               </span>
               </div>
 
               <div className="profile-item">
-              <h3>Personbästa</h3>
+              <h3>STATISTIK</h3>
               <span className="profile-icon">
               <FontAwesomeIcon icon={faPen} />
               </span>

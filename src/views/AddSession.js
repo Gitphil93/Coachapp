@@ -7,6 +7,7 @@ import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
 import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode"
+import Footer from "../components/Footer";
 
 
 
@@ -33,7 +34,7 @@ export default function AddSession() {
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
-  console.log(user)
+  console.log(exerciseArray)
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -427,7 +428,7 @@ if (isPostSessionSuccess) {
                       if (exercise.category === category) {
                         return (
                           <button
-                            key={exercise.name}
+                            key={exercise._id}
                             className="exercise-button"
                             onClick={() => addExercises(exercise)}
                           >
@@ -472,7 +473,7 @@ if (isPostSessionSuccess) {
       <h2 className="header-text">ÖVNINGAR</h2>
       <div className="selected-exercises">
         {selectedExercises.map((exercise, index) => (
-          <div key={exercise.name} className="exercise-item">
+          <div key={exercise._id} className="exercise-item">
             <img
               src="/arrow.png"
               alt="arrow-icon"
@@ -557,7 +558,7 @@ if (isPostSessionSuccess) {
                 <div className="filtered-exercises">
         {filteredExercises.map((exercise) => (
           <button
-            key={exercise.name}
+            key={exercise._id}
             className="exercise-button"
             onClick={() => addFromSearch(exercise)}
           >
@@ -575,7 +576,7 @@ if (isPostSessionSuccess) {
           </Modal>
         </div>
 
-
+          <Footer/>
       </div>
     </div>
   );
