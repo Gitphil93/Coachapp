@@ -5,6 +5,8 @@ import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext.js";
 import Success from "../components/Success.js";
 import { useNavigate } from "react-router-dom";
+import AdminButton from "../components/AdminButton";
+
 
 export default function AddAthlete() {
   const [name, setName] = useState("");
@@ -127,6 +129,8 @@ export default function AddAthlete() {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton/>
+    
       <div
         className="home-wrapper"
         style={{

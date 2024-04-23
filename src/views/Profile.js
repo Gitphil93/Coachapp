@@ -7,6 +7,7 @@ import Menu from '../components/Menu'
 import MenuContext from '../context/MenuContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faGear, faTrophy,faMountain} from '@fortawesome/free-solid-svg-icons';
+import AdminButton from '../components/AdminButton'
 
 
 export default function Profile() {
@@ -61,6 +62,7 @@ export default function Profile() {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton/>
            <div
         className="home-wrapper"
         style={{

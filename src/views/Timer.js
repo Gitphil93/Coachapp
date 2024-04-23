@@ -3,6 +3,7 @@ import "../styles/Timer.css";
 import MenuContext from "../context/MenuContext";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu";
+import AdminButton from "../components/AdminButton";
 
 export default function Timer() {
   const [time, setTime] = useState(0);
@@ -50,6 +51,7 @@ export default function Timer() {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton/>
 
       <div
         className="home-wrapper"

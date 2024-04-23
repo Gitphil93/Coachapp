@@ -789,6 +789,36 @@ app.delete("/delete-exercise/:exerciseId", verifyToken, verifyRole(2000), async 
   }
 });
 
+app.delete("/admin/delete-global-message", verifyToken, verifyRole(2000), async (req, res) => {
+ 
+  let client;
+  const message = req.body.messageId
+  console.log(message)
+  try {
+      client = await getConnection();
+      const db = client.db("Coachapp");
+      const globalMessage = db.collection("globalmessage");
+
+
+
+      const result = await globalMessage.deleteOne({ _id: new ObjectId(message) });
+
+      if (result.deletedCount === 1) {
+          res.status(200).json({ message: "Globalt meddelande raderat" });
+      } else {
+          res.status(404).json({ message: "Inget globalt meddelande hittades att radera" });
+      }
+  } catch (error) {
+      console.error("Failed to delete global message:", error);
+      res.status(500).json({ message: "Misslyckades med att radera det globala meddelandet" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+  }
+  }
+});
+
+
 
 
 app.listen(port, () => {

@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode"
 import Footer from "../components/Footer";
 import Success from "../components/Success"
+import AdminButton from "../components/AdminButton";
 
 
 
@@ -319,6 +320,7 @@ if (isPostSessionSuccess) {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton />
 
 
       <div

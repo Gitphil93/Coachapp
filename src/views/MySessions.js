@@ -11,6 +11,7 @@ import Weather from "../components/Weather"
 import Footer from "../components/Footer"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
+import AdminButton from '../components/AdminButton';
 
 
 
@@ -436,7 +437,7 @@ export default function MySessions() {
         }
             <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} hamburgerRef={hamburgerRef} />
-
+            <AdminButton />
          
             <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
              <div className="view-header">

@@ -9,6 +9,7 @@ import Loader from "../components/Loader.js"
 import {jwtDecode} from "jwt-decode"
 import Weather from "../components/Weather.js"
 import Footer from "../components/Footer.js"
+import AdminButton from "../components/AdminButton";
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -29,7 +30,6 @@ export default function Home() {
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
-console.log(globalMessage)
 
 
 
@@ -206,7 +206,7 @@ const getToday = () => {
       );
 
       if (response.ok) {
-        fetchGlobalMessage();
+        setGlobalMessage(message)
       }
 
       console.log(response);
@@ -221,7 +221,7 @@ const getToday = () => {
   };
 
   useEffect(() => {
-    fetchGlobalMessage();
+    fetchGlobalMessage(); 
     getToday()
   }, []);
 
@@ -253,7 +253,7 @@ const formatDate = (dateString) => {
 };
 
 
-const fetchGlobalMessage = async () => {
+ const fetchGlobalMessage = async () => {
   const token = localStorage.getItem("token")
   const decodedToken = jwtDecode(token)
   const role = decodedToken.role
@@ -291,14 +291,39 @@ const fetchGlobalMessage = async () => {
   } finally {
     setIsLoading(false);
   }
+}; 
+
+
+const deleteGlobalMessage = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+      setIsLoading(true);
+      const response = await fetch("http://192.168.0.30:5000/admin/delete-global-message", {
+          method: "DELETE",
+          headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+              messageId: globalMessage._id 
+          })
+      });
+
+      if (response.ok) {
+          console.log("Globalt meddelande raderat");
+          setGlobalMessage("");  
+          setIsGlobalMessageModalOpen(false);  
+      } else {
+          console.error("Misslyckades med att radera det globala meddelandet");
+      }
+  } catch (error) {
+      console.error("Error deleting global message:", error);
+  } finally {
+      setIsLoading(false);
+  }
 };
-
-
-  const deleteGlobalMessage = async () => {
-    setGlobalMessage("");
-    setIsGlobalMessageModalOpen(false);
-  };
-
  
   
   const handleSessionClick = (sessionId) => {
@@ -339,6 +364,7 @@ const fetchGlobalMessage = async () => {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton />
 
     {!isLoading &&
       <div
@@ -379,17 +405,6 @@ const fetchGlobalMessage = async () => {
         )}
 
 
-
-{userRole >= 2000 && (
-          <div className="menu-icon">
-            <img
-              src="./plus-icon.svg"
-              alt="plus-icon"
-              onClick={openAdminModal}
-              className="admin-button"
-            />
-          </div>
-        )}
 
 {!isLoading && allTodaysSessions.length > 0 ? (
   <div to="my-sessions" className="sessions-wrapper">
@@ -494,18 +509,19 @@ const fetchGlobalMessage = async () => {
           >
             <div className="modal-wrapper">
               <div className="modal-header">
-                <h2>Ändra eller ta bort globalt meddelande</h2>
+                <h2>Posta eller ta bort globalt meddelande</h2>
               </div>
 
               <div className="modal-buttons">
-                <button className="modal-button" onClick={message}>
-                  Ändra
-                </button>
                 <button
                   className="modal-delete-button"
                   onClick={deleteGlobalMessage}
                 >
                   Ta bort
+                </button>
+                
+                <button className="modal-button" onClick={message}>
+                  Ändra
                 </button>
               </div>
             </div>

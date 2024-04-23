@@ -5,7 +5,7 @@ import Loader from "./Loader.js";
 
 const Weather = ({ sessionDate, sessionTime }) => {
   const [isLoading, setIsLoading] = useState(false)
-  const [userLocation, setUserLocation] = useState({latitude:57.708870, longitude: 11.974560}); 
+  const [userLocation, setUserLocation] = useState( {latitude:57.708870, longitude: 11.974560}); 
   const [weatherData, setWeatherData] = useState(null);
   const API_KEY = '19c737dffbd944c5114401ce4fb6d57a';
 

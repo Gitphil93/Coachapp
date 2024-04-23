@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { jwtDecode } from "jwt-decode";
 import Modal from '../components/Modal';
-import { json } from 'react-router-dom';
+import AdminButton from '../components/AdminButton';
 
 export default function AdminDashboard() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
             {isLoading && <Loader />}
             <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} hamburgerRef={hamburgerRef} />
-
+            <AdminButton/>
             <div id="modal-root">
           <Modal
             isOpen={isDeleteModalOpen}

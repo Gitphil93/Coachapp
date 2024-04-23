@@ -5,6 +5,8 @@ import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
 import MenuContext from "../context/MenuContext";
 import {jwtDecode} from "jwt-decode"
+import AdminButton from "../components/AdminButton";
+
 
 export default function AddExcercise() {
   const [nameValue, setNameValue] = useState("");
@@ -82,6 +84,7 @@ export default function AddExcercise() {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton/>
 
       <div
         className="home-wrapper"
@@ -136,9 +139,9 @@ export default function AddExcercise() {
             <option value="Uppvärmning">Uppvärmning</option>
 
             {user.name === "Yannick" ?  (
-            <option value="Uppvärmning">Bös</option>
+            <option value="Övrigt">Bös</option>
             ) : 
-            <option value="Uppvärmning">Övrigt</option>
+            <option value="Övrigt">Övrigt</option>
              }
           </select>
         </div>
