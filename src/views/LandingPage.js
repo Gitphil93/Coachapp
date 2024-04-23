@@ -4,8 +4,6 @@ import "../styles/landingPage.css"
 
 export default function LandingPage() {
     const navigate = useNavigate()
-    console.log(document.scrollTop)
-
     useEffect(() => {
 /*         const token = localStorage.getItem("token")
         if (token) navigate("/home") */
@@ -20,53 +18,46 @@ export default function LandingPage() {
 
         <div className="video-container">
         <video width="100%" height="100%" autoPlay playsInline muted loop>
-            <source src="/start-video3.mp4" type="video/mp4"/>
+            <source src="/start-video4.mp4" type="video/mp4"/>
           </video>
           </div>
 
         <div className="overlay-content">
           <div className="appleet-header">
-          <h1>appleet</h1>
+          <h1 className="appleet-header-h1">appleet</h1>
           <div className="landing-buttons">
-            <button className="landing-button" onClick={login}>Logga in</button>
-            <button className="landing-button">Skapa konto</button>
+            <button id="login" className="landing-button" onClick={login}>Logga in</button>
+            <button  id="signup" className="landing-button">Skapa konto</button>
           </div>
 
-          <div className="try-for-free-container">
+        <div>
+          <h2>Läs mer</h2>
+        </div>
+
+          </div>
+
+        </div>
+
+        <div className="overlay-content">
+          <div className="page-two-container">
+        <div className="hook-container1">
+        <h2>REGISTRERA. PLANERA. ANALYSERA.</h2>
+        </div>
+
+        <div className="hook-container1">
+          <p>Med Appleet kan du enkelt skapa ett konto och bjuda in dina atleter för att effektivt planera och analysera deras träning. Skapa skräddarsydda övningar, följ deras framsteg i realtid och jämför resultat för att optimera deras prestation.
+         </p>
+        </div>
+
+        <div className="try-for-free-container">
           <button id="try-for-free-button">Prova gratis i 30 dagar</button>
         </div>
 
-          </div>
-
- 
-          <div className="hook-container1">
-        <h2>Skapa skräddarsydda träningsprogram som är anpassade efter dig och dina atleters behov</h2>
-        </div>
-
-        <div className="hook-container2">
-        <h2>Nå dina träningsdata var som helst, när som helst</h2>
-        </div>
-
-          <div className="row-wrapper">
-            <div className="row-item">
-              <h3 className="row-item-h3">REGISTRERA</h3>
-              <p className="row-item-p">Skapa konto på några sekunder</p>
-            </div>
-
-            <div className="row-item">
-              <h3 className="row-item-h3">PLANERA</h3>
-              <p className="row-item-p">Lägg till atleter, övningar och skapa träningspass</p>
-            </div>
-
-            <div className="row-item">
-              <h3 className="row-item-h3">ANALYSERA</h3>
-              <p className="row-item-p">Följ framsteg och jämför tidigare resultat</p>
-            </div>
 
           </div>
 
 
-
+          
         </div>
 
 

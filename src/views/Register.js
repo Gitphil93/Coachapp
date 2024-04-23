@@ -49,6 +49,14 @@ export default function Register() {
   };
 
   return (
+    <div>
+
+<div className="video-container">
+        <video width="100%" height="100%" autoPlay playsInline muted loop>
+            <source src="/start-video4.mp4" type="video/mp4"/>
+          </video>
+          </div>
+
     <div className="register-wrapper">
             <div className="logo-header">
         <h1>appleet.</h1>
@@ -59,7 +67,7 @@ export default function Register() {
         </div>
 
         <div className="input-wrapper">
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="email"
               placeholder="Email"
@@ -67,7 +75,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setEmailValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="password"
               placeholder="Lösenord"
@@ -75,7 +83,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setPasswordValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="password"
               placeholder="Upprepa lösenord"
@@ -83,7 +91,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setPasswordRepeatValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="text"
               placeholder="Nyckel"
@@ -111,6 +119,7 @@ export default function Register() {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

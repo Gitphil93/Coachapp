@@ -10,7 +10,7 @@
     justify-content: space-between;
     opacity: 1;
     padding:1rem;
-    background-color: rgb(53, 58, 75);
+    background-color: rgb(53, 58, 75, .9);
     opacity: .98;
 }
 

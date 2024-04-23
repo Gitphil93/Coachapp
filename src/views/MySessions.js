@@ -9,13 +9,17 @@ import Modal from "../components/Modal"
 import Loader from "../components/Loader"
 import Weather from "../components/Weather"
 import Footer from "../components/Footer"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment } from '@fortawesome/free-solid-svg-icons';
+
+
 
 
 export default function MySessions() {
     const location = useLocation();
     const selectedSession = location.state ? location.state.selectedSession : "";
     const [today, setToday] = useState("")
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)

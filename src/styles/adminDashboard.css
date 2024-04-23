@@ -1,0 +1,36 @@
+.dashboard-wrapper{
+    width: 90%;
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.athlete-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: auto;
+    width: 100%;
+}
+
+.athlete-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3rem;
+    margin-top: .5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.11);
+}
+.athlete-item > p {
+    font-size: .9rem;
+}
+
+.delete-icon{
+    color: red;
+}
+
+.dashboard-exercises{
+    height: auto;
+}

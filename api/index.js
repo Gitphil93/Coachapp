@@ -6,16 +6,9 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const transporter = require('./nodemailer.js');
-const webPush = require('web-push');
-
 
 dotenv.config();
 
-webPush.setVapidDetails(
-  'mailto:philipjansson1027@hotmail.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
 
 const app = express();
 const port = process.env.PORT;
@@ -137,7 +130,7 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
     
       const emailResult = await transporter.sendMail({
         from: 'Appleet <philipjansson1027@hotmail.com>',
-        to: newUser.email,
+        to:/*  newUser.email */ "philipjansson1027@hotmail.com",
         subject: 'Välkommen Till Appleet!',
         text: `Hej ${newUser.name}! ${newUser.coach} har lagt till dig som användare på Appleet. din användarnyckel är: ${newUser.key}. Kopiera nyckeln och klicka på länken för att registrera dig. http://appleet.vercel.app/register.
         
@@ -737,6 +730,64 @@ app.put("/update-session/:sessionId", verifyToken, async (req, res) => {
   }
 });
 
+app.delete("/delete-user", verifyToken, verifyRole(2000), async (req, res) => {
+  let client;
+
+  try {
+      const userEmail = req.body.email;
+      console.log(userEmail)
+      client = await getConnection();
+      const database = client.db("Coachapp");
+      const usersCollection = database.collection("users");
+
+      // Delete the user
+      const result = await usersCollection.deleteOne({ email: userEmail });
+      if (result.deletedCount === 0) {
+          return res.status(404).json({ error: "User not found" });
+      }
+
+      res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+      console.error("Failed to delete user:", error);
+      res.status(500).json({ error: "Failed to delete user" });
+  } finally {
+      if (client) {
+          releaseConnection(client);
+      }
+  }
+});
+
+app.delete("/delete-exercise/:exerciseId", verifyToken, verifyRole(2000), async (req, res) => {
+  const exerciseId = req.params.exerciseId;
+  let client;
+ 
+  try {
+      // Connect to the MongoDB client
+      client = await getConnection();
+      const database = client.db("Coachapp");
+      const exercises = database.collection("exercises");
+
+      // Construct query to find the exercise by ID and coach
+      const query = {
+          _id: new ObjectId(exerciseId)
+      };
+
+      const result = await exercises.deleteOne(query);
+
+      if (result.deletedCount === 1) {
+          res.status(200).json({ message: "Successfully deleted one document." });
+      } else {
+          res.status(404).json({ message: "No documents matched the query. Deleted 0 documents or you do not own this exercise." });
+      }
+  } catch (err) {
+      console.error("Failed to delete exercise:", err);
+      res.status(500).json({ message: "Failed to delete exercise" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+  }
+  }
+});
 
 
 

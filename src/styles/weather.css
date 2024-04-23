@@ -2,12 +2,13 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     margin-right: 0.5rem;
+    background-color: rgba(156, 151, 151, 0.199);
+    border-radius: 10px;
   /*   font-size: 1rem; */
   }
   
-  #weather-celsius {
-/*   margin-left: 6px; */
-  
-  }
+.weather-wrapper > img {
+  height: 2rem;
+}

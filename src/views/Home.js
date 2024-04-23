@@ -25,7 +25,7 @@ export default function Home() {
   const [allTodaysSessions, setAllTodaysSessions] = useState([])
   const [userTodaysSession, setUserTodaysSession] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const navigate = useNavigate()
@@ -111,13 +111,12 @@ const getToday = () => {
   const getSessions = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-
-  
-    const decodedToken = jwtDecode(token);
-    setRole(decodedToken.role);
-    setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
   
     try {
+      const decodedToken = jwtDecode(token);
+      setRole(decodedToken.role);
+      setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
+    
       setIsLoading(true);
       const response = await fetch("http://192.168.0.30:5000/get-sessions", {
         method: "GET",
@@ -125,31 +124,36 @@ const getToday = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+    
+      if (!response.ok) {
+        throw new Error('Failed to fetch sessions');
+      }
+    
       const data = await response.json();
       const sessions = data.sessions;
       const currentTime = new Date();
-  
+    
       // Filter and sort sessions
       const sortedSessions = sessions.sort((a, b) => {
         const dateA = new Date(`${a.date}T${a.time}`);
         const dateB = new Date(`${b.date}T${b.time}`);
         return dateA - dateB;
       });
-  
-      // Filtering today's sessions considering the time constraint
+    
+      // Filtering today's and upcoming sessions
       const todaySessions = sortedSessions.filter(session => {
         const sessionDateTime = new Date(`${session.date}T${session.time}`);
         const twoHoursLater = new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000);
         return session.date === today && twoHoursLater > currentTime;
       });
       setAllTodaysSessions(todaySessions);
-  
-      if (role >= 2000) {
-        setAllUpcomingSessions(sortedSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime && session.date > today));
-      } else {
-        const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-         setAllUpcomingSessions(userSessions.filter(session => new Date(`${session.date}T${session.time}`) > currentTime && session.date > today));
-      }
+    
+      const upcomingSessions = sortedSessions.filter(session => {
+        const sessionDateTime = new Date(`${session.date}T${session.time}`);
+        return sessionDateTime > currentTime && session.date > today;
+      });
+      setAllUpcomingSessions(role >= 2000 ? upcomingSessions : upcomingSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email)));
+    
     } catch (err) {
       console.error("Couldn't get sessions", err);
     } finally {
@@ -160,7 +164,9 @@ const getToday = () => {
 
 
       useEffect(() => {
+        if (today !== ""){
           getSessions();
+        }
       }, [role, today]);
 
   const message = async () => {
@@ -303,6 +309,10 @@ const fetchGlobalMessage = async () => {
     navigate('/my-sessions', { state: { selectedSession: sessionId } });
   };
 
+  const adminDashboard = () => {
+    navigate("/admin-dashboard")
+  }
+
   let hour = new Date().getHours();
   let greeting = "";
   
@@ -336,7 +346,7 @@ const fetchGlobalMessage = async () => {
         style={{
           filter: isMenuOpen
             ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
+            : "blur(0) brightness(100%)"
         }}
       >
         <div className="view-header">
@@ -526,6 +536,7 @@ const fetchGlobalMessage = async () => {
                   <h2>Lägg till övning</h2>
                 </Link>
 
+
                 <Link
                   to="/add-athlete"
                   className="admin-modal-item"
@@ -537,7 +548,14 @@ const fetchGlobalMessage = async () => {
                 <div className="admin-modal-item" onClick={message}>
                   <h2>Skriv globalt meddelande</h2>
                 </div>
+
+                <div className="admin-modal-item-center" onClick={adminDashboard}>
+                  <h2>Adminpanel</h2>
+                </div>
+
               </div>
+
+              
 
               <div className="modal-buttons">
                 <button className="modal-button" onClick={closeAdminModal}>

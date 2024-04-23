@@ -45,7 +45,16 @@ export default function Login() {
   };
 
   return (
+
+    <div>
+                    <div className="video-container">
+        <video width="100%" height="100%" autoPlay playsInline muted loop>
+            <source src="/start-video4.mp4" type="video/mp4"/>
+          </video>
+          </div>
+
     <div className="login-wrapper">
+
       <div className="logo-header">
         <h1>appleet.</h1>
         </div>
@@ -57,12 +66,13 @@ export default function Login() {
 
         <div className="input-wrapper" id="login-input">
 
-          <div className="input-name">
+          <div className="input-login-form">
             <span className="form-icon">
           <FontAwesomeIcon icon={faEnvelope} />
           </span>
             <input
               type="email"
+              placeholder="Email"
               value={emailValue}
               onChange={(e) => handleChange(e, setEmailValue)}
               
@@ -70,12 +80,13 @@ export default function Login() {
             </input>
           </div>
         
-          <div className="input-name">
+          <div className="input-login-form">
             <span className="form-icon">
           <FontAwesomeIcon icon={faLock} />
           </span>
             <input
               type="password"
+              placeholder="Lösenord"
               value={passwordValue}
               onChange={(e) => handleChange(e, setPasswordValue)}
             >
@@ -98,5 +109,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

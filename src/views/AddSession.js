@@ -8,6 +8,7 @@ import Loader from "../components/Loader.js"
 import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode"
 import Footer from "../components/Footer";
+import Success from "../components/Success"
 
 
 
@@ -34,7 +35,8 @@ export default function AddSession() {
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
-  console.log(exerciseArray)
+  const [showNotification, setShowNotification] = useState(true)
+
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -244,7 +246,7 @@ if (isPostSessionSuccess) {
   const postSession = async () => {
     const token = localStorage.getItem("token")
     if (!token) return
-      if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
+      if (selectedAttendees.length === 0 || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
           return false
       }
@@ -285,6 +287,7 @@ if (isPostSessionSuccess) {
               setSelectedTime("")
               setSelectedPlace("")
               setSelectedName("")
+              setShowNotification(true)
               setIsPostSessionSuccess(true);
               setExpandedCategory(false)
               window.scrollTo({
@@ -316,6 +319,8 @@ if (isPostSessionSuccess) {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+
+
       <div
         className="home-wrapper-exercises"
         style={{
@@ -350,7 +355,7 @@ if (isPostSessionSuccess) {
 )}
 
           <div className="input-name">
-                <h2 className="header-text">NAMN (FRIVILLIGT)</h2>
+                <h2 className="header-text">NAMN</h2>
                 <input
                  type="text"
                  value={selectedName}
@@ -359,7 +364,7 @@ if (isPostSessionSuccess) {
            </div>
 
           <div className="date-time-header">
-            <h2 className="header-text">DATUM</h2>
+            <h2 className="header-text">DATUM *</h2>
             <h2 className="header-text">TID</h2>
           </div>
 
@@ -367,7 +372,7 @@ if (isPostSessionSuccess) {
             <div className="datetime-picker">
               <input
                 id="date-input"
-                type="text"
+                type="date"
                 placeholder="YYYY-MM-DD"
                 value={selectedDate}
                 onChange={handleDateChange}
@@ -375,7 +380,7 @@ if (isPostSessionSuccess) {
               <input
                 id="time-input"
                 type="time"
-                value={selectedTime || "00:00"}
+                value={selectedTime}
                 onChange={handleTimeChange}
               />
             </div>
