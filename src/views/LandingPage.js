@@ -50,7 +50,9 @@ export default function LandingPage() {
         </div>
 
         <div className="try-for-free-container">
-          <button id="try-for-free-button">Prova gratis i 30 dagar</button>
+          <form action="http://localhost:5000/create-checkout-session" method="POST">
+          <button type="submit" id="try-for-free-button">Prova gratis i 30 dagar</button>
+          </form>
         </div>
 
 

@@ -6,7 +6,8 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const transporter = require('./nodemailer.js');
-
+const stripe = require('stripe')(process.env.STRIPE_KEY)
+console.log(process.env.STRIPE_KEY)
 dotenv.config();
 
 
@@ -68,6 +69,63 @@ app.options('*', (req, res) => {
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(200).send();
+});
+
+app.post('/create-checkout-session', async (req, res) => {
+
+  const session = await stripe.checkout.sessions.create({
+
+    line_items: [
+      {
+        price_data: {
+          currency: 'sek',
+          product_data: {
+            name: 'Montly Subscription',
+          },
+          unit_amount: 14900,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: 'http://localhost:3000/success',
+    cancel_url: 'http://localhost:3000/cancel',
+  });
+  console.log(session)
+  res.redirect(303, session.url);
+});
+
+app.post('/webhook', express.json({type: 'application/json'}), (request, response) => {
+  const event = request.body;
+
+  //Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      console.log("Woho, en betalning har gått igenom")
+      // Then define and call a method to handle the successful payment intent.
+      // handlePaymentIntentSucceeded(paymentIntent);
+      break;
+    case 'payment_method.attached':
+      const paymentMethod = event.data.object;
+      console.log("Woho, en ny betalningsmetod har lagts till!")
+      // Then define and call a method to handle the successful attachment of a PaymentMethod.
+      // handlePaymentMethodAttached(paymentMethod);
+      break;
+      case 'customer.created':
+        const customerCreated = event.data.object
+        console.log(customerCreated)
+    break;
+    case 'checkout.session.completed':
+      const checkoutSessionCompleted = event.data.object
+      console.log("checkoutSessionCompleted",checkoutSessionCompleted)
+  break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  // Return a response to acknowledge receipt of the event
+  response.json({received: true});
 });
 
 

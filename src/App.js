@@ -14,6 +14,8 @@ import Profile from "./views/Profile";
 import CheckToken from "./components/CheckToken";
 import LandingPage from "./views/LandingPage"
 import AdminDashboard from "./views/AdminDashboard"
+import StripeCancel from "./views/StripeCancel";
+import StripeSuccess from "./views/StripeSuccess";
 
 function App() {
 
@@ -28,12 +30,14 @@ function App() {
             <Route path="add-excercise" element={<AddExcercise />} />
             <Route path="add-athlete" element={<AddAthlete />} />
             <Route path="add-session" element={<AddSession />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="admin-dashboard" element={<AdminDashboard />} />
             <Route path="my-sessions" element={<MySessions />} />
             <Route path="timer" element={<Timer />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="success" element={<StripeSuccess />} />
+            <Route path="cancel" element={<StripeCancel />} />
           </Routes>
         </Router>
       </MenuProvider>
