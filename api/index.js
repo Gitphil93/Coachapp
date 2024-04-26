@@ -72,25 +72,21 @@ app.options('*', (req, res) => {
 });
 
 app.post('/create-checkout-session', async (req, res) => {
-
+  const priceId = "price_1P9P8SP8D5bxhkopn6UJul76"
+ 
   const session = await stripe.checkout.sessions.create({
-
-    line_items: [
-      {
-        price_data: {
-          currency: 'sek',
-          product_data: {
-            name: 'Montly Subscription',
-          },
-          unit_amount: 14900,
-        },
+    mode: 'subscription',
+      line_items: [{
+        price: priceId,
         quantity: 1,
+      }],
+      subscription_data: {
+        trial_period_days: 30,
       },
-    ],
-    mode: 'payment',
     success_url: 'http://localhost:3000/success',
     cancel_url: 'http://localhost:3000/cancel',
-  });
+  })
+  
   console.log(session)
   res.redirect(303, session.url);
 });
@@ -119,6 +115,7 @@ app.post('/webhook', express.json({type: 'application/json'}), (request, respons
     case 'checkout.session.completed':
       const checkoutSessionCompleted = event.data.object
       console.log("checkoutSessionCompleted",checkoutSessionCompleted)
+      console.log("checkoutSessionCompleted",checkoutSessionCompleted.customer_details.email)
   break;
     default:
       console.log(`Unhandled event type ${event.type}`);

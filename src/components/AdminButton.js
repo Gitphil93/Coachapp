@@ -22,9 +22,7 @@ export default function AdminButton() {
         const decodedToken = jwtDecode(token)
         setUser(decodedToken)
 
-        if (location.pathname === "/home"){
-        fetchGlobalMessage()
-        }
+    
     }, [])
 
     const openGlobalMessageModal = () => {
@@ -40,13 +38,13 @@ export default function AdminButton() {
     }
 
     const openAdminModal = () => {
-        if (user.role >= 2000) {
+        if (user.role > 1999) {
           setIsAdminModalOpen(true);
         }
       };
     
       const closeAdminModal = () => {
-        if (user.role >= 2000) {
+        if (user.role >= 1999) {
           setIsAdminModalOpen(false);
         }
       };
@@ -61,11 +59,14 @@ export default function AdminButton() {
     
         if (message === null || message.trim() === "") {
            setGlobalMessage(""); 
+           closeGlobalMessageModal()
           return false
         }
-    
+        closeGlobalMessageModal()
+
         setGlobalMessage(message);
         await postMessage(message);
+
       };
     
       const postMessage = async (message) => {
@@ -159,7 +160,7 @@ export default function AdminButton() {
       
             if (data.globalMessage.globalMessage === "") {
               setGlobalMessage("");
-            } else if (role > 2000){ // admin hämtar alla meddelanden, alltså i en array
+            } else if (role === 3000){ // admin hämtar alla meddelanden, alltså i en array
               // Därför tar vi det sista
               setGlobalMessage(data.globalMessage[data.globalMessage.length -1])
             } else {
@@ -218,7 +219,7 @@ export default function AdminButton() {
                 </div>
 
                 <div className="admin-modal-item-center" onClick={adminDashboard}>
-                  <h2>Adminpanel</h2>
+                  <h2>Dashboard</h2>
                 </div>
 
               </div>
@@ -264,7 +265,7 @@ export default function AdminButton() {
           </Modal>
         </div>
 
-        {user.role >= 2000 && (
+        {user.role >= 2000 && location.pathname !== "/home" && (
           <div className="menu-icon">
             <img
               src="./plus-icon.svg"

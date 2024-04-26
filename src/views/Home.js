@@ -24,15 +24,17 @@ export default function Home() {
   const [initials, setInitials] = useState("");
   const [user, setUser] = useState(null)
   const [allTodaysSessions, setAllTodaysSessions] = useState([])
-  const [userTodaysSession, setUserTodaysSession] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
+  const [globalMessageInput, setGlobalMessageInput] = useState("")
   const navigate = useNavigate()
 
 
-
+    const handleInputChange = (e) => {
+      setGlobalMessageInput(e.target.value)
+    }
 
 const getToday = () => {
   const dateObj = new Date();
@@ -47,41 +49,63 @@ const getToday = () => {
     if (isMenuOpen) {
       return
     }
-    if (userRole > 1000) {
+    if (userRole > 1999) {
       setIsGlobalMessageModalOpen(true);
     }
   };
 
   const closeGlobalMessageModal = () => {
-    if (userRole > 1000) {
+    if (userRole > 1999) {
       setIsGlobalMessageModalOpen(false);
     }
   };
 
   const openAdminModal = () => {
-    if (userRole > 1000) {
+    if (userRole > 1999) {
       setIsAdminModalOpen(true);
     }
   };
 
   const closeAdminModal = () => {
-    if (userRole > 1000) {
+    if (userRole > 1999) {
       setIsAdminModalOpen(false);
     }
   };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return
+    if (!token) {
+      navigate("/")
+      return
+    }
+    setIsLoading(true)
+    const decodedToken = jwtDecode(token);
+    setRole(decodedToken.role);
+    setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
+    getToday()
+
+
+    try{
+      fetchGlobalMessage(token)
+      getUser(token)
+      if (today !== ""){
+      getSessions(token, today)
+    }
+
+    } catch (err) {
+      console.error("Error fetching data", err)
+    } finally {
+      setIsLoading(false)
+    }
 
  
-  }, []);
+  }, [today]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+
+    const getUser = async (token) => {
     if (!token) return
     if (token && today) {
-      setIsLoading(true)
+
       fetch("http://192.168.0.30:5000/get-user", {
         method: "GET",
         headers: {
@@ -102,22 +126,16 @@ const getToday = () => {
   
       })
       .finally(() => {
-        setIsLoading(false); 
       }
   )} 
-  }, [today]);
+}
 
 
-  const getSessions = async () => {
-    const token = localStorage.getItem("token");
+
+  const getSessions = async (token, today) => {
     if (!token) return;
   
     try {
-      const decodedToken = jwtDecode(token);
-      setRole(decodedToken.role);
-      setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
-    
-      setIsLoading(true);
       const response = await fetch("http://192.168.0.30:5000/get-sessions", {
         method: "GET",
         headers: {
@@ -152,37 +170,29 @@ const getToday = () => {
         const sessionDateTime = new Date(`${session.date}T${session.time}`);
         return sessionDateTime > currentTime && session.date > today;
       });
-      setAllUpcomingSessions(role >= 2000 ? upcomingSessions : upcomingSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email)));
+      setAllUpcomingSessions(role >= 2000 ? upcomingSessions : upcomingSessions.filter(session => session.attendees.some(attendee => attendee.email === user.email)));
     
     } catch (err) {
       console.error("Couldn't get sessions", err);
-    } finally {
-      setIsLoading(false);
     }
   };
   
 
+  const message = async (message) => {
+    console.log(message)
+  setIsAdminModalOpen(false);
 
-      useEffect(() => {
-        if (today !== ""){
-          getSessions();
-        }
-      }, [role, today]);
+  if (message === null || message.trim() === "") {
+     setGlobalMessage(""); 
+     closeGlobalMessageModal()
+    return false
+  }
+  closeGlobalMessageModal()
 
-  const message = async () => {
-    setIsGlobalMessageModalOpen(false);
-    setIsAdminModalOpen(false);
-    const message = prompt("Skriv globalt meddelande");
+  setGlobalMessage(message);
+  await postMessage(message);
 
-    if (message === null || message.trim() === "") {
-      /* setGlobalMessage(""); */
-      return false
-    }
-
-    setGlobalMessage(message);
-    await postMessage(message);
-  };
-
+};
   const postMessage = async (message) => {
     const token = localStorage.getItem("token")
     if (!token) return
@@ -220,10 +230,6 @@ const getToday = () => {
     }
   };
 
-  useEffect(() => {
-    fetchGlobalMessage(); 
-    getToday()
-  }, []);
 
 
 const getDayOfWeek = (dateString) => {
@@ -253,17 +259,11 @@ const formatDate = (dateString) => {
 };
 
 
- const fetchGlobalMessage = async () => {
-  const token = localStorage.getItem("token")
+ const fetchGlobalMessage = async (token) => {
+   console.log("token",token)
   const decodedToken = jwtDecode(token)
   const role = decodedToken.role
   try {
-    setIsLoading(true);
-
-    // Hämta JWT-token från lagring eller var den är tillgänglig
-    const token = localStorage.getItem('token'); // Justera detta beroende på var din token lagras
-
-    // Lägg till Authorization-header med token
     const response = await fetch("http://192.168.0.30:5000/get-global-message", {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -288,9 +288,7 @@ const formatDate = (dateString) => {
 
   } catch (error) {
     console.error("Error fetching global message:", error);
-  } finally {
-    setIsLoading(false);
-  }
+  } 
 }; 
 
 
@@ -299,7 +297,6 @@ const deleteGlobalMessage = async () => {
   if (!token) return;
 
   try {
-      setIsLoading(true);
       const response = await fetch("http://192.168.0.30:5000/admin/delete-global-message", {
           method: "DELETE",
           headers: {
@@ -321,7 +318,7 @@ const deleteGlobalMessage = async () => {
   } catch (error) {
       console.error("Error deleting global message:", error);
   } finally {
-      setIsLoading(false);
+
   }
 };
  
@@ -403,6 +400,17 @@ const deleteGlobalMessage = async () => {
               )}
           </div>
         )}
+
+                  {userRole >= 2000 && (
+                      <div className="menu-icon">
+                        <img
+                          src="./plus-icon.svg"
+                          alt="plus-icon"
+                          onClick={openAdminModal}
+                          className="admin-button"
+                        />
+                      </div>
+                    )}
 
 
 
@@ -502,7 +510,7 @@ const deleteGlobalMessage = async () => {
 
 
 
-        <div id="modal-root">
+  <div id="modal-root">
           <Modal
             isOpen={isGlobalMessageModalOpen}
             onClose={closeGlobalMessageModal}
@@ -512,16 +520,20 @@ const deleteGlobalMessage = async () => {
                 <h2>Posta eller ta bort globalt meddelande</h2>
               </div>
 
+              <div>
+                  <input type="text" value={globalMessageInput} onChange={handleInputChange}/>
+              </div>
+
               <div className="modal-buttons">
+
                 <button
                   className="modal-delete-button"
                   onClick={deleteGlobalMessage}
                 >
                   Ta bort
                 </button>
-                
-                <button className="modal-button" onClick={message}>
-                  Ändra
+                <button className="modal-button" onClick={ () => message(globalMessageInput)}>
+                  Posta
                 </button>
               </div>
             </div>
@@ -561,12 +573,12 @@ const deleteGlobalMessage = async () => {
                   <h2>Lägg till atlet</h2>
                 </Link>
 
-                <div className="admin-modal-item" onClick={message}>
+                <div className="admin-modal-item" onClick={openGlobalMessageModal}>
                   <h2>Skriv globalt meddelande</h2>
                 </div>
 
                 <div className="admin-modal-item-center" onClick={adminDashboard}>
-                  <h2>Adminpanel</h2>
+                  <h2>Dashboard</h2>
                 </div>
 
               </div>
@@ -579,6 +591,7 @@ const deleteGlobalMessage = async () => {
                 </button>
               </div>
             </div>
+            
           </Modal>
         </div>
         <Footer />

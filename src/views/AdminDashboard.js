@@ -240,7 +240,7 @@ export default function AdminDashboard() {
 
             <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }} >
                 <div className="view-header">
-                    <h1>Adminpanel</h1>
+                    <h1>Dashboard</h1>
                 </div>
 
 
