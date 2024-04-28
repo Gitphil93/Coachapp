@@ -12,6 +12,10 @@ export default function LandingPage() {
     const login = () => {
       navigate("/login")
     }
+
+    const navigateRegister = () => {
+      navigate("/coach/register")
+    }
   return (
     <div>
         <div className="landing-wrapper">
@@ -50,10 +54,7 @@ export default function LandingPage() {
         </div>
 
         <div className="try-for-free-container">
-          <form action="http://localhost:5000/create-checkout-session" method="POST">
-            <input type="hidden" name="priceId" value="price_G0FvDp6vZvdwRZ" />
-          <button type="submit" id="try-for-free-button">Prova gratis i 30 dagar</button>
-          </form>
+          <button type="submit" id="try-for-free-button" onClick={navigateRegister}>Prova gratis i 30 dagar</button>
         </div>
 
 

@@ -14,8 +14,6 @@ export default function AdminButton() {
     const [globalMessage, setGlobalMessage] = useState("")
     const [globalMessageInput, setGlobalMessageInput] = useState("")
     const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false)
-    console.log(globalMessage)
-    console.log(user)
 
     useEffect(() => {
         const token = localStorage.getItem("token")

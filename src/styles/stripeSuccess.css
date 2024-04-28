@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap');
+
+.success-wrapper{
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center; 
+     text-align: center;
+     z-index: 2;
+
+    
+}
+#welcome {
+  font-family: "Racing Sans One", sans-serif;
+  font-size: 2rem;
+}
+
+.logo-header-success-page{
+  color: rgb(255, 255, 255);
+  font-size: 2rem;
+}
+
+.login-success-page {
+  width: 20rem;
+  height: 3rem;
+  color: rgb(255, 255, 255);
+  border: 2px solid rgba(255, 187, 0, 1);
+  border-radius: 10px;
+  background-color: rgba(32, 28, 82, 0.2);
+  letter-spacing: 1px;
+  font-weight: 400;
+  font-size: 1rem;
+  z-index: 4;
+}
+

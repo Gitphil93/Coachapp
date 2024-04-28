@@ -15,9 +15,9 @@
 /*   min-height: 100vh; */
  height: calc(100vh - var(--header-height));    
   background: linear-gradient(
-    to bottom right,
+    to bottom,
     rgb(238, 237, 237)10%,
-    rgb(178, 182, 245, 0.3)
+    rgb(178, 182, 245, 0.5)
   );
   overflow-y: auto;
 }
@@ -90,8 +90,7 @@
   width: 80%;
   height: 20vh;
   border-radius: 10px;
-  box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
-  background-color: white;
+  box-shadow: 1px 1px 10px 5px rgb(218, 218, 218, 0.8);
   transition: transform 0.3s ease;
   visibility: hidden;
   animation-name: appear;
@@ -107,7 +106,8 @@
   align-items: center;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(to bottom right, rgb(238, 237, 237) 50%, rgb(4, 52, 85));
+/*   background: linear-gradient(to bottom, rgb(238, 237, 237) 60%, rgb(4, 52, 85, 0.7)); */
+  background-color: rgb(187, 186, 186,0.5);
   border-radius: 10px;
 
 

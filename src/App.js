@@ -16,6 +16,7 @@ import LandingPage from "./views/LandingPage"
 import AdminDashboard from "./views/AdminDashboard"
 import StripeCancel from "./views/StripeCancel";
 import StripeSuccess from "./views/StripeSuccess";
+import CoachRegister from "./views/CoachRegister";
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
             <Route path="timer" element={<Timer />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="coach/register" element={<CoachRegister />} />
             <Route path="profile" element={<Profile />} />
             <Route path="success" element={<StripeSuccess />} />
             <Route path="cancel" element={<StripeCancel />} />

@@ -366,11 +366,12 @@ const deleteGlobalMessage = async () => {
     {!isLoading &&
       <div
         className="home-wrapper"
-        style={{
+/*         style={{
           filter: isMenuOpen
             ? "blur(4px) brightness(40%)"
             : "blur(0) brightness(100%)"
-        }}
+        }} */
+
       >
         <div className="view-header">
           <h1>

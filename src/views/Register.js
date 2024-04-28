@@ -21,20 +21,20 @@ export default function Register() {
   
     if (passwordValue === passwordRepeatValue) {
       try {
-        const response = await fetch("http://192.168.0.30:5000/register", {
+        const response = await fetch("http://192.168.0.30:5000/athlete/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: emailValue,
+            email: emailValue.toLowerCase(),
             password: passwordValue,
-            key: keyValue,
+            key: keyValue.trim(),
           }),
         });
-        const data = response.status;
+        
 
-        if (data === 201) {
+        if (response.ok) {
           navigate("/login")
           console.log("Användare skapad");
         }

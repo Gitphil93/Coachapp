@@ -8,7 +8,7 @@ const CheckToken = () => {
 
   useEffect(() => {
     // Rutter som inte kräver autentisering
-    const publicRoutes = ['/', '/login', '/register', "/success", "/cancel"];
+    const publicRoutes = ['/', '/login', '/register', "/success", "/cancel", "/coach/register"];
 
     // Kontrollera om den nuvarande rutten är en av de offentliga rutterna
     if (publicRoutes.includes(location.pathname)) {

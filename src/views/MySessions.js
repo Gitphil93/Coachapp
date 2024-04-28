@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useContext, useRef, useLayoutEffect} from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/mySessions.css";
 import MenuContext from "../context/MenuContext.js";
 import Header from '../components/Header';
@@ -17,6 +17,7 @@ import AdminButton from '../components/AdminButton';
 
 
 export default function MySessions() {
+    const navigate = useNavigate()
     const location = useLocation();
     const selectedSession = location.state ? location.state.selectedSession : "";
     const [today, setToday] = useState("")
@@ -48,9 +49,8 @@ export default function MySessions() {
     const [showPastSessions, setShowPastSessions] = useState(false)
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredPastSessions, setFilteredPastSessions] = useState([]);
-    console.log(showPastSessions)
+    console.log(today)
 
-        console.log(filteredPastSessions)
 
 
     const openModal = (session, exercise) => {
@@ -245,10 +245,6 @@ export default function MySessions() {
         }
     };
     
-      
-    const isAnyContentExpanded = () => {
-        return allSessions.some(session => isContentExpanded(session));
-    };
 
     const toggleExpandContent = (session, e) => {
         console.log(session)
@@ -257,7 +253,7 @@ export default function MySessions() {
         }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
-                return false; 
+                return ""; 
             } else {
                 return session;
             }
@@ -276,12 +272,22 @@ export default function MySessions() {
     }, [expandedContent]);
 
     useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (!token) {
+            navigate("/login")
+            return
+        }
+
+        try {
+            setIsLoading(true)
+        getToday()
         getSessions();
-    /*     if (selectedSession) {
-            toggleExpandContent(selectedSession);
-        } else {
-            setExpandedContent(null);
-        } */
+    } catch(err){
+        console.error("Something went wrong with fetching data:", err)
+    } finally {
+        setIsLoading(false)
+    }
+
     }, []);
 
   
@@ -308,7 +314,8 @@ export default function MySessions() {
     
     const handleTouchMove = (sessionId, e) => {
         if (role >= 2000) {
-            if (!isAnyContentExpanded(sessionId)) {
+            
+            if (expandedContent === "") {
                 const deltaX = e.touches[0].clientX - touchStartX;
     
                 if (deltaX < 0) {
@@ -323,7 +330,7 @@ export default function MySessions() {
     
     const handleTouchEnd = (sessionId) => {
         if (role >= 2000) {
-            if (!isAnyContentExpanded(sessionId)) {
+            if (expandedContent === "") {
                 const deltaX = sessionXValues[sessionId] || 0;
                 if (Math.abs(deltaX) > 200) {
                     openDeleteModal(sessionId);
@@ -348,7 +355,7 @@ export default function MySessions() {
         
 
         if (Math.abs(deltaX) <= 100) {
-            return 'linear-gradient(to bottom right, rgb(238, 237, 237) 50%, rgb(4, 52, 85))'
+            return 'rgba(187, 186, 186,0.5)'
         } else{
         return `rgba(${red}, ${green}, ${blue}, ${alpha})`
     }
@@ -382,6 +389,21 @@ export default function MySessions() {
             setFilteredPastSessions(allPastSessions);
         }
     };
+
+    const formatDate = (dateString) => {
+        const dateObj = new Date(dateString);
+        const formattedDate = dateObj.toLocaleDateString('sv-SE', {
+          day: '2-digit',
+          month: '2-digit'
+        });
+      
+        // Ta bort inledande nollor från månad och dag
+        const [month, day] = formattedDate.split('/').map(part => parseInt(part, 10));
+        const formattedMonth = month < 10 ? month.toString() : month;
+        const formattedDay = day < 10 ? day.toString() : day;
+      
+        return `${formattedMonth}/${formattedDay}`;
+      };
     
     
 
@@ -467,9 +489,9 @@ export default function MySessions() {
                             onTouchMove={(e) => handleTouchMove(session._id, e)}
                             onTouchEnd={() => handleTouchEnd(session._id)}// Uppdatera sessionens position baserat på sessionX
                         >   
-                                <div className="sessions-content" style={{ background: calculateSwipeColor(session._id)}}>
+                                <div className="sessions-content" style={{ backgroundColor: calculateSwipeColor(session._id)}}>
                                     <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                                        <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
                                         <h2><Weather sessionDate={session.date ? session.date : today}
                                               sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
@@ -514,7 +536,7 @@ export default function MySessions() {
 
                                 <div className="sessions-content">
                                     <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                                        <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
                                         <h2><Weather sessionDate={session.date ? session.date : today}
                                               sessionTime={session.time ? session.time : "12:00"}/></h2>
                                     </div>
@@ -568,7 +590,7 @@ export default function MySessions() {
             <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index} onClick={(e) => toggleExpandContent(session, e)}> 
                 <div className="sessions-content">
                     <div className="session-top">
-                        <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                        <h2>{getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
                     </div>
 
                     {!isContentExpanded(session) &&
@@ -648,7 +670,7 @@ export default function MySessions() {
         {showPastSessions &&
             <input
                 id="date-filter"
-                type="text"  // Change this to 'date' for easier input handling
+                type="text" 
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="YYYY-MM-DD"

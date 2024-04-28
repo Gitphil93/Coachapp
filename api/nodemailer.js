@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const pass = process.env.MAIL_PASS
-console.log(pass)
+
 // Konfigurera e-posttransport
 const transporter = nodemailer.createTransport({
   service: 'hotmail',

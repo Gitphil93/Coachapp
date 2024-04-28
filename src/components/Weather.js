@@ -67,7 +67,7 @@ const Weather = ({ sessionDate, sessionTime }) => {
     return currentTimeDiff < closestTimeDiff ? current : closest;
   });
 
-  console.log(closestWeatherData)
+  //console.log(closestWeatherData)
 
   const iconUrl = getWeatherIconUrl(closestWeatherData.weather[0].icon);
 

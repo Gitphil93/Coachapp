@@ -64,66 +64,141 @@ run().catch(console.dir);
 app.use(express.json());
 app.use(cors());
 
-app.options('*', (req, res) => {
+/* app.options('*', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(200).send();
 });
+ */
 
 app.post('/create-checkout-session', async (req, res) => {
-  const priceId = "price_1P9P8SP8D5bxhkopn6UJul76"
- 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
       line_items: [{
-        price: priceId,
+        price: "price_1P9P8SP8D5bxhkopn6UJul76",
         quantity: 1,
       }],
       subscription_data: {
         trial_period_days: 30,
       },
-    success_url: 'http://localhost:3000/success',
-    cancel_url: 'http://localhost:3000/cancel',
-  })
-  
-  console.log(session)
-  res.redirect(303, session.url);
-});
-
-app.post('/webhook', express.json({type: 'application/json'}), (request, response) => {
-  const event = request.body;
-
-  //Handle the event
-  switch (event.type) {
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      console.log("Woho, en betalning har gått igenom")
-      // Then define and call a method to handle the successful payment intent.
-      // handlePaymentIntentSucceeded(paymentIntent);
-      break;
-    case 'payment_method.attached':
-      const paymentMethod = event.data.object;
-      console.log("Woho, en ny betalningsmetod har lagts till!")
-      // Then define and call a method to handle the successful attachment of a PaymentMethod.
-      // handlePaymentMethodAttached(paymentMethod);
-      break;
-      case 'customer.created':
-        const customerCreated = event.data.object
-        console.log(customerCreated)
-    break;
-    case 'checkout.session.completed':
-      const checkoutSessionCompleted = event.data.object
-      console.log("checkoutSessionCompleted",checkoutSessionCompleted)
-      console.log("checkoutSessionCompleted",checkoutSessionCompleted.customer_details.email)
-  break;
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+      customer_email: req.body.email,
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/coach/register',
+    });
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error in Stripe session creation:', error);
+    res.status(500).send("Failed to create checkout session");
   }
-
-  // Return a response to acknowledge receipt of the event
-  response.json({received: true});
 });
+
+// When subscription started
+//Unhandled event type customer.updated
+//Unhandled event type invoice.created
+//Unhandled event type invoice.finalized
+//Unhandled event type invoice.paid
+//Unhandled event type invoice.payment_succeeded
+//Unhandled event type customer.subscription.created
+
+app.post('/webhook', express.json({type: 'application/json'}), async (req, res) => {
+  const eventType = req.body.type;
+  const data = req.body.data.object; // Assumes that you are always passing the correct structure
+
+  try {
+    switch (eventType) {
+      case 'payment_intent.succeeded':
+      case "payment_intent.created":
+      case 'payment_method.attached':
+      case 'customer.subscription.created':
+      case 'customer.updated':
+      case "invoice.created":
+      case "invoice.finalized":
+      case "invoice.paid":
+      case "invoice.payment_succeeded":
+
+       /*  console.log(`${eventType} received with data:`, data); */
+        break;
+
+        case 'customer.subscription.updated':
+
+          console.log("Subscription Updated", data);
+          if (data.status === "active" || data.status === "trialing") {
+            await updateActiveStatus(data.customer_email, true, 2000)
+          } else {
+            await updateActiveStatus(data.customer_email, false, 1999);
+          }
+          break;
+
+          case 'invoice.payment_failed':
+            console.log("Payment Failed", data);
+            if (data.attempt_count === 3){
+            await updateActiveStatus(data.customer_email, false, 1999);
+           }
+            break;
+
+      case 'checkout.session.completed':
+        if (data.payment_status === 'paid' || data.mode === 'subscription') {
+          await activateUserAccount(data.customer_email);
+        }
+        break;
+
+        case 'customer.subscription.deleted':
+          console.log("Subscription Deleted", data);
+          await updateActiveStatus(data.customer_email, false, 1999);
+          break;
+
+      default:
+        console.log(`Unhandled event type ${eventType}`);
+    }
+
+    res.json({received: true}); // Acknowledge receipt of the event
+  } catch (error) {
+    console.error(`Error handling ${eventType}:`, error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+async function updateActiveStatus(email, isActive, role) {
+  const client = await getConnection();
+  try {
+    const db = client.db("Coachapp");
+    const usersCollection = db.collection("users");
+    const updateResult = await usersCollection.updateOne(
+      { email: email },
+      { $set: { isActive: isActive, role: role } }
+    );
+    console.log(`Active status updated for ${email} to ${isActive}`, updateResult);
+  } catch (error) {
+    console.error("Failed to update user active status:", error);
+    throw error;
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+}
+
+async function activateUserAccount(email) {
+  const client = await getConnection();
+  try {
+    const db = client.db("Coachapp");
+    const usersCollection = db.collection("users");
+    const updateResult = await usersCollection.updateOne(
+      { email: email },
+      { $set: { isActive: true, role: 2000} }
+    );
+    console.log(`Account activated for ${email}`, updateResult);
+  } catch (error) {
+    console.error("Failed to activate user:", error);
+    throw error; // Rethrow to handle in the calling function
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+}
 
 
 const hashPassword = async (password) => {
@@ -227,7 +302,7 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
 
 // Här registerar sig atleten själv. Man ska jämföra med nyckeln som redan finns i
 // användarobjektet
-app.post("/register", async (req, res) => {
+app.post("/athlete/register", async (req, res) => {
   const newUser = req.body;
   let client
 
@@ -266,6 +341,53 @@ app.post("/register", async (req, res) => {
     }
   }
 });
+
+app.post("/coach/register", async (req, res) => {
+  const { name, lastname, email, role, password } = req.body;
+  let client
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const usersCollection = database.collection("users");
+
+    const existingUser = await usersCollection.findOne({ email });
+
+    if (existingUser) {
+      if (existingUser.isActive) {
+        return res.status(409).json({ message: "User already exists and is active. Please log in." });
+      } else {
+        // User exists but is inactive, update with new data
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        await usersCollection.updateOne(
+          { _id: existingUser._id },
+          { $set: { name, lastname, role, password: hashedPassword, isActive: false } }
+        );
+        return res.status(202).json({ message: "Existing inactive account updated. Please complete payment to activate.", userId: existingUser._id });
+      }
+    }
+
+    // If no existing user, create new
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newUser = await usersCollection.insertOne({
+      name,
+      lastname,
+      email,
+      role,
+      password: hashedPassword,
+      isActive: false
+    });
+
+    res.status(201).json({ message: "User registered, pending payment", userId: newUser.insertedId });
+  } catch (error) {
+    console.error("Failed to register user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+});
+
 
 app.post("/login", async (req, res) => {
   const credentials = req.body;
