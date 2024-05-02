@@ -53,14 +53,7 @@ export default function Timer() {
       />
       <AdminButton/>
 
-      <div
-        className="home-wrapper"
-        style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
-        }}
-      >
+      <div className="home-wrapper">
          <div className="view-header">
         <h1>Timer</h1>
         </div>

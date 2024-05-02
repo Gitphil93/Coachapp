@@ -44,6 +44,8 @@ h2 {
 input, textarea {
   touch-action: none; 
   font-size: .9rem;
+  outline:none;
+  border: none;
 }
 
 input::placeholder{

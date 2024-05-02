@@ -84,8 +84,8 @@ app.post('/create-checkout-session', async (req, res) => {
         trial_period_days: 30,
       },
       customer_email: req.body.email,
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/coach/register',
+      success_url: 'http://192.168.0.30:3000/success',
+      cancel_url: 'http://192.168.0.30:3000/coach/register',
     });
     res.json({ url: session.url });
   } catch (error) {
@@ -796,6 +796,7 @@ app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) =>
   const exerciseId = req.params.exerciseId;
   const author = req.body.author
   const comment = req.body.userComment;
+  const exerciseResult = req.body.result
 
   let client;
 
@@ -814,7 +815,7 @@ app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) =>
         "exercises._id": exerciseId
       },
       { 
-        $addToSet: { "exercises.$.userComment": {author: author, comment: comment} } 
+        $addToSet: { "exercises.$.userComment": {author: author, comment: comment, result: exerciseResult} } 
       }
     );
 

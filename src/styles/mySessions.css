@@ -137,3 +137,24 @@
     border-radius: 0%;
   }
 
+  .result-row{
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 2rem;
+    
+  }
+
+  .result-row input {
+    width: 60%;
+  }
+
+  .result-row select{
+    margin-top: 1rem;
+    outline: none;
+    border: none;
+    height: 2rem;
+    width: 6rem;
+  }
+

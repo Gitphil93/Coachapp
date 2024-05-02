@@ -86,14 +86,7 @@ export default function AddExcercise() {
       />
       <AdminButton/>
 
-      <div
-        className="home-wrapper"
-        style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
-        }}
-      >
+      <div className="home-wrapper">
          <div className="view-header">
         <h1>Skapa övning</h1>
         </div>

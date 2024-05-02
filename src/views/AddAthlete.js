@@ -131,14 +131,7 @@ export default function AddAthlete() {
       />
       <AdminButton/>
     
-      <div
-        className="home-wrapper"
-        style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
-        }}
-      >
+      <div className="home-wrapper">
          <div className="view-header">
         <h1>Lägg till atlet</h1>
         </div>

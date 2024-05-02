@@ -183,7 +183,6 @@ export default function AdminButton() {
           <Modal isOpen={isAdminModalOpen} onClose={closeAdminModal}>
             <div className="modal-wrapper">
               <div className="modal-header">
-                <h2>Admin</h2>
               </div>
 
               <div className="admin-modal">

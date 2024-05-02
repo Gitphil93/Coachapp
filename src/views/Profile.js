@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "../styles/Profile.css";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Menu from '../components/Menu';
 import MenuContext from '../context/MenuContext';
+import Loader from '../components/Loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faGear, faTrophy, faMountain, faPlus } from '@fortawesome/free-solid-svg-icons';
 import AdminButton from '../components/AdminButton';
@@ -11,41 +13,47 @@ import Modal from '../components/Modal';
 
 
 export default function Profile() {
+  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [image, setImage] = useState(); 
     const [event, setEvent] = useState("")
     const [pb, setPb] = useState(0)
     const [pbDate, setPbDate] = useState("")
+    const [user, setUser] = useState({})
+    const [unit, setUnit] =useState("")
     const [expandedItemId, setExpandedItemId] = useState(null);
-    const [bio, setBio] = useState("asd asd asd asd asd asd asd asd asd asd a");
+    const [bio, setBio] = useState("asd asd asd asd asd asd asd asd asd asd aasd asd asd asd asd asd asd asd asd asd a");
     const [imageUrl, setImageUrl] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZBRWavH_xKSiGgujWbvZOFI0lSClOPgX6M9f5sKj95w&s'); 
     const [profileItems, setProfileItems] = useState([
-      { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23s" }, { event: "Längdhopp", performance: "7.35m" }] },
-      { id: 2, title: "Dina SB", details: [{ event: "200m", performance: "20.56s" }, { event: "Höjdhopp", performance: "2.05m" }] },
-      { id: 3, title: "TÄVLINGAR", details: "Competition Details" },
-      { id: 4, title: "RESULTAT", details: "Results Details" },
-      { id: 5, title: "STATISTIK", details: "Statistics Details" },
+      { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23", date: "2024-01-02", unit:"s", outside: true }, { event: "Längdhopp", performance: "7.35", date: "2024-01-02", unit:"m", outside: true }, { event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true }] },
+      { id: 2, title: "Dina SB", details: [{ event: "200m", performance: "20.56", date: "2024-01-02", unit:"s", outside: true }, { event: "Höjdhopp", performance: "2.05", date: "2024-01-02", unit:"m", outside: true }] },
+      { id: 3, title: "Tävlingar", details: "Competition Details" },
+      { id: 4, title: "Resultat", details: "Results Details" },
+      { id: 5, title: "Statistik", details: "Statistics Details" },
     ]);
 
     const [statistics, setStatistics] = useState([
       {
           personalBests: [
-              { event: "Höjdhopp", score: 2.00, date: "2023-10-27", metric: "m" },
-              { event: "Längdhopp", score: 5.60, date: "2023-10-27", metric: "m" }
+              { event: "Höjdhopp", score: 2.00, date: "2023-10-27", unit: "m" },
+              { event: "Längdhopp", score: 5.60, date: "2023-10-27", unit: "m" }
           ],
-          seasonBest: { event: "Höjdhopp", score: 1.89, date: "2024-04-01", metric: "m" }
+          seasonBest: { event: "Höjdhopp", score: 1.89, date: "2024-04-01", unit: "m" }
       }
   ]);
+
 
     const handleChanges = (event, setter) => {
       setter(event.target.value)
     }
     const toggleExpand = (itemId) => {
-        setExpandedItemId(prevItemId => prevItemId === itemId ? null : itemId);
-    };
+      setExpandedItemId(prevItemId => prevItemId === itemId ? null : itemId);
+  };
 
-    const openModal = () => {
+    const openModal = (event ,expandedItemId) => {
+      event.stopPropagation()
       setIsModalOpen(true)
     }
     const closeModal = () => {
@@ -66,25 +74,70 @@ export default function Profile() {
         }
     };
 
+    const getUser = async (token) => {
+      try {
+        const response = await fetch("http://192.168.0.30:5000/get-user", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+    
+        if (response.ok) {
+          const data = await response.json(); // Läser och parsar JSON-svaret
+          setUser(data.user)
+          console.log(data); // Loggar den parsade datan
+        } else {
+          console.log("Kunde inte hämta användare");
+        }
+      } catch (err) {
+        console.error("Något gick fel när användaren hämtades", err);
+      }
+    }
+    
+    
+
     const addPb = (itemId, event) => {
       event.stopPropagation(); // Prevents the event from bubbling up
+
   
-      const newDetail = { date: pbDate, event: event, performance: pb }; // New empty detail
-  
-      setProfileItems(prevItems =>
-          prevItems.map(item =>
-              item.id === itemId ? {
-                  ...item,
-                  details: [...item.details, newDetail] // Adds the new detail to the correct item
-              } : item
-          )
-      );
       closeModal()
+  };
+
+  const formatDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const formattedDate = dateObj.toLocaleDateString('sv-SE', {
+      day: '2-digit',
+      month: '2-digit',
+    });
+
+    const formattedYear = dateObj.getFullYear().toString().slice(2)
+
+    const [month, day, year] = formattedDate.split('/').map(part => parseInt(part, 10));
+    const formattedMonth = month < 10 ? month.toString() : month;
+    const formattedDay = day < 10 ? day.toString() : day;
+  
+
+  
+    return `${formattedMonth}/${formattedDay}-${formattedYear}`;
   };
   
     useEffect(() => {
         const token = localStorage.getItem("token")
-        if (!token) return;
+        if (!token) {
+        navigate("/login")
+        return 
+      }
+  
+      try {
+        setIsLoading(true)
+        getUser(token)
+      } catch (err){
+        console.error("Något gick fel vid hämtning", err)
+      } finally {
+        setIsLoading(false)
+      }
     }, []);
 
     return (
@@ -93,6 +146,9 @@ export default function Profile() {
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} />
             <AdminButton/>
 
+            {isLoading &&
+            <Loader />
+            }
 
         <div id="modal-root">
           <Modal isOpen={isModalOpen} onClose={closeModal}>
@@ -101,10 +157,36 @@ export default function Profile() {
                   <h2>Lägg till PB</h2>
               </div>
 
-                 <div className="modal-content">
-                   <input type="text" placeholder="Övning/gren" onChange={(e) => handleChanges(e, setEvent)} />
-                   <input type="number" placeholder="10.23s/1.80m" onChange={(e) => handleChanges(e, setPb)} />
-                   <input type="date" placeholder="YYYY-MM-DD" onChange={(e) => handleChanges(e, setPbDate)} />
+                 <div className="modal-inputs">
+                    <div className="modal-top-row">
+                   <input className="modal-input" type="text" placeholder="Övning/gren" onChange={(e) => handleChanges(e, setEvent)} />
+                   <input className="modal-input" type="number" placeholder="10.23s/1.80m" onChange={(e) => handleChanges(e, setPb)} />
+                    <select id="unit"
+                    onChange={(e) => handleChanges(e, setUnit)}>
+                    <option value="">Välj enhet</option>
+                      <option value="m">m</option>
+                      <option value="cm">cm</option>
+                      <option value="s">sekunder</option>
+                      <option value="min">minuter</option>
+                      <option value="kg">kg</option>
+                    </select>
+                    </div>
+                  
+                    <input type="date" value="Placeholder" onfocus="if(this.value=='YYYY-MM-DD') this.value='';" onblur="if(this.value=='') this.value='placeholder';"/>
+
+                   <input className="modal-input" type="date" name="date" placeholder="YYYY-MM-DD" onChange={(e) => handleChanges(e, setPbDate)} />
+                   <div className="modal-radios">
+                     <span className="modal-radio">
+                   <label for="outside">Utomhus</label>
+                   <input  type="radio" id="html" name="outside" value="HTML"/>
+                   </span>
+                   <span className="modal-radio">
+                   <label for="inside">Inomhus</label>
+                    <input type="radio" id="html" name="outside" value="HTML"/>
+                    </span>
+                    </div>
+
+
                 </div>
                 
 
@@ -118,13 +200,13 @@ export default function Profile() {
 
 
 
-            <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
+            <div className="home-wrapper">
                 <div className="top-header">
                     <FontAwesomeIcon icon={faGear} />
                 </div>
                 <div className="card-container">
                     <div className="profile-name-container">
-                        <h3>Philip Jansson</h3>
+                        <h3>{user.name} {user.lastname}</h3>
                         <p id="title">Hacker</p>
                         <textarea rows="5" value={bio} onChange={(e) => setBio(e.target.value)} className="description-area"></textarea>
                     </div>
@@ -139,35 +221,39 @@ export default function Profile() {
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faTrophy} /></span>Nästa tävling</h3>
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faMountain} /></span>Nästa läger</h3>
                 </div>
+
                 <div className="content-container">
-                    {profileItems.map(item => (
-                        <div 
-                            key={item.id} 
-                            className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`}
-                            onClick={() => toggleExpand(item.id)}
-                        >    
-                            
-                            <h3>{item.title}</h3>
-                            {expandedItemId === item.id &&
-                            <span id="add-icon-span" onClick={(e) => openModal(e, expandedItemId)}>
+                                      
+                {profileItems.map(item => (
+                 <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={() => toggleExpand(item.id)}>    
 
+                   <h3>{item.title}</h3>
+
+
+                   {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
+                    <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`} >
+                      {expandedItemId === item.id && item.details.map((detail, index) => (
+                        <div className="detail" key={index}>
+                            <p className="bold-paragraph">{detail.event}: </p>
+                            <p>{detail.performance}{detail.unit}</p>
+                            <p>{formatDate(detail.date)}</p>
+                            {detail.outside ? <p>Utomhus</p> : <p>Inomhus</p>}
+                            </div>
+                        ))}
+
+                        
+                    </div>
+                    )}
+                                       {expandedItemId === item.id &&
+                            <div id="add-icon-span" onClick={(e) => openModal(e, expandedItemId)}>
                             <FontAwesomeIcon id="add-icon" icon={faPlus} />
-                            </span>
+                            </div>
                           }
-                            {expandedItemId === item.id && (
-                                <div className="details-container">
-                                    {Array.isArray(item.details) ? item.details.map(detail => (
-                                        <div key={`${item.id}-${detail.event}`} className="detail">
 
-                                            <p>{detail.event}: </p>
-                                            <p>{detail.performance}</p>
-                                        
-                                        </div>
-                                    )) : <p>{item.details}</p>}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                 </div>
+             ))}
+
+              
                 </div>
                 <Footer/>
             </div>

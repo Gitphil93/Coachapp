@@ -19,7 +19,7 @@ export default function CoachRegister() {
 
   const triggerCheckout = async (email) => {
     try {
-      const response = await fetch("http://localhost:5000/create-checkout-session", {
+      const response = await fetch("http://192.168.0.30:5000/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,6 +28,7 @@ export default function CoachRegister() {
       });
       const data = await response.json();
       window.location.href = data.url; // Redirect to Stripe
+      //navigate(data.url)
     } catch (error) {
       console.error("Failed to initiate checkout:", error);
     }
@@ -36,7 +37,7 @@ export default function CoachRegister() {
   const register = async () => {
     setIsLoading(true)
   
-    if (passwordValue === passwordRepeatValue) {
+    if (passwordValue === passwordRepeatValue || nameValue !== "" || lastnameValue !== "" || emailValue !== "") {
       try {
         const response = await fetch("http://192.168.0.30:5000/coach/register", {
           method: "POST",

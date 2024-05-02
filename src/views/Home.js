@@ -86,7 +86,7 @@ const getToday = () => {
 
 
     try{
-      fetchGlobalMessage(token)
+      fetchGlobalMessage()
       getUser(token)
       if (today !== ""){
       getSessions(token, today)
@@ -179,7 +179,6 @@ const getToday = () => {
   
 
   const message = async (message) => {
-    console.log(message)
   setIsAdminModalOpen(false);
 
   if (message === null || message.trim() === "") {
@@ -191,6 +190,7 @@ const getToday = () => {
 
   setGlobalMessage(message);
   await postMessage(message);
+  fetchGlobalMessage()
 
 };
   const postMessage = async (message) => {
@@ -219,7 +219,6 @@ const getToday = () => {
         setGlobalMessage(message)
       }
 
-      console.log(response);
     } catch (err) {
       console.error("Något gick fel vid postning av meddelande", err);
     } finally {
@@ -259,8 +258,8 @@ const formatDate = (dateString) => {
 };
 
 
- const fetchGlobalMessage = async (token) => {
-   console.log("token",token)
+ const fetchGlobalMessage = async () => {
+   const token = localStorage.getItem("token")
   const decodedToken = jwtDecode(token)
   const role = decodedToken.role
   try {
@@ -364,15 +363,7 @@ const deleteGlobalMessage = async () => {
       <AdminButton />
 
     {!isLoading &&
-      <div
-        className="home-wrapper"
-/*         style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)"
-        }} */
-
-      >
+      <div className="home-wrapper">
         <div className="view-header">
           <h1>
             {greeting} {name}! 
@@ -545,7 +536,6 @@ const deleteGlobalMessage = async () => {
           <Modal isOpen={isAdminModalOpen} onClose={closeAdminModal}>
             <div className="modal-wrapper">
               <div className="modal-header">
-                <h2>Admin</h2>
               </div>
 
               <div className="admin-modal">

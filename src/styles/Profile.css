@@ -84,22 +84,14 @@ font-style:oblique;
     width: 90%;
     height: 100%;
 }
-.profile-item{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 3rem;
-    box-shadow: 1px 1px 10px 5px rgb(218, 218, 218, 0.8);
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    background-color: rgb(187, 186, 186,0.5);
-}
 
 .profile-item {
+    width:100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 3rem;  
+    min-height: 0rem;
     box-shadow: 1px 1px 10px 5px rgb(218, 218, 218, 0.8);
     border-radius: 10px;
     margin-bottom: 1rem;
@@ -109,12 +101,41 @@ font-style:oblique;
 }
 
 .profile-item.expanded {
+    width: 100%;
     position: relative;
-    height: auto;  
+  min-height: 20rem; 
+  overflow-y: auto;
+  display:flex;
     flex-direction: column;
-    background-color: rgb(187, 186, 186,0.3);
-    padding: 15px;
+    justify-content: space-between;
+   background-color: rgb(187, 186, 186,0.3);
+
+} 
+
+.details-container {
+
+    overflow-y: auto;
+    width: 100%;
+    height: auto;
+    transition: padding 0.3s 0.1s ease;
 }
+
+.details-container.expanded {
+   padding: 1rem; 
+   height: auto;
+   max-height: 15rem;
+}
+
+
+.detail {
+    width: 100%;
+    height: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
 
 .profile-item > h3{
     font-size: 0.9rem;
@@ -122,13 +143,7 @@ font-style:oblique;
     letter-spacing: .5px;
     padding-left: 1rem;
    color: rgb(71, 70, 70);
-}
-
-.detail{
-    width: 80%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+   white-space: nowrap; 
 }
 
 .detail > p {
@@ -138,11 +153,8 @@ font-style:oblique;
 
 #add-icon-span{
     background-color: rgba(71, 70, 70, 0.3); 
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 3rem; 
+   width: 100%;
+    height: 3rem;
     display: flex;  
     align-items: center;  
     justify-content: center; 
@@ -153,14 +165,6 @@ font-style:oblique;
     height: 1.3rem; 
     width: 1.3rem;  
 
-}
-
-.details-container{
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-start;
 }
 
 .upcoming-container{
@@ -185,30 +189,75 @@ font-style:oblique;
 }
 
 .top-header{
-
+    margin-top: 1rem;
     display:flex;
     align-items: center;
     justify-content: flex-end;
     height: 4rem;
     width: 90%;
-}
-
-#gear{
-    padding-top: .5rem;
     color: rgb(59, 59, 59);
-    height: 1.2rem;
 }
 
 
-.upload-icon-container {
-    position: absolute;
-    display: inline-block; /* Aligns label neatly */
-    cursor: pointer; /* Indicates an interactive element */
+  .bold-paragraph{
+      font-weight: 600;
+      width: 43%;
+      text-overflow: ellipsis; 
+      overflow: hidden;
+      white-space: nowrap;
   }
-  
-  .upload-button {
-    border: none;
-    background: none;
-    color: #333; 
-    font-size: 12px; 
+
+  .modal-inputs{
+      width: 100%;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+
+
+  .modal-input{
+      width: 100%;
+      height: 2rem;
+      margin-top: 1rem;
+
+  }
+
+  .modal-inputs select {
+      width: 100%;
+      margin-top: 1rem;
+      height: 2rem;
+      border: none;
+  }
+
+
+  .modal-radios{
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      margin-top: 1rem;
+      height: 4rem;
+      width: 100%;
+  }
+
+  .modal-radio {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+  }
+  .modal-radios  input[type="radio"]{
+
+      height: 2rem;
+      width: 2rem;
+ 
+  }
+
+  input[type="date"] {
+    display:block;
+   
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    min-height: 1rem;
   }

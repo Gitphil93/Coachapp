@@ -49,8 +49,10 @@ export default function MySessions() {
     const [showPastSessions, setShowPastSessions] = useState(false)
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredPastSessions, setFilteredPastSessions] = useState([]);
-    console.log(today)
+    const [result, setResult] = useState()
+    const [unit, setUnit] = useState("")
 
+console.log(unit)
 
 
     const openModal = (session, exercise) => {
@@ -74,6 +76,19 @@ export default function MySessions() {
       const handleComment = (e) => {
         setComment(e.target.value)
       }
+
+      const handleResultChange = (e) => {
+          let value = e.target.value
+          if(value.includes(",")) {
+           value = value.replace(",",".")
+          }
+
+          setResult(value)
+      }
+      const handleUnitChange = (e) => {
+        setUnit(e.target.value)
+      }
+
 
       const handleSummaryCommentChange = (e) => {
           setSummaryComment(e.target.value)
@@ -169,6 +184,7 @@ export default function MySessions() {
             },
             body: JSON.stringify({
               userComment: comment,
+              result: result + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
@@ -179,6 +195,8 @@ export default function MySessions() {
           if (response.ok) {
             console.log("Kommentaren postades framgångsrikt!");
             getSessions();
+            setUnit("")
+            setResult("")
           } else {
             console.error("Något gick fel när du försökte posta kommentaren.");
           }
@@ -217,7 +235,7 @@ export default function MySessions() {
         console.log(sessionId)
         const token = localStorage.getItem("token");
         if (!token) return
-        console.log(user.email)
+
         try {
             const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
                 method: "PUT",
@@ -423,6 +441,26 @@ export default function MySessions() {
                              value={comment}
                              placeholder="Skriv kommentar">
                      </input>
+                    
+                    <div className="result-row">
+                     <input type="text"
+                    className="input-name"
+                         onChange={handleResultChange}
+                             value={result}
+                             placeholder="Resultat">
+                     </input>
+
+                     <select onChange={handleUnitChange}>
+                     <option>Välj enhet</option>
+                         <option value="m">m</option>
+                         <option value="cm">cm</option>
+                         <option value="s">s</option>
+                         <option value="h">h</option>
+                         <option value="min">min</option>
+                         <option value="kg">kg</option>
+                     </select>
+                     </div>
+
                 </div>
               <div className="modal-buttons">
                 <button className="modal-button" onClick={postComment}>Kommentera</button>
@@ -461,7 +499,7 @@ export default function MySessions() {
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} hamburgerRef={hamburgerRef} />
             <AdminButton />
          
-            <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
+            <div className="home-wrapper">
              <div className="view-header">
                  <h1>Mina Pass</h1>
               </div>
@@ -510,7 +548,7 @@ export default function MySessions() {
                                         <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
                                         <p>{exercise.description}</p>
                                         {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
+                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment} {userComment.result}</p>
                                         ))}
                                     </div>
                                     ))}

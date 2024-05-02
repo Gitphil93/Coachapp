@@ -11,16 +11,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-}
-
-input {
   position: relative;
   height: 2rem;
-  border: none;
   box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
   border-radius: 5px;
-  outline: none;
 }
+
 input::placeholder {
   font-style: oblique;
 }
