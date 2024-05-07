@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import "../styles/Menu.css";
 import MenuContext from "../context/MenuContext.js";
 import {jwtDecode} from "jwt-decode"
 
 export default function Menu({ hamburgerRef }) {
+  const navigate = useNavigate()
   const { isMenuOpen, toggleMenu } = useContext(MenuContext);
   const menuRef = useRef(null);
   const [role, setRole] = useState(0)
@@ -17,7 +18,10 @@ export default function Menu({ hamburgerRef }) {
       const token = localStorage.getItem("token")
       const decodedToken = jwtDecode(token)
       setRole(decodedToken.role)
-      if (!token) return
+      if (!token)   {
+        navigate("/login")
+          return
+         } 
 }, [])
 
 

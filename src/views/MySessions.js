@@ -49,11 +49,8 @@ export default function MySessions() {
     const [showPastSessions, setShowPastSessions] = useState(false)
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredPastSessions, setFilteredPastSessions] = useState([]);
-    const [result, setResult] = useState()
+    const [result, setResult] = useState(0)
     const [unit, setUnit] = useState("")
-
-console.log(unit)
-
 
     const openModal = (session, exercise) => {
         setCurrentSessionId(session._id); 
@@ -143,21 +140,13 @@ console.log(unit)
                 };
     
                 if (role >= 2000) {
-                    // Kommande pass (äldsta först)
+
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session)));
-                    // Tidigare pass (nyaste först)
                     setAllPastSessions(sortedSessions.filter(sessionIsPast).reverse());
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-                    // Kommande pass för användaren (äldsta först)
-                    setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                    // Tidigare pass för användaren (nyaste först)
-                    setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse());
-                    // Alla kommande pass (äldsta först)
-                    setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
-                    // Alla tidigare pass (nyaste först)
-                    setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)).reverse());
-                    // Sessions där användaren inte har signerat närvaro (nyaste först)
+                    setAllUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
+                    setAllPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse())
                     const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse();
                     setNotSignedSessions(notSignedSessions);
                 }
@@ -183,8 +172,9 @@ console.log(unit)
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              userComment: comment,
-              result: result + unit,
+              email: user.email,
+              userComment: comment.trim() !== "" ? comment.trim() : "",
+              result: result.trim() + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
@@ -442,7 +432,7 @@ console.log(unit)
                              placeholder="Skriv kommentar">
                      </input>
                     
-                    <div className="result-row">
+                    <div className="modal-result-row">
                      <input type="text"
                     className="input-name"
                          onChange={handleResultChange}
@@ -505,114 +495,91 @@ console.log(unit)
               </div>
 
 
-                <div  className="sessions-wrapper" >
-                    <div className="sessions-header">
-                        <h2>Kommande pass</h2>
-                        {allUpcomingSessions.length > 0 &&
-                        <h3 className="sessions-number">{allUpcomingSessions.length}</h3>
-                    }
+                    <div className="sessions-wrapper">
+    <div className="sessions-header">
+        <h2>Kommande pass</h2>
+        {allUpcomingSessions.length > 0 &&
+        <h3 className="sessions-number">{allUpcomingSessions.length}</h3>
+        }
+    </div>
+    {allUpcomingSessions.map((session, index) => (
+        <div
+            id={expandedContent ? expandedContent._id : ""}
+            key={session._id}
+            className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
+            style={{
+                transform: `translateX(${sessionXValues[session._id]}px)`,
+            }}
+            onClick={(e) => toggleExpandContent(session, e)}
+            onTouchStart={(e) => handleTouchStart(session._id, e)}
+            onTouchMove={(e) => handleTouchMove(session._id, e)}
+            onTouchEnd={() => handleTouchEnd(session._id)}
+        >
+            <div className="sessions-content" style={{ backgroundColor: calculateSwipeColor(session._id) }}>
+                <div className="session-top">
+                    <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
+                    <h2><Weather sessionDate={session.date ? session.date : today}
+                        sessionTime={session.time ? session.time : "12:00"}/></h2>
+                </div>
+
+                {!isContentExpanded(session) &&
+                <div className="session-center">
+                    <h2>{session.title}</h2>
+                </div>
+                }
+
+                {isContentExpanded(session) && (
+                <div className="expanded-session-content">
+                    {session.exercises.map((exercise, exerciseIndex) => {                           
+                                const resultsByAuthor = (exercise.results && Array.isArray(exercise.results)) ? exercise.results.reduce((acc, result) => {
+                                    if (acc[result.author]) {
+                                        acc[result.author].push(result.value);
+                                    } else {
+                                        acc[result.author] = [result.value];
+                                    }
+                                    return acc;
+                                }, {}) : {};
+                              
+
+                        return (
+                            <div id="exercise-item" key={exerciseIndex}>
+                                <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                <p>{exercise.description}</p>
+
+                                {Object.keys(resultsByAuthor).length > 0 && (
+                                <div className="result-row comment-container">
+                                    {Object.entries(resultsByAuthor).map(([author, values], index) => (
+                                        <p key={index} id="exercise-comment">{author}: {values.join(", ")}</p>
+                                    ))}
+                                </div>
+                                )}
+
+                                {exercise.userComments && exercise.userComments.map((userComment, userCommentIndex) => (
+                                    <div key={userCommentIndex} className="comment-container">
+                                        {userComment.comment && <p id="exercise-comment">{userComment.author}: {userComment.comment}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })}
+                </div>
+                )}
+
+                <div className="session-bottom">
+                    <h2>{session.place}</h2>
+                    <div className="session-initials">
+                        {session.attendees.map((initials, attendeeIndex) => (
+                            <span key={attendeeIndex} className="initials-wrapper">
+                                <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
+                            </span>
+                        ))}
                     </div>
-                    {role >= 2000 ? (
-                        allUpcomingSessions.map((session, index) => (
-                            
-                            <div
-                            id={expandedContent ? expandedContent._id : ""} 
-                            key={session._id}
-                            className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
-                            style={{
-                                transform: `translateX(${sessionXValues[session._id]}px)`,
-                            }}
-                            onClick={(e) => toggleExpandContent(session, e)}
-                            onTouchStart={(e) => handleTouchStart(session._id, e)}
-                            onTouchMove={(e) => handleTouchMove(session._id, e)}
-                            onTouchEnd={() => handleTouchEnd(session._id)}// Uppdatera sessionens position baserat på sessionX
-                        >   
-                                <div className="sessions-content" style={{ backgroundColor: calculateSwipeColor(session._id)}}>
-                                    <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
-                                        <h2><Weather sessionDate={session.date ? session.date : today}
-                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
-                                    </div>
+                </div>
+            </div>
+        </div>
+    ))}
 
-                                    {!isContentExpanded(session) &&
-                                    <div className="session-center">
-                                       <h2>{session.title}</h2>
-                                     </div>
-                                    }
 
-                                    
-                                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p>{exercise.description}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment} {userComment.result}</p>
-                                        ))}
-                                    </div>
-                                    ))}
-                                </div>
-                                )}
-
-                                    <div className="session-bottom">
-                                        <h2>{session.place}</h2>
-                                        <div className="session-initials">
-                                            {session.attendees.map((initials, attendeeIndex) => (
-                                                <span key={attendeeIndex} className="initials-wrapper">
-                                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        userUpcomingSessions.map((session, index) => (
-                        <div id={expandedContent ? expandedContent._id : ""} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={(e) => toggleExpandContent(session, e)}>
-
-                                <div className="sessions-content">
-                                    <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
-                                        <h2><Weather sessionDate={session.date ? session.date : today}
-                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
-                                    </div>
-
-                                    {!isContentExpanded(session) &&
-                                    <div className="session-center">
-                                       <h2>{session.title}</h2>
-                                     </div>
-                                    }
-
-                                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
-                                    ))}
-                                </div>
-                                )}
-
-                                    <div className="session-bottom">
-                                        <h2>{session.place}</h2>
-                                        <div className="session-initials">
-                                            {session.attendees.map((initials, attendeeIndex) => (
-                                                <span key={attendeeIndex} className="initials-wrapper">
-                                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
                 </div>
 
                 {role === 1000 && notSignedSessions.length > 0 && (
@@ -747,6 +714,16 @@ console.log(unit)
                                     ))}
                                 </div>
                             ))}
+                            <div className="session-results-wrapper">
+                                {session.attendees.map((result, resultIndex) => (
+                                <div key={resultIndex} className="session-results"> 
+                                <p id="result-name">{result.name} {result.lastname}</p>
+                                <p id="result-score">{result.howDidSessionGo}/10</p>
+                                <p id="result-comment">{result.summaryComment}</p>
+                                </div>
+                                
+                               ))}
+                            </div>
                         </div>
                     )}
                     <div className="session-bottom">

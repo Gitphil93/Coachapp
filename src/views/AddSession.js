@@ -37,7 +37,9 @@ export default function AddSession() {
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
   const [showNotification, setShowNotification] = useState(true)
+  const [exercisesInCategory, setExercisesInCategory] = useState({})
 
+  console.log(exercisesInCategory)
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -109,6 +111,18 @@ export default function AddSession() {
     setSelectedExercises((prevExercises) => [...prevExercises, exercise]);
     setExerciseArray((prevExercises) =>
       prevExercises.filter((e) => e.name !== exercise.name),
+    );
+  };
+
+  const addModuleExercises = (module) => {
+    module.exercises.forEach((exercise) => {
+      // Kopiera övningen och lägg till isModule-informationen
+      const modifiedExercise = { ...exercise, isModule: true };
+      console.log(modifiedExercise)
+      setSelectedExercises((prevExercises) => [...prevExercises, modifiedExercise]);
+    });
+    setExerciseArray((prevExercises) =>
+      prevExercises.filter((e) => e.name !== module.name),
     );
   };
 
@@ -210,6 +224,7 @@ if (isPostSessionSuccess) {
           const categories = Array.from(
             new Set(data.map((exercise) => exercise.category)),
           );
+
           setExerciseCategories(categories);
         } catch (err) {
           console.log(err, "Kunde inte hämta övningarna");
@@ -268,7 +283,7 @@ if (isPostSessionSuccess) {
               time: selectedTime.trim(),
               place: selectedPlace.trim().charAt(0).toUpperCase() + selectedPlace.trim().slice(1),
               exercises: selectedExercises,
-              coach: user.name + " " + user.lastname
+              coach: user.email
             }),
           });
 
@@ -308,6 +323,33 @@ if (isPostSessionSuccess) {
     }
   }
 
+  const isExerciseFromModule = (exercise) => {
+    // Kontrollera om `exerciseArray` är definierad och inte tom
+    if (exerciseArray && exerciseArray.length > 0) {
+      return selectedExercises.some((item) => item._id === exercise._id && item.isModule);
+    }
+    return false; // Returnera false om `exerciseArray` inte är definierad eller är tom
+  };
+
+  const updateCategoriesAndCounts = () => {
+    // Beräkna nya antal baserat på övningar
+    const categoryCount = exerciseArray.reduce((acc, exercise) => {
+      const { category } = exercise;
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+  
+    // Säkerställ att alla kategorier behålls
+    const allCategories = new Set([...exerciseCategories, ...Object.keys(categoryCount)]);
+    setExerciseCategories([...allCategories]);
+  
+    setExercisesInCategory(categoryCount);
+  };
+
+  useEffect(() => {
+    updateCategoriesAndCounts();
+  }, [exerciseArray]);
+  
   
   return (
     <div>
@@ -332,7 +374,7 @@ if (isPostSessionSuccess) {
         
 
         <div className="input-wrapper">
-          <h2 className="header-text">LÄGG TILL DELTAGARE</h2>
+          <h2 className="header-text">Lägg till deltagare</h2>
 
           {users.length !== 0 && (
           <div className="attendees">
@@ -348,9 +390,10 @@ if (isPostSessionSuccess) {
           </div>
 )}
 
-          <div className="input-name">
-                <h2 className="header-text">NAMN</h2>
+          <div className="name-wrapper">
+                <h2 className="header-text">Namn</h2>
                 <input
+                 className="input-name"
                  type="text"
                  value={selectedName}
                  onChange={handleNameChange}
@@ -358,8 +401,8 @@ if (isPostSessionSuccess) {
            </div>
 
           <div className="date-time-header">
-            <h2 className="header-text">DATUM *</h2>
-            <h2 className="header-text">TID</h2>
+            <h2 className="header-text">Datum*</h2>
+            <h2 className="header-text">Tid</h2>
           </div>
 
           <div className="datetime-wrapper">
@@ -380,9 +423,10 @@ if (isPostSessionSuccess) {
             </div>
           </div>
 
-          <div className="input-name">
-            <h2 className="header-text">PLATS</h2>
+          <div className="place-wrapper">
+            <h2 className="header-text">Plats</h2>
             <input
+            className="input-name"
               type="text"
               value={selectedPlace}
               onChange={handlePlaceChange}
@@ -391,7 +435,7 @@ if (isPostSessionSuccess) {
 
           <div className="add-exercises">
             <div className="add-exercises-header">
-              <h2 className="header-text">LÄGG TILL ÖVNINGAR</h2>
+              <h2 className="header-text">Lägg till övningar</h2>
               <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
             </div>
 
@@ -403,6 +447,7 @@ if (isPostSessionSuccess) {
                     onClick={() => toggleExpand(category)}
                   >
                     <h3 id="category-header">{category}</h3>
+                    <h3 className="category-number">{exercisesInCategory[category] || 0}</h3>
                     <img
                       id="arrow"
                       src="/arrow.png"
@@ -423,20 +468,32 @@ if (isPostSessionSuccess) {
                         : "expanded-content"
                     }
                   >
-                    {exerciseArray.map((exercise) => {
-                      if (exercise.category === category) {
-                        return (
-                          <button
-                            key={exercise._id}
-                            className="exercise-button"
-                            onClick={() => addExercises(exercise)}
-                          >
-                            {exercise.name}
-                          </button>
-                        );
-                      }
-                      return null;
-                    })}
+             {exerciseArray.map((item) => {
+  if (item.category === category) {
+    if (item.isModule) {
+      return (
+        <button
+          key={item._id}
+          className="module-button"
+          onClick={() => addModuleExercises(item)}
+        >
+          {item.name}
+        </button>
+      );
+    } else {
+      return (
+        <button
+          key={item._id}
+          className="exercise-button"
+          onClick={() => addExercises(item)}
+        >
+          {item.name}
+        </button>
+      );
+    }
+  }
+  return null;
+})}
                   </div>
                 </div>
               ))}
@@ -445,7 +502,7 @@ if (isPostSessionSuccess) {
             {selectedAttendees.length > 0 && (
   <div className="session-summary">
     <div className="session-summary-attendees">
-      <h2 className="header-text">DELTAGARE</h2>
+      <h2 className="header-text">Deltagare</h2>
       <div className="attendees">
         {selectedAttendees.map((attendee) => (
           <button
@@ -461,15 +518,19 @@ if (isPostSessionSuccess) {
       </div>
     </div>
     <div className="session-summary-time-place">
-      <h2 className="header-text">TID OCH PLATS</h2>
+      <h2 className="header-text">Tid och plats</h2>
       <div className="selected-time-place">
         <h3>
           {selectedDate} {selectedTime} {selectedPlace}
         </h3>
       </div>
     </div>
+
     <div className="session-summary-exercises">
-      <h2 className="header-text">ÖVNINGAR</h2>
+      <div className="header-row">
+      <h2 className="header-text">Övningar</h2>
+      <h2 className="category-number">{selectedExercises.length}</h2>
+      </div>
       <div className="selected-exercises">
         {selectedExercises.map((exercise, index) => (
           <div key={exercise._id} className="exercise-item">
@@ -481,10 +542,10 @@ if (isPostSessionSuccess) {
               className="up-button"
             />
              {exercise.comment && (
-          <img id="commented-svg" src="/comment.svg" alt="commented-picture" />
+          <img id="commented-svg" src="/comment.svg" alt="talk-bubble" />
         )}
             <button
-              className="exercise-button"
+             className={isExerciseFromModule(exercise) ? "module-button" : "exercise-button"}
               onClick={() => openModal(exercise)}
             >
               {exercise.name}

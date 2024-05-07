@@ -600,13 +600,12 @@ app.get("/get-exercises", verifyToken, async (req, res) => {
       return;
     }
 
-    // Hämta den inloggade användarens namn och efternamn från token
-    const loggedInUserName = req.decoded.name;
-    const loggedInUserLastName = req.decoded.lastname;
-    const loggedInUserFullName = `${loggedInUserName} ${loggedInUserLastName}`;
+    // Hämta den inloggade användarens email från token
+    const email = req.decoded.email
 
-    // Hämta övningar där coachen är sammanslagningen av namn och efternamn för den inloggade användaren
-    const exercises = await exerciseCollection.find({ coach: loggedInUserFullName }).toArray();
+
+    // Hämta övningar där coach = email
+    const exercises = await exerciseCollection.find({ coach: email }).toArray();
     if (exercises.length > 0) {
       res.status(200).json(exercises);
     } else {
@@ -634,7 +633,7 @@ app.post("/admin/post-global-message", verifyToken, verifyRole(2000), async (req
     const userRole = req.decoded.role;
     
     // Hämta användarens coach från dekrypterad token
-    const currentUserCoach = `${req.decoded.name} ${req.decoded.lastname}`;
+    const currentUserCoach = req.decoded.email;
 
     // Kontrollera användarens roll och tillåt endast tränare och admin att posta globala meddelanden
     if (userRole === 2000 || userRole === 3000) {
@@ -681,7 +680,7 @@ app.get("/get-global-message", verifyToken, async (req, res) => {
       globalMessage = await globalMessageCollection.find().toArray();
     } else if (userRole === 2000) {
       // Om användaren är tränare (2000), hämta det globala meddelandet som de har skrivit
-      const currentUser = `${req.decoded.name} ${req.decoded.lastname}`;
+      const currentUser = req.decoded.email;
       globalMessage = await globalMessageCollection.findOne({ coach: currentUser });
     } else if (userRole === 1000) {
       // Om användaren är användare (1000), hämta det globala meddelandet som deras coach har skrivit
@@ -745,41 +744,30 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
     const database = client.db("Coachapp");
     const sessionCollection = database.collection("sessions");
 
-    // Hämta den inloggade användarens roll från token
     const loggedInUserRole = req.decoded.role;
+    const loggedInUserEmail = req.decoded.email; 
 
-    // Om användarens roll är 3000 (admin), hämta alla sessioner oavsett coach
+
     if (loggedInUserRole === 3000) {
+      // Admins get all sessions
       const sessions = await sessionCollection.find().toArray();
-      if (sessions.length > 0) {
-        res.status(200).json({ success: true, sessions: sessions });
-      } else {
-        res.status(404).json({ success: false, message: "Inga sessioner hittades" });
-      }
-      return;
-    }
+      return res.status(200).json({ success: true, sessions: sessions });
+    } 
 
-    // Hämta den inloggade användarens coach från dess användarobjekt
-    const loggedInUserCoach = req.decoded.name + " " + req.decoded.lastname;
-
-    // Om användarens roll är 2000 (coach), hämta alla sessioner där coach matchar användarens coach
     if (loggedInUserRole === 2000) {
-      const sessions = await sessionCollection.find({ coach: loggedInUserCoach }).toArray();
-      if (sessions.length > 0) {
-        res.status(200).json({ success: true, sessions: sessions });
-      } else {
-        res.status(404).json({ success: false, message: "Inga sessioner hittades" });
-      }
-      return;
+      // Coaches get their own sessions
+      const sessions = await sessionCollection.find({ coach: loggedInUserEmail }).toArray();
+      return res.status(200).json({ success: true, sessions: sessions });
     }
 
-    // Om användarens roll är 1000 (user), hämta alla sessioner där coach matchar användarens coach
-    const sessions = await sessionCollection.find({ coach: loggedInUserCoach }).toArray();
-    if (sessions.length > 0) {
-      res.status(200).json({ success: true, sessions: sessions });
-    } else {
-      res.status(404).json({ success: false, message: "Inga sessioner hittades" });
+    // Regular users get sessions where they are attendees
+    if (loggedInUserRole === 1000) {
+      const sessions = await sessionCollection.find({ "attendees.email": loggedInUserEmail }).toArray();
+      return res.status(200).json({ success: true, sessions: sessions });
     }
+
+    // Fallback if no valid role matches
+    res.status(404).json({ success: false, message: "Inga sessioner hittades" });
   } catch (error) {
     console.error("Error fetching sessions:", error);
     res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av sessioner" });
@@ -791,12 +779,15 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
 });
 
 
+
 app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) => {
   const sessionId = req.params.sessionId;
   const exerciseId = req.params.exerciseId;
-  const author = req.body.author
+  const author = req.body.author;
   const comment = req.body.userComment;
-  const exerciseResult = req.body.result
+  const exerciseResult = req.body.result;
+  const email = req.body.email
+  console.log(1,comment)
 
   let client;
 
@@ -808,24 +799,39 @@ app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) =>
     const { ObjectId } = require('mongodb');
     const sessionObjectId = new ObjectId(sessionId);
 
-    // Uppdatera sessionen i databasen och använd $addToSet för att lägga till kommentaren
-    const result = await sessionsCollection.updateOne(
-      { 
-        _id: sessionObjectId, 
-        "exercises._id": exerciseId
-      },
-      { 
-        $addToSet: { "exercises.$.userComment": {author: author, comment: comment, result: exerciseResult} } 
-      }
-    );
+    const updateOperations = {};
 
-    // Kontrollera om ingen uppdatering gjordes (kommentaren redan finns)
-    if (result.modifiedCount === 0) {
-      return res.status(400).json({ error: "Kommentaren finns redan" });
+    if (comment !== "") {
+      // Lägg till en kommentar om den finns
+      updateOperations["$addToSet"] = {
+        "exercises.$.userComments": {
+          email: email,
+          author: author,
+          comment: comment,
+        }
+      };
     }
 
-    // Skicka ett svar
-    res.status(200).json({ message: "Kommentaren har lagts till" });
+    if (exerciseResult !== undefined) {
+      // Lägg till ett resultat om det finns
+      if (!updateOperations["$addToSet"]) updateOperations["$addToSet"] = {};
+      updateOperations["$addToSet"]["exercises.$.results"] = {
+        email: email,
+        author: author,
+        value: exerciseResult,
+      };
+    }
+
+    const result = await sessionsCollection.updateOne(
+      { _id: sessionObjectId, "exercises._id": exerciseId },
+      updateOperations
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ error: "Ingen uppdatering gjordes" });
+    }
+
+    res.status(200).json({ message: "Kommentar och/eller resultat har lagts till" });
   } catch (error) {
     console.error("Ett fel uppstod vid hantering av kommentaren:", error);
     res.status(500).json({ error: "Ett fel uppstod vid hantering av kommentaren" });
@@ -835,6 +841,8 @@ app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) =>
     }
   }
 });
+
+
 
 app.delete("/delete-session/:sessionId", verifyRole(2000), async (req, res) => {
   const sessionId = req.params.sessionId;
@@ -913,7 +921,7 @@ app.delete("/delete-user", verifyToken, verifyRole(2000), async (req, res) => {
 
   try {
       const userEmail = req.body.email;
-      console.log(userEmail)
+
       client = await getConnection();
       const database = client.db("Coachapp");
       const usersCollection = database.collection("users");
@@ -971,7 +979,7 @@ app.delete("/admin/delete-global-message", verifyToken, verifyRole(2000), async 
  
   let client;
   const message = req.body.messageId
-  console.log(message)
+
   try {
       client = await getConnection();
       const db = client.db("Coachapp");

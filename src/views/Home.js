@@ -31,6 +31,10 @@ export default function Home() {
   const [globalMessageInput, setGlobalMessageInput] = useState("")
   const navigate = useNavigate()
 
+  console.log("upcoming", allUpcomingSessions)
+  console.log("today",allTodaysSessions)
+  console.log(role)
+
 
     const handleInputChange = (e) => {
       setGlobalMessageInput(e.target.value)
@@ -132,50 +136,62 @@ const getToday = () => {
 
 
 
-  const getSessions = async (token, today) => {
-    if (!token) return;
+const getSessions = async (token, today) => {
+  if (!token) return;
+  const decodedToken = jwtDecode(token)
+  console.log(1,decodedToken.role)
+  try {
+    const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   
-    try {
-      const response = await fetch("http://192.168.0.30:5000/get-sessions", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    
-      if (!response.ok) {
-        throw new Error('Failed to fetch sessions');
-      }
-    
-      const data = await response.json();
-      const sessions = data.sessions;
-      const currentTime = new Date();
-    
-      // Filter and sort sessions
-      const sortedSessions = sessions.sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.time}`);
-        const dateB = new Date(`${b.date}T${b.time}`);
-        return dateA - dateB;
-      });
-    
-      // Filtering today's and upcoming sessions
-      const todaySessions = sortedSessions.filter(session => {
-        const sessionDateTime = new Date(`${session.date}T${session.time}`);
-        const twoHoursLater = new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000);
-        return session.date === today && twoHoursLater > currentTime;
-      });
-      setAllTodaysSessions(todaySessions);
-    
-      const upcomingSessions = sortedSessions.filter(session => {
-        const sessionDateTime = new Date(`${session.date}T${session.time}`);
-        return sessionDateTime > currentTime && session.date > today;
-      });
-      setAllUpcomingSessions(role >= 2000 ? upcomingSessions : upcomingSessions.filter(session => session.attendees.some(attendee => attendee.email === user.email)));
-    
-    } catch (err) {
-      console.error("Couldn't get sessions", err);
+    if (!response.ok) {
+      throw new Error('Failed to fetch sessions');
     }
-  };
+  
+    const data = await response.json();
+    const sessions = data.sessions;
+    const currentTime = new Date();
+    console.log(sessions)
+  
+    // Sort sessions by date and time
+    const sortedSessions = sessions.sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`);
+      const dateB = new Date(`${b.date}T${b.time}`);
+      return dateA - dateB;
+    });
+  
+    // Determine today's and upcoming sessions
+    const todaySessions = sortedSessions.filter(session => {
+      const sessionDateTime = new Date(`${session.date}T${session.time}`);
+      const twoHoursLater = new Date(sessionDateTime.getTime() + 2 * 60 * 60 * 1000);
+      return session.date === today && twoHoursLater > currentTime;
+    });
+    
+    const upcomingSessions = sortedSessions.filter(session => {
+      const sessionDateTime = new Date(`${session.date}T${session.time}`);
+      return sessionDateTime > currentTime && session.date > today;
+    });
+    
+
+      setAllTodaysSessions(todaySessions);
+      setAllUpcomingSessions(upcomingSessions);
+
+      console.log("jag går in här")
+      // For attendees: Filter sessions where the user is an attendee
+      setAllTodaysSessions(todaySessions);
+      setAllUpcomingSessions(upcomingSessions);
+    
+  
+  } catch (err) {
+    console.error("Couldn't get sessions", err);
+  }
+};
+
+
   
 
   const message = async (message) => {
@@ -210,7 +226,7 @@ const getToday = () => {
           body: JSON.stringify({
             globalMessage: message.trim(),
             author: initials,
-            coach: user.name + " " + user.lastname
+            coach: user.email
           }),
         },
       );

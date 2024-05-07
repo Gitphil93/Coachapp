@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap');
 .header {
-  position: relative;
+  position: fixed;
   top: 0;
   display: flex;
   justify-content: space-between;

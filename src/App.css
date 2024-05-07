@@ -34,7 +34,9 @@ h3 {
 }
 
 .header-text {
+/*   margin-top: 1rem; */
   font-weight: 400;
+  position: relative;
 }
 
 h2 {

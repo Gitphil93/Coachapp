@@ -1,5 +1,4 @@
 .card-container{
-    margin-top: 1rem;
     display: flex;
     position: relative;
     width: 90%;
@@ -189,7 +188,6 @@ font-style:oblique;
 }
 
 .top-header{
-    margin-top: 1rem;
     display:flex;
     align-items: center;
     justify-content: flex-end;

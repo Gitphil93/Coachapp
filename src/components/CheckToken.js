@@ -8,10 +8,10 @@ const CheckToken = () => {
 
   useEffect(() => {
     // Rutter som inte kräver autentisering
-    const publicRoutes = ['/', '/login', '/register', "/success", "/cancel", "/coach/register"];
+    const publicRoutes = ['/', '/login', '/register', "/success", "/coach/register"];
 
     // Kontrollera om den nuvarande rutten är en av de offentliga rutterna
-    if (publicRoutes.includes(location.pathname) || "stripe") {
+    if (publicRoutes.includes(location.pathname)) {
       return; // Avbryt useEffect om vi är på en offentlig sida
     }
 
@@ -27,8 +27,9 @@ const CheckToken = () => {
       const currentTime = Math.floor(Date.now() / 1000);
       const tokenExpiration = decodedToken.exp;
       const tokenExpiryThreshold = 60; // Threshold på 60 sekunder innan tokenet löper ut
-
+      console.log("123")
       if (tokenExpiration - currentTime < tokenExpiryThreshold) {
+    
         console.log("Försöker uppdatera token");
         updateToken(token);
       }

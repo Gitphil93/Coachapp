@@ -8,17 +8,21 @@
     min-height: 20vh;
     border-radius: 10px;
     box-shadow: 1px 1px 5px 1px rgb(172, 172, 172);
-    background-color: white;
-    transition: min-height 0.3s ease-in-out;
-  
+    transition: min-height 0.3s ease-in-out, max-height 0.3s ease-in-out;
+    max-height: 0;
   }
-
   .sessions-expandable.expanded {
     min-height: 30vh;
-    max-height: 90vh;
-    transition: min-height 0.3s ease-in-out;
-
+    max-height: 60vh; 
   }
+  
+  .sessions-content{
+    min-height: 20vh;
+
+    height: auto;
+  }
+
+ 
 
   .expanded-session-content{
       height: auto;
@@ -63,7 +67,7 @@
     appearance: none;
     width: 75%; 
     height: 0.2rem; 
-    background: linear-gradient(to right, rgb(255, 255, 255) 50%, rgb(7, 173, 7) 60%) ;
+    background: linear-gradient(to right, rgb(255, 255, 255,.5) 50%, rgb(7, 173, 7,.5) 60%) ;
     outline: none; 
     transition: opacity .2s;
   }
@@ -94,7 +98,7 @@
     width:10rem;
     border-radius: 10px;
     border:none;
-    background-color: green;
+    background-color: rgba(0, 128, 0, 0.842);
     color: white;
     font-size: 1rem;
     font-weight: 500;
@@ -137,7 +141,7 @@
     border-radius: 0%;
   }
 
-  .result-row{
+  .modal-result-row{
     margin-top: 1rem;
     display: flex;
     justify-content: space-between;
@@ -146,15 +150,60 @@
     
   }
 
-  .result-row input {
+  .modal-result-row input {
     width: 60%;
   }
 
-  .result-row select{
-    margin-top: 1rem;
+  .modal-result-row select{
+
     outline: none;
     border: none;
     height: 2rem;
     width: 6rem;
   }
+
+.comment-container{
+  background-color: rgb(187, 186, 186, 1);
+  height: auto;
+  border-top-right-radius: 1px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 10px;
+  padding: .5rem;
+}
+
+.result-row{
+  display: flex; 
+  flex-direction: row;
+  width: 100%;
+}
+
+.session-results-wrapper{
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.session-results{
+  width: 33%;
+  display: flex;
+  flex-direction: column;
+}
+
+
+#result-name{
+  font-weight: 500;
+  font-size: .9rem;
+}
+#result-score{
+  margin-top: .5rem;
+  font-weight: 500;
+  font-size: .9rem;
+}
+#result-comment{
+  margin-top: .5rem;
+  font-weight: 400;
+  font-size: .8rem;
+  font-style: italic;
+}
 

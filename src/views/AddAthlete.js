@@ -6,10 +6,12 @@ import MenuContext from "../context/MenuContext.js";
 import Success from "../components/Success.js";
 import { useNavigate } from "react-router-dom";
 import AdminButton from "../components/AdminButton";
+import {jwtDecode } from "jwt-decode";
 
 
 export default function AddAthlete() {
   const [name, setName] = useState("");
+  const [user, setUser] = useState({})
   const [key, setKey] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,33 +24,17 @@ export default function AddAthlete() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const getUser = async () => {
-      const token = localStorage.getItem("token");
-      if(!token) return
-      if (token) {
-        try {
-          const response = await fetch("http://192.168.0.30:5000/get-user", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setCoach(data.user.name + " " + data.user.lastname)
-          } else {
-            console.log("Kunde inte hämta användaren");
-          }
-        } catch (error) {
-          console.error("Något gick fel vid hämtning av användare:", error);
-        }
-      } else {
-        navigate("/login")
-        console.log("Token saknas");
-      }
-    };
 
-    getUser();
+      const token = localStorage.getItem("token");
+      const decodedToken = jwtDecode(token)
+
+      if(!token){
+        navigate("/login")
+        return
+      } 
+ 
+      setUser(decodedToken)
+
   }, []);
 
   const handleChange = (event, setter) => {
@@ -65,6 +51,7 @@ export default function AddAthlete() {
       setShowWarning(true);
       return false;
     }
+
     const token = localStorage.getItem("token")
     if (!token) return 
     try {
@@ -80,7 +67,7 @@ export default function AddAthlete() {
           email: email,
           key: key,
           role: 1000,
-          coach: coach,
+          coach: user.email,
         }),
       });
       console.log(response);
@@ -137,9 +124,10 @@ export default function AddAthlete() {
         </div>
 
         <div className="input-wrapper">
-          <div className="input-name">
+          <div>
             <label htmlFor="name">Namn</label>
             <input
+             className="input-name"
               type="text"
               id="name"
               name="name"
@@ -148,9 +136,10 @@ export default function AddAthlete() {
               onChange={(e) => handleChange(e, setName)}
             />
           </div>
-          <div className="input-name">
+          <div>
             <label htmlFor="lastname">Efternamn</label>
             <input
+             className="input-name"
               type="text"
               id="lastname"
               name="lastname"
@@ -159,9 +148,10 @@ export default function AddAthlete() {
               onChange={(e) => handleChange(e, setLastName)}
             />
           </div>
-          <div className="input-name">
+          <div>
             <label htmlFor="email">Mailadress</label>
             <input
+             className="input-name"
               type="email"
               id="email"
               name="email"
@@ -180,12 +170,13 @@ export default function AddAthlete() {
               </div>
             )}
           </div>
-          <div className="save-button-wrapper">
+
+        </div>
+        <div className="save-button-wrapper">
             <button className="save-button" onClick={registerAthlete}>
               Spara atlet
             </button>
           </div>
-        </div>
 
         {showNotification && (
           <div className="notification">

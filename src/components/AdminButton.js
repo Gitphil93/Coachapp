@@ -84,7 +84,7 @@ export default function AdminButton() {
               body: JSON.stringify({
                 globalMessage: message.trim(),
                 author: user.name.charAt(0) + user.lastname.charAt(0),
-                coach: user.name + " " + user.lastname
+                coach: user.email
               }),
             },
           );

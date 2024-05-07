@@ -257,7 +257,7 @@ export default function AdminDashboard() {
 
 
                     <div className="dashboard-exercises">
-                    <h2 className='header-text'>Alla övningar</h2>
+                    <h2 className='header-text'>Dina övningar</h2>
                     <div className="expand-wrapper">
               {exerciseCategories.map((category) => (
                 <div key={category}>
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                         return (
                           <button
                             key={exercise._id}
-                            className="exercise-button"
+                            className={!exercise.isModule ? "exercise-button" : "module-button"}
                             onClick={ () => openDeleteExerciseModal(exercise)}
                             
                           >
