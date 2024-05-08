@@ -145,12 +145,14 @@ const removeExerciseFromModule = (exerciseId) => {
           },
         );
         const data = await response.json();
+        if(response.ok){
         console.log(data);
         setExerciseArray(data);
         const categories = Array.from(
           new Set(data.map((exercise) => exercise.category)),
         );
         setExerciseCategories(categories);
+      }
       } catch (err) {
         console.log(err, "Kunde inte hämta övningarna");
       } finally {

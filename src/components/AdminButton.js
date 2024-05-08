@@ -69,6 +69,7 @@ export default function AdminButton() {
     
       const postMessage = async (message) => {
         const token = localStorage.getItem("token")
+        const decodedToken = jwtDecode(token)
         if (!token) return
         if (token) {
         try {
@@ -84,7 +85,8 @@ export default function AdminButton() {
               body: JSON.stringify({
                 globalMessage: message.trim(),
                 author: user.name.charAt(0) + user.lastname.charAt(0),
-                coach: user.email
+                coach: user.email,
+                profileImage: decodedToken.profileImage ? decodedToken.profileImage : null
               }),
             },
           );

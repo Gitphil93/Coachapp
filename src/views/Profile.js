@@ -17,7 +17,7 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
-    const [image, setImage] = useState(); 
+    const [image, setImage] = useState(""); 
     const [event, setEvent] = useState("")
     const [pb, setPb] = useState(0)
     const [pbDate, setPbDate] = useState("")
@@ -60,19 +60,39 @@ export default function Profile() {
       setIsModalOpen(false)
     }
 
-    const handleImageChange = (event) => {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith("image")) {
-            setImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImageUrl(reader.result);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImage(null);
-        }
-    };
+    const handleImageChange = async (event) => {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith("image")) {
+          setImage(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setImageUrl(reader.result);
+              uploadImage(file);  // Lägg till denna rad
+          };
+          reader.readAsDataURL(file);
+      } else {
+          setImage(null);
+      }
+  };
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("profileImage", file);
+    const token = localStorage.getItem("token")
+    try {
+        const response = await fetch("http://192.168.0.30:5000/upload-image", {
+            method: "POST",
+            headers: {
+               "Authorization": `Bearer ${token}`,
+          },
+            body: formData,
+        });
+        const data = await response.json();
+        console.log("Upload successful", data);
+    } catch (error) {
+        console.error("Error uploading image", error);
+    }
+};  
 
     const getUser = async (token) => {
       try {
@@ -87,6 +107,7 @@ export default function Profile() {
         if (response.ok) {
           const data = await response.json(); // Läser och parsar JSON-svaret
           setUser(data.user)
+          setImageUrl(data.user.profileImage)
           console.log(data); // Loggar den parsade datan
         } else {
           console.log("Kunde inte hämta användare");
@@ -211,7 +232,7 @@ export default function Profile() {
                         <textarea rows="5" value={bio} onChange={(e) => setBio(e.target.value)} className="description-area"></textarea>
                     </div>
                     <div className="picture-container">
-                        <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" onChange={handleImageChange} style={{ display: 'none' }} />
+                        <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/heic, image/jpg" onChange={handleImageChange} style={{ display: 'none' }} />
                         <label htmlFor="avatar">
                             <img className="profile-pic" src={imageUrl} alt="profile-pic" />
                         </label>

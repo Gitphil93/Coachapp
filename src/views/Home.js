@@ -29,7 +29,10 @@ export default function Home() {
   const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const [globalMessageInput, setGlobalMessageInput] = useState("")
+  const [profilePic, setProfilePic] = useState("")
+  const [sessions, setSessions] = useState([]);
   const navigate = useNavigate()
+  console.log(profilePic)
 
   console.log("upcoming", allUpcomingSessions)
   console.log("today",allTodaysSessions)
@@ -84,8 +87,10 @@ const getToday = () => {
     }
     setIsLoading(true)
     const decodedToken = jwtDecode(token);
+    console.log(decodedToken)
     setRole(decodedToken.role);
     setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
+    setProfilePic(decodedToken.profileImage)
     getToday()
 
 
@@ -123,6 +128,7 @@ const getToday = () => {
           setInitials(data.user.name[0] + data.user.lastname[0]);
           setUserRole(data.user.role);
           setUser(data.user);
+          setProfilePic(data.user.profileImage)
         }
       })
       .catch((error) => {
@@ -179,11 +185,6 @@ const getSessions = async (token, today) => {
 
       setAllTodaysSessions(todaySessions);
       setAllUpcomingSessions(upcomingSessions);
-
-      console.log("jag går in här")
-      // For attendees: Filter sessions where the user is an attendee
-      setAllTodaysSessions(todaySessions);
-      setAllUpcomingSessions(upcomingSessions);
     
   
   } catch (err) {
@@ -226,7 +227,8 @@ const getSessions = async (token, today) => {
           body: JSON.stringify({
             globalMessage: message.trim(),
             author: initials,
-            coach: user.email
+            coach: user.email,
+            profileImage: profilePic ? profilePic : null
           }),
         },
       );
@@ -391,7 +393,12 @@ const deleteGlobalMessage = async () => {
               globalMessage !== "" && (
                 <>
                   <span className="global-message-author">
-                    <h3 id="author">{globalMessage.author}</h3>
+                    {globalMessage.profileImage ? (
+                    <img className="author-avatar" src={globalMessage.profileImage }/>
+                    ) : (
+                    <h3 id="author">{globalMessage.author}</h3> )
+                }
+                    
                   </span>
 
                   <span id="skrev">
@@ -448,9 +455,13 @@ const deleteGlobalMessage = async () => {
             <div className="session-bottom">
               <h2>{session.place}</h2>
               <div className="session-initials">
-                {attendeesInitials.map((initials, attendeeIndex) => (
-                  <span key={attendeeIndex} className="initials-wrapper">
-                    <h3 id="initials">{initials}</h3>
+                {session.attendees.map((attendee, index) => (
+                  <span key={index} className="initials-wrapper">
+                    {attendee.profileImage ? (
+                      <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                    ) : (
+                      <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
+                    )}
                   </span>
                 ))}
               </div>
@@ -502,9 +513,13 @@ const deleteGlobalMessage = async () => {
               <div className="session-bottom">
               <h2>{session.place}</h2>
               <div className="session-initials">
-                {attendeesInitials.map((initials, index) => (
+                {session.attendees.map((attendee, index) => (
                   <span key={index} className="initials-wrapper">
-                    <h3 id="initials">{initials}</h3>
+                    {attendee.profileImage ? (
+                      <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                    ) : (
+                      <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
+                    )}
                   </span>
                 ))}
               </div>

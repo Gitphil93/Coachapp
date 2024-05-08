@@ -26,8 +26,8 @@ const CheckToken = () => {
       const decodedToken = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
       const tokenExpiration = decodedToken.exp;
-      const tokenExpiryThreshold = 60; // Threshold på 60 sekunder innan tokenet löper ut
-      console.log("123")
+      const tokenExpiryThreshold = 600; // 10 min
+      //om det är mindre än 10 min kvar på tokenet så försöker vi refresha
       if (tokenExpiration - currentTime < tokenExpiryThreshold) {
     
         console.log("Försöker uppdatera token");

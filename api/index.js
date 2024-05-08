@@ -1,13 +1,21 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const { MongoClient } = require("mongodb");
-const { ObjectId } = require('mongodb');
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const transporter = require('./nodemailer.js');
-const stripe = require('stripe')(process.env.STRIPE_KEY)
-console.log(process.env.STRIPE_KEY)
+
+import express from "express"
+import dotenv from "dotenv"
+import { MongoClient } from "mongodb"
+import { ObjectId } from "mongodb"
+import cors from "cors"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import transporter from './nodemailer.js'
+import Stripe from 'stripe';
+import multer from 'multer';
+import { S3Client, PutObjectCommand,DeleteObjectCommand } from '@aws-sdk/client-s3';
+import fs from "fs"
+
+
+const stripe = new Stripe(process.env.STRIPE_KEY);
+
+console.log("stripe key:", process.env.STRIPE_KEY)
 dotenv.config();
 
 
@@ -16,6 +24,7 @@ const port = process.env.PORT;
 const uri = process.env.MONGODB_URI;
 const saltRounds = 10;
 let connectionPool = [];
+
 
 async function createConnection() {
   try {
@@ -418,8 +427,8 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Fel lösenord" });
     }
 
-    const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: 12000,
+    const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role, profileImage: user.profileImage }, process.env.JWT_SECRET, {
+      expiresIn: 86400, //24 timmar i sekunder
     });
     resObj.success = true;
     resObj.token = token;
@@ -747,27 +756,32 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
     const loggedInUserRole = req.decoded.role;
     const loggedInUserEmail = req.decoded.email; 
 
+    let query = {};
 
     if (loggedInUserRole === 3000) {
       // Admins get all sessions
-      const sessions = await sessionCollection.find().toArray();
-      return res.status(200).json({ success: true, sessions: sessions });
-    } 
-
-    if (loggedInUserRole === 2000) {
-      // Coaches get their own sessions
-      const sessions = await sessionCollection.find({ coach: loggedInUserEmail }).toArray();
-      return res.status(200).json({ success: true, sessions: sessions });
+      query = {}; // no filter, fetch all sessions
+    } else if (loggedInUserRole === 2000) {
+      // Coaches get sessions where they are either the coach or an attendee
+      query = {
+        $or: [
+          { coach: loggedInUserEmail },
+          { "attendees.email": loggedInUserEmail }
+        ]
+      };
+    } else if (loggedInUserRole === 1000) {
+      // Regular users get sessions where they are attendees
+      query = { "attendees.email": loggedInUserEmail };
+    } else {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
-    // Regular users get sessions where they are attendees
-    if (loggedInUserRole === 1000) {
-      const sessions = await sessionCollection.find({ "attendees.email": loggedInUserEmail }).toArray();
-      return res.status(200).json({ success: true, sessions: sessions });
+    const sessions = await sessionCollection.find(query).toArray();
+    if (sessions.length > 0) {
+      res.status(200).json({ success: true, sessions: sessions });
+    } else {
+      res.status(404).json({ success: false, message: "Inga sessioner hittades" });
     }
-
-    // Fallback if no valid role matches
-    res.status(404).json({ success: false, message: "Inga sessioner hittades" });
   } catch (error) {
     console.error("Error fetching sessions:", error);
     res.status(500).json({ success: false, message: "Ett fel inträffade vid hämtning av sessioner" });
@@ -777,6 +791,7 @@ app.get("/get-sessions", verifyToken, async (req, res) => {
     }
   }
 });
+
 
 
 
@@ -1004,6 +1019,95 @@ app.delete("/admin/delete-global-message", verifyToken, verifyRole(2000), async 
   }
 });
 
+const s3Client = new S3Client({region: "eu-north-1", credentials: {
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+} });
+
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/upload-image', verifyToken, upload.single('profileImage'), async (req, res) => {
+  const file = req.file;
+  const userEmail = req.decoded.email;
+  const bucketName = 'appleetbucket';
+  const fileType = file.mimetype.split('/')[1];
+
+
+  const handledEmail = userEmail.replace(/@/g, '-at-');
+  const key = `profilepic-${handledEmail}.${fileType}`;
+  console.log(key)
+
+  try {
+      // Kontrollera och ta bort befintlig fil från S3 om den finns
+      const currentImageUrl = await getImageUrlFromDatabase(userEmail);
+      if (currentImageUrl) {
+          const deleteParams = {
+              Bucket: bucketName,
+              Key: key,
+          };
+          await s3Client.send(new DeleteObjectCommand(deleteParams));
+      }
+
+      const fileStream = fs.createReadStream(file.path);
+      const uploadParams = {
+          Bucket: bucketName,
+          Key: key,
+          Body: fileStream,
+          ACL: "public-read"
+      };
+      await s3Client.send(new PutObjectCommand(uploadParams));
+
+      const imageUrl = `https://${bucketName}.s3.eu-north-1.amazonaws.com/${key}`;
+      await saveImageReferenceToDatabase(userEmail, imageUrl);
+
+      // Radera filen från serverns filsystem
+      fs.unlink(file.path, err => {
+          if (err) {
+              console.error("Failed to delete local file", err);
+          }
+      });
+
+      console.log("Success");
+      res.status(200).json({ message: "Image uploaded successfully", imageUrl });
+  } catch (error) {
+      console.error("Failed to upload image", error);
+      res.status(500).json({ error: "Failed to upload image" });
+  }
+});
+
+
+async function getImageUrlFromDatabase(email) {
+  const client = await getConnection();
+  try {
+      const db = client.db("Coachapp");
+      const usersCollection = db.collection("users");
+      const user = await usersCollection.findOne({ email: email });
+      return user ? user.profileImage : null;
+  } catch (error) {
+      console.error("Error retrieving image URL from database:", error);
+      return null;
+  } finally {
+      releaseConnection(client);
+  }
+}
+
+
+async function saveImageReferenceToDatabase(userEmail, imageUrl) {
+  const client = await getConnection();
+  try {
+      const database = client.db("Coachapp");
+      const usersCollection = database.collection("users");
+      const updateResult = await usersCollection.updateOne(
+          { email: userEmail },
+          { $set: { profileImage: imageUrl } }
+      );
+      console.log(`Image URL updated for user ${userEmail}`);
+  } catch (error) {
+      console.error("Failed to save image reference in database:", error);
+  } finally {
+      releaseConnection(client);
+  }
+}
 
 
 

@@ -6,14 +6,20 @@
 
 
 * {
-/*   font-family: "Quicksand", sans-serif; */
   font-family: "Montserrat", sans-serif;
-/*   font-family: "Poppins", sans-serif; */
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
 }
 
+:root{
+  --orange: rgb(255, 136, 0);
+  --light-orange:rgba(255, 187, 0, 1);
+  --blue: rgb(38, 42, 56);
+  --grey:rgb(187, 186, 186,0.5);
+  --text-grey:rgb(71, 70, 70);
+}
 .app {
   position: relative;
   height: auto;

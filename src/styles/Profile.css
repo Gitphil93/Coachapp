@@ -160,7 +160,7 @@ font-style:oblique;
 }
 
 #add-icon{
-    color: rgba(255, 187, 0, 1);
+    color: var(--light-orange);
     height: 1.3rem; 
     width: 1.3rem;  
 
@@ -178,7 +178,7 @@ font-style:oblique;
 
 .upcoming-icon{
     padding-right:.5rem;
-    color: rgba(255, 187, 0, 1);
+    color: var(--orange);
 }
 
 .upcoming-container > h3{
@@ -245,16 +245,15 @@ font-style:oblique;
       justify-content: center;
       align-items: center;
   }
+  
   .modal-radios  input[type="radio"]{
-
       height: 2rem;
       width: 2rem;
- 
+
   }
 
   input[type="date"] {
     display:block;
-   
     -webkit-appearance: textfield;
     -moz-appearance: textfield;
     min-height: 1rem;

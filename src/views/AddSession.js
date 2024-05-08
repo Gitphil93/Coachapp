@@ -277,7 +277,7 @@ if (isPostSessionSuccess) {
               "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-              attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email, signed: false })),
+              attendees: selectedAttendees.map(({ name, lastname, email, profileImage }) => ({ name, lastname, email, profileImage, signed: false })),
               title: selectedName.trim().charAt(0).toUpperCase() + selectedName.trim().slice(1),
               date: selectedDate.trim(),
               time: selectedTime.trim(),
@@ -332,7 +332,10 @@ if (isPostSessionSuccess) {
   };
 
   const updateCategoriesAndCounts = () => {
-    // Beräkna nya antal baserat på övningar
+    if (!Array.isArray(exerciseArray) || exerciseArray.length === 0) {
+      console.log('Inga övningar att bearbeta.');
+      return;
+    }
     const categoryCount = exerciseArray.reduce((acc, exercise) => {
       const { category } = exercise;
       acc[category] = (acc[category] || 0) + 1;
@@ -447,7 +450,7 @@ if (isPostSessionSuccess) {
                     onClick={() => toggleExpand(category)}
                   >
                     <h3 id="category-header">{category}</h3>
-                    <h3 className="category-number">{exercisesInCategory[category] || 0}</h3>
+                    <h3 id="number" className="category-number">{exercisesInCategory[category] || 0}</h3>
                     <img
                       id="arrow"
                       src="/arrow.png"
