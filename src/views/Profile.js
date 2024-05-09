@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faGear, faTrophy, faMountain, faPlus } from '@fortawesome/free-solid-svg-icons';
 import AdminButton from '../components/AdminButton';
 import Modal from '../components/Modal';
+import DateInput from '../components/DateInput';
 
 
 export default function Profile() {
@@ -33,7 +34,7 @@ export default function Profile() {
       { id: 4, title: "Resultat", details: "Results Details" },
       { id: 5, title: "Statistik", details: "Statistics Details" },
     ]);
-
+      console.log(imageUrl)
     const [statistics, setStatistics] = useState([
       {
           personalBests: [
@@ -107,8 +108,7 @@ export default function Profile() {
         if (response.ok) {
           const data = await response.json(); // Läser och parsar JSON-svaret
           setUser(data.user)
-          setImageUrl(data.user.profileImage)
-          console.log(data); // Loggar den parsade datan
+          setImageUrl(`${data.user.profileImage}?${new Date().getTime()}`);
         } else {
           console.log("Kunde inte hämta användare");
         }
@@ -193,8 +193,7 @@ export default function Profile() {
                     </select>
                     </div>
                   
-                    <input type="date" value="Placeholder" onfocus="if(this.value=='YYYY-MM-DD') this.value='';" onblur="if(this.value=='') this.value='placeholder';"/>
-
+                
                    <input className="modal-input" type="date" name="date" placeholder="YYYY-MM-DD" onChange={(e) => handleChanges(e, setPbDate)} />
                    <div className="modal-radios">
                      <span className="modal-radio">

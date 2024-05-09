@@ -277,7 +277,7 @@ if (isPostSessionSuccess) {
               "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-              attendees: selectedAttendees.map(({ name, lastname, email, profileImage }) => ({ name, lastname, email, profileImage, signed: false })),
+              attendees: selectedAttendees.map(({ name, lastname, email, thumbnailImage }) => ({ name, lastname, email, thumbnailImage, signed: false })),
               title: selectedName.trim().charAt(0).toUpperCase() + selectedName.trim().slice(1),
               date: selectedDate.trim(),
               time: selectedTime.trim(),

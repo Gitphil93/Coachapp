@@ -298,10 +298,11 @@
 
 .author-avatar{
   position: absolute;
-  height: 2rem;
   width: 2rem;
+  height: 2rem;
   object-fit: cover; 
-/*   border: 1px solid var(--light-orange);  */
+  image-resolution: 300dpi;
   border-radius: 50%;
-/*   mix-blend-mode: soft-light; */
+  overflow: hidden;
+  
 }

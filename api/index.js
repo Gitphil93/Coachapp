@@ -1,5 +1,6 @@
 
 import express from "express"
+import compression from 'compression';
 import dotenv from "dotenv"
 import { MongoClient } from "mongodb"
 import { ObjectId } from "mongodb"
@@ -9,6 +10,7 @@ import jwt from "jsonwebtoken"
 import transporter from './nodemailer.js'
 import Stripe from 'stripe';
 import multer from 'multer';
+import sharp from "sharp"
 import { S3Client, PutObjectCommand,DeleteObjectCommand } from '@aws-sdk/client-s3';
 import fs from "fs"
 
@@ -20,6 +22,10 @@ dotenv.config();
 
 
 const app = express();
+//Middleware
+app.use(compression());
+app.use(express.json());
+app.use(cors());
 const port = process.env.PORT;
 const uri = process.env.MONGODB_URI;
 const saltRounds = 10;
@@ -70,8 +76,6 @@ async function run() {
 
 run().catch(console.dir);
 
-app.use(express.json());
-app.use(cors());
 
 /* app.options('*', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -427,7 +431,7 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Fel lösenord" });
     }
 
-    const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role, profileImage: user.profileImage }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ email: user.email, name:user.name, lastname:user.lastname, role: user.role, profileImage: user.profileImage, thumbnailImage: user.thumbnailImage }, process.env.JWT_SECRET, {
       expiresIn: 86400, //24 timmar i sekunder
     });
     resObj.success = true;
@@ -1030,51 +1034,70 @@ app.post('/upload-image', verifyToken, upload.single('profileImage'), async (req
   const file = req.file;
   const userEmail = req.decoded.email;
   const bucketName = 'appleetbucket';
-  const fileType = file.mimetype.split('/')[1];
-
 
   const handledEmail = userEmail.replace(/@/g, '-at-');
-  const key = `profilepic-${handledEmail}.${fileType}`;
-  console.log(key)
+  const thumbnailKey = `thumbnail-${handledEmail}.jpeg`;
+  const profilePicKey = `profilepic-${handledEmail}.jpeg`;
 
   try {
-      // Kontrollera och ta bort befintlig fil från S3 om den finns
-      const currentImageUrl = await getImageUrlFromDatabase(userEmail);
-      if (currentImageUrl) {
-          const deleteParams = {
+      const fileBuffer = fs.readFileSync(file.path);
+
+      // Hämta befintlig profilbild och thumbnail från databasen
+      const existingImages = await getImageUrlFromDatabase(userEmail);
+
+      // Skapa thumbnail och profilbild
+      const thumbnailBuffer = await sharp(fileBuffer).rotate().resize(100, 100).jpeg({ quality: 90 }).toBuffer();
+      const profilePicBuffer = await sharp(fileBuffer).rotate().resize(300, 300).jpeg({ quality: 90 }).toBuffer();
+
+      // Radera befintliga bilder om de finns
+      if (existingImages && existingImages.profileImageUrl) {
+          await s3Client.send(new DeleteObjectCommand({
               Bucket: bucketName,
-              Key: key,
-          };
-          await s3Client.send(new DeleteObjectCommand(deleteParams));
+              Key: thumbnailKey,
+          }));
+          await s3Client.send(new DeleteObjectCommand({
+              Bucket: bucketName,
+              Key: profilePicKey,
+          }));
       }
 
-      const fileStream = fs.createReadStream(file.path);
-      const uploadParams = {
+      // Ladda upp de nya bilderna
+      await s3Client.send(new PutObjectCommand({
           Bucket: bucketName,
-          Key: key,
-          Body: fileStream,
-          ACL: "public-read"
-      };
-      await s3Client.send(new PutObjectCommand(uploadParams));
+          Key: thumbnailKey,
+          Body: thumbnailBuffer,
+          ACL: "public-read",
+          CacheControl: 'no-cache, must-revalidate'
+      }));
 
-      const imageUrl = `https://${bucketName}.s3.eu-north-1.amazonaws.com/${key}`;
-      await saveImageReferenceToDatabase(userEmail, imageUrl);
+      await s3Client.send(new PutObjectCommand({
+          Bucket: bucketName,
+          Key: profilePicKey,
+          Body: profilePicBuffer,
+          ACL: "public-read",
+          CacheControl: 'no-cache, must-revalidate'
+      }));
 
-      // Radera filen från serverns filsystem
+      // Spara nya URL:er i databasen
+      await saveImageReferenceToDatabase(userEmail, thumbnailKey, profilePicKey, bucketName);
+
+      // Radera den lokala filen
       fs.unlink(file.path, err => {
           if (err) {
               console.error("Failed to delete local file", err);
           }
       });
 
-      console.log("Success");
-      res.status(200).json({ message: "Image uploaded successfully", imageUrl });
-  } catch (error) {
-      console.error("Failed to upload image", error);
+      res.status(200).json({
+          message: "Image and thumbnail updated successfully",
+          profileImageUrl: `https://${bucketName}.s3.eu-north-1.amazonaws.com/${profilePicKey}`,
+          thumbnailUrl: `https://${bucketName}.s3.eu-north-1.amazonaws.com/${thumbnailKey}`
+      });
+  } catch ( error) {
+      console.error("Failed to process or upload image", error);
       res.status(500).json({ error: "Failed to upload image" });
   }
 });
-
 
 async function getImageUrlFromDatabase(email) {
   const client = await getConnection();
@@ -1082,7 +1105,7 @@ async function getImageUrlFromDatabase(email) {
       const db = client.db("Coachapp");
       const usersCollection = db.collection("users");
       const user = await usersCollection.findOne({ email: email });
-      return user ? user.profileImage : null;
+      return user ? { profileImageUrl: user.profileImage, thumbnailUrl: user.thumbnailImage } : null;
   } catch (error) {
       console.error("Error retrieving image URL from database:", error);
       return null;
@@ -1091,15 +1114,14 @@ async function getImageUrlFromDatabase(email) {
   }
 }
 
-
-async function saveImageReferenceToDatabase(userEmail, imageUrl) {
+async function saveImageReferenceToDatabase(userEmail, thumbnailKey, profilePicKey, bucketName) {
   const client = await getConnection();
   try {
       const database = client.db("Coachapp");
       const usersCollection = database.collection("users");
       const updateResult = await usersCollection.updateOne(
           { email: userEmail },
-          { $set: { profileImage: imageUrl } }
+          { $set: { profileImage: `https://${bucketName}.s3.eu-north-1.amazonaws.com/${profilePicKey}`, thumbnailImage: `https://${bucketName}.s3.eu-north-1.amazonaws.com/${thumbnailKey}` } }
       );
       console.log(`Image URL updated for user ${userEmail}`);
   } catch (error) {
@@ -1108,6 +1130,7 @@ async function saveImageReferenceToDatabase(userEmail, imageUrl) {
       releaseConnection(client);
   }
 }
+
 
 
 

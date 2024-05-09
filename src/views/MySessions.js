@@ -570,8 +570,8 @@ export default function MySessions() {
                     <div className="session-initials">
                           {session.attendees.map((attendee, index) => (
                               <span key={index} className="initials-wrapper">
-                            {attendee.profileImage ? (
-                            <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                            {attendee.thumbnailImage  ? (
+                            <img src={attendee.thumbnailImage} alt="Profilbild" className="author-avatar"/>
                             ) : (
                             <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
                          )}
@@ -739,8 +739,8 @@ export default function MySessions() {
                         <div className="session-initials">
                           {session.attendees.map((attendee, index) => (
                               <span key={index} className="initials-wrapper">
-                            {attendee.profileImage ? (
-                            <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                            {attendee.thumbnailImage ? (
+                            <img src={attendee.thumbnailImage} alt="Profilbild" className="author-avatar"/>
                             ) : (
                             <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
                          )}

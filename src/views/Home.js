@@ -16,7 +16,7 @@ export default function Home() {
   const [today, setToday] = useState("")
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const hamburgerRef = useRef(null);
-  const modalRef = useRef();
+ /*  const modalRef = useRef(); */
   const [name, setName] = useState("");
   const [globalMessage, setGlobalMessage] = useState("");
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
@@ -26,11 +26,9 @@ export default function Home() {
   const [allTodaysSessions, setAllTodaysSessions] = useState([])
   const [allUpcomingSessions, setAllUpcomingSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedSession, setSelectedSession] = useState(null)
   const [role, setRole] = useState(0)
   const [globalMessageInput, setGlobalMessageInput] = useState("")
-  const [profilePic, setProfilePic] = useState("")
-  const [sessions, setSessions] = useState([]);
+  const [profilePic, setProfilePic] = useState({})
   const navigate = useNavigate()
   console.log(profilePic)
 
@@ -90,7 +88,6 @@ const getToday = () => {
     console.log(decodedToken)
     setRole(decodedToken.role);
     setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
-    setProfilePic(decodedToken.profileImage)
     getToday()
 
 
@@ -128,7 +125,7 @@ const getToday = () => {
           setInitials(data.user.name[0] + data.user.lastname[0]);
           setUserRole(data.user.role);
           setUser(data.user);
-          setProfilePic(data.user.profileImage)
+          setProfilePic({profileImage: data.user.profileImage, thumbnailImage: data.user.thumbnailImage})
         }
       })
       .catch((error) => {
@@ -228,7 +225,7 @@ const getSessions = async (token, today) => {
             globalMessage: message.trim(),
             author: initials,
             coach: user.email,
-            profileImage: profilePic ? profilePic : null
+            thumbnailImage: profilePic.thumbnailImage ? profilePic.thumbnailImage : null
           }),
         },
       );
@@ -344,7 +341,7 @@ const deleteGlobalMessage = async () => {
     if (isMenuOpen) {
       return;
     }
-    setSelectedSession(sessionId);
+
     navigate('/my-sessions', { state: { selectedSession: sessionId } });
   };
 
@@ -353,7 +350,7 @@ const deleteGlobalMessage = async () => {
   }
 
   let hour = new Date().getHours();
-  let greeting = "";
+  let greeting;
   
 
   if (hour <= 10) {
@@ -393,8 +390,8 @@ const deleteGlobalMessage = async () => {
               globalMessage !== "" && (
                 <>
                   <span className="global-message-author">
-                    {globalMessage.profileImage ? (
-                    <img className="author-avatar" src={globalMessage.profileImage }/>
+                    {globalMessage.thumbnailImage ? (
+                    <img className="author-avatar" alt="thumbnail" src={globalMessage.thumbnailImage }/>
                     ) : (
                     <h3 id="author">{globalMessage.author}</h3> )
                 }
@@ -435,7 +432,7 @@ const deleteGlobalMessage = async () => {
       <h2>Dagens Pass</h2>
     </div>
     {allTodaysSessions.map((session, sessionIndex) => {
-      const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
+
       return (
         <div className="sessions" key={sessionIndex}>
           <div className="sessions-content" onClick={() => handleSessionClick(session)}>
@@ -457,8 +454,8 @@ const deleteGlobalMessage = async () => {
               <div className="session-initials">
                 {session.attendees.map((attendee, index) => (
                   <span key={index} className="initials-wrapper">
-                    {attendee.profileImage ? (
-                      <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                    {attendee.thumbnailImage ? (
+                      <img src={attendee.thumbnailImage} alt="thumbnail"  className="author-avatar"/>
                     ) : (
                       <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
                     )}
@@ -494,8 +491,6 @@ const deleteGlobalMessage = async () => {
       <h2>Kommande Pass</h2>
     </div>
     {allUpcomingSessions.map((session, index) => {
-        const attendeesInitials = session.attendees.map((attendee) => attendee.name[0] + attendee.lastname[0]);
-
         return (
           <div className="sessions" key={index}>
             <div className="sessions-content" onClick={() => handleSessionClick(session)}>
@@ -515,8 +510,8 @@ const deleteGlobalMessage = async () => {
               <div className="session-initials">
                 {session.attendees.map((attendee, index) => (
                   <span key={index} className="initials-wrapper">
-                    {attendee.profileImage ? (
-                      <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                    {attendee.thumbnailImage ? (
+                      <img src={attendee.thumbnailImage} alt="thumbnail"  className="author-avatar"/>
                     ) : (
                       <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
                     )}
