@@ -10,6 +10,9 @@ import {jwtDecode} from "jwt-decode"
 import Weather from "../components/Weather.js"
 import Footer from "../components/Footer.js"
 import AdminButton from "../components/AdminButton";
+import Greeting from "../components/Greeting";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -30,11 +33,7 @@ export default function Home() {
   const [globalMessageInput, setGlobalMessageInput] = useState("")
   const [profilePic, setProfilePic] = useState({})
   const navigate = useNavigate()
-  console.log(profilePic)
 
-  console.log("upcoming", allUpcomingSessions)
-  console.log("today",allTodaysSessions)
-  console.log(role)
 
 
     const handleInputChange = (e) => {
@@ -142,7 +141,6 @@ const getToday = () => {
 const getSessions = async (token, today) => {
   if (!token) return;
   const decodedToken = jwtDecode(token)
-  console.log(1,decodedToken.role)
   try {
     const response = await fetch("http://192.168.0.30:5000/get-sessions", {
       method: "GET",
@@ -158,7 +156,6 @@ const getSessions = async (token, today) => {
     const data = await response.json();
     const sessions = data.sessions;
     const currentTime = new Date();
-    console.log(sessions)
   
     // Sort sessions by date and time
     const sortedSessions = sessions.sort((a, b) => {
@@ -348,20 +345,6 @@ const deleteGlobalMessage = async () => {
   const adminDashboard = () => {
     navigate("/admin-dashboard")
   }
-
-  let hour = new Date().getHours();
-  let greeting;
-  
-
-  if (hour <= 10) {
-    greeting = "God morgon";
-  } else if (hour >= 18 && hour < 23) {
-    greeting = "God kväll";
-  } else {
-    greeting = "Hej"
-  }
-
-
    
   return (
     <div>
@@ -381,7 +364,7 @@ const deleteGlobalMessage = async () => {
       <div className="home-wrapper">
         <div className="view-header">
           <h1>
-            {greeting} {name}! 
+            <Greeting/> {name}! 
           </h1>
         </div>
         {globalMessage && typeof globalMessage === "object" && (
@@ -414,14 +397,15 @@ const deleteGlobalMessage = async () => {
         )}
 
                   {userRole >= 2000 && (
-                      <div className="menu-icon">
-                        <img
-                          src="./plus-icon.svg"
-                          alt="plus-icon"
-                          onClick={openAdminModal}
-                          className="admin-button"
-                        />
-                      </div>
+               <div className="menu-icon">
+               <FontAwesomeIcon className="admin-button" onClick={openAdminModal} icon={faPlus}/>
+   {/*             <img
+                 src="./plus-icon.svg"
+                 alt="plus-icon"
+                 onClick={openAdminModal}
+                 className="admin-button"
+               /> */}
+             </div>
                     )}
 
 

@@ -1131,6 +1131,45 @@ async function saveImageReferenceToDatabase(userEmail, thumbnailKey, profilePicK
   }
 }
 
+app.put("/update-user/:userId", verifyToken, async (req, res) => {
+  const { userId } = req.params;
+  const updates = req.body;  
+  console.log(updates)// Detta förväntas vara ett objekt med nycklar och värden som ska uppdateras
+  let client;
+
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const usersCollection = database.collection("users");
+
+    // Bygg ett objekt för $set som dynamiskt genererar sökvägar för varje uppdaterad egenskap
+    const setObj = {};
+    for (const key in updates) {
+      setObj[`profile.${key}`] = updates[key];
+    }
+
+    const updateResult = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: setObj }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      res.status(404).json({ message: "Ingen användare hittades eller inga uppdateringar gjordes" });
+    } else {
+      res.status(200).json({ message: "Användarprofil uppdaterad" });
+    }
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Ett fel inträffade vid uppdatering av användarprofilen" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+});
+
+
+
 
 
 

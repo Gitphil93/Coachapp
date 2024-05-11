@@ -4,6 +4,8 @@ import "../styles/adminButton.css"
 import Modal from './Modal'
 import {jwtDecode} from "jwt-decode"
 import Loader from './Loader'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export default function AdminButton() {
     const navigate = useNavigate()
@@ -266,12 +268,13 @@ export default function AdminButton() {
 
         {user.role >= 2000 && location.pathname !== "/home" && (
           <div className="menu-icon">
-            <img
+            <FontAwesomeIcon className="admin-button" onClick={openAdminModal} icon={faPlus}/>
+{/*             <img
               src="./plus-icon.svg"
               alt="plus-icon"
               onClick={openAdminModal}
               className="admin-button"
-            />
+            /> */}
           </div>
         )}
     </div>

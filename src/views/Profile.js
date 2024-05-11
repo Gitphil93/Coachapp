@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "../styles/Profile.css";
 import Header from '../components/Header';
@@ -8,15 +8,23 @@ import MenuContext from '../context/MenuContext';
 import Loader from '../components/Loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faGear, faTrophy, faMountain, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram } from '@fortawesome/free-brands-svg-icons';
+
 import AdminButton from '../components/AdminButton';
 import Modal from '../components/Modal';
 import DateInput from '../components/DateInput';
 
 
 export default function Profile() {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+      const navigate = useNavigate()
+      const [isLoading, setIsLoading] = useState(false)
+      const [isModalOpen, setIsModalOpen] = useState(false)
+      const [isEditingBio, setIsEditingBio] = useState(false);
+      const bioRef = useRef(null);
+      const [isEditingInstagram, setIsEditingInstagram] = useState(false);
+      const [instagram, setInstagram] = useState('');
+      const instagramRef = useRef(null);
+      const [addingItemId, setAddingItemId] = useState({})
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [image, setImage] = useState(""); 
     const [event, setEvent] = useState("")
@@ -25,16 +33,16 @@ export default function Profile() {
     const [user, setUser] = useState({})
     const [unit, setUnit] =useState("")
     const [expandedItemId, setExpandedItemId] = useState(null);
-    const [bio, setBio] = useState("asd asd asd asd asd asd asd asd asd asd aasd asd asd asd asd asd asd asd asd asd a");
+    const [bio, setBio] = useState("");
     const [imageUrl, setImageUrl] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZBRWavH_xKSiGgujWbvZOFI0lSClOPgX6M9f5sKj95w&s'); 
     const [profileItems, setProfileItems] = useState([
-      { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23", date: "2024-01-02", unit:"s", outside: true }, { event: "Längdhopp", performance: "7.35", date: "2024-01-02", unit:"m", outside: true }, { event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true },{ event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true }] },
+      { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23", date: "2024-01-02", unit:"s", outside: true }, { event: "Längdhopp", performance: "7.35", date: "2024-01-02", unit:"m", outside: true }, { event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true }] },
       { id: 2, title: "Dina SB", details: [{ event: "200m", performance: "20.56", date: "2024-01-02", unit:"s", outside: true }, { event: "Höjdhopp", performance: "2.05", date: "2024-01-02", unit:"m", outside: true }] },
       { id: 3, title: "Tävlingar", details: "Competition Details" },
       { id: 4, title: "Resultat", details: "Results Details" },
       { id: 5, title: "Statistik", details: "Statistics Details" },
     ]);
-      console.log(imageUrl)
+
     const [statistics, setStatistics] = useState([
       {
           personalBests: [
@@ -46,12 +54,66 @@ export default function Profile() {
   ]);
 
 
+  useEffect(() => {
+    if (isEditingBio && bioRef.current) {
+      bioRef.current.focus();
+    }
+  }, [isEditingBio]);
+
+  const toggleEditBio = () => {
+    setIsEditingBio(!isEditingBio);
+  };
+
+  const handleBlurBio = () => {
+    if (bio !== "Klicka här för att lägga till biografi" && bio.trim() !== "") {
+        updateUserProfile({ bio: bio });
+    }
+    setIsEditingBio(false);
+};
+  
+  useEffect(() => {
+    if (isEditingInstagram && instagramRef.current) {
+      instagramRef.current.focus();
+    }
+  }, [isEditingInstagram]);
+
+  const toggleEditInstagram = () => {
+    setIsEditingInstagram(!isEditingInstagram);
+  };
+
+  const handleInstagramChange = (event) => {
+    setInstagram(event.target.value);
+  };
+
+const handleBlurInstagram = () => {
+    if (instagram !== "Lägg till din instagram" && instagram.trim() !== "") {
+        updateUserProfile({ instagram: instagram });
+    }
+    setIsEditingInstagram(false);
+};
+
+const toggleExpand = (itemId) => {
+  if (expandedItemId === itemId) {
+      setExpandedItemId(null);  // Om samma element klickas igen, stäng det
+      setAddingItemId(null);    // Återställ även addingItemId när inget element är expanderat
+  } else {
+      setExpandedItemId(itemId);  // Öppna det nya elementet
+  }
+};
+
+const toggleAddItem = (e, itemId) => {
+  e.stopPropagation(); // Prevent event bubbling to keep the item expanded
+  if (addingItemId === itemId) {
+      setAddingItemId(null); // Toggle off if it's the same item
+  } else {
+      setAddingItemId(itemId); // Toggle on new item
+  }
+}
+
+
     const handleChanges = (event, setter) => {
       setter(event.target.value)
     }
-    const toggleExpand = (itemId) => {
-      setExpandedItemId(prevItemId => prevItemId === itemId ? null : itemId);
-  };
 
     const openModal = (event ,expandedItemId) => {
       event.stopPropagation()
@@ -107,7 +169,10 @@ export default function Profile() {
     
         if (response.ok) {
           const data = await response.json(); // Läser och parsar JSON-svaret
+          console.log(data)
           setUser(data.user)
+          setBio(data.user.profile?.bio || "Klicka här för att lägga till biografi"); 
+          setInstagram(data.user.profile?.instagram || "Lägg till instagram");
           setImageUrl(`${data.user.profileImage}?${new Date().getTime()}`);
         } else {
           console.log("Kunde inte hämta användare");
@@ -161,6 +226,32 @@ export default function Profile() {
       }
     }, []);
 
+    const updateUserProfile = async (updates) => {
+      console.log(updates)
+      const token = localStorage.getItem("token"); // Assume token is stored in localStorage
+      try {
+          const response = await fetch(`http://192.168.0.30:5000/update-user/${user._id}`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(updates)
+          });
+  
+          const result = await response.json();
+          if (response.ok) {
+              console.log('Update successful:', result);
+              setUser(prev => ({ ...prev, ...updates }));
+          } else {
+              console.error('Failed to update user profile:', result);
+          }
+      } catch (error) {
+          console.error('Error updating user profile:', error);
+      }
+  };
+    
+
     return (
         <div>
             <Header onMenuToggle={toggleMenu} />
@@ -182,15 +273,7 @@ export default function Profile() {
                     <div className="modal-top-row">
                    <input className="modal-input" type="text" placeholder="Övning/gren" onChange={(e) => handleChanges(e, setEvent)} />
                    <input className="modal-input" type="number" placeholder="10.23s/1.80m" onChange={(e) => handleChanges(e, setPb)} />
-                    <select id="unit"
-                    onChange={(e) => handleChanges(e, setUnit)}>
-                    <option value="">Välj enhet</option>
-                      <option value="m">m</option>
-                      <option value="cm">cm</option>
-                      <option value="s">sekunder</option>
-                      <option value="min">minuter</option>
-                      <option value="kg">kg</option>
-                    </select>
+
                     </div>
                   
                 
@@ -225,53 +308,122 @@ export default function Profile() {
                     <FontAwesomeIcon icon={faGear} />
                 </div>
                 <div className="card-container">
-                    <div className="profile-name-container">
-                        <h3>{user.name} {user.lastname}</h3>
-                        <p id="title">Hacker</p>
-                        <textarea rows="5" value={bio} onChange={(e) => setBio(e.target.value)} className="description-area"></textarea>
+                <div className="profile-name-container">
+                  <h3>{user.name} {user.lastname}</h3>
+                  <p id="title">Hacker</p>
+                  {isEditingBio ? (
+                    <div className="description-area">
+                      <textarea
+                        ref={bioRef}
+                        rows="6"
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        onBlur={handleBlurBio}
+                      />
                     </div>
+                  ) : (
+                    <div className="description-area">
+                    <p onClick={toggleEditBio}>{bio}</p>
+                    </div>
+                  )}
+                </div>
+
                     <div className="picture-container">
                         <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/heic, image/jpg" onChange={handleImageChange} style={{ display: 'none' }} />
                         <label htmlFor="avatar">
                             <img className="profile-pic" src={imageUrl} alt="profile-pic" />
                         </label>
+                        <div className="instagram-wrapper">
+                          <FontAwesomeIcon className="instagram-logo" alt="instagram" onClick={toggleEditInstagram} icon={faInstagram} />&nbsp;
+                          {isEditingInstagram ? (
+                          <input
+                              ref={instagramRef}
+                              type="text"
+                              value={instagram}
+                              onChange={handleInstagramChange}
+                              onBlur={handleBlurInstagram}
+                            />
+                                                      ) : (
+                            <p onClick={toggleEditInstagram}>&nbsp;@{instagram}</p>
+                          )}
+                        </div>
                     </div>
                 </div>
                 <div className="upcoming-container">
+                  <div className="upcoming-item">
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faTrophy} /></span>Nästa tävling</h3>
+                    </div>
+                    <div className="upcoming-item">
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faMountain} /></span>Nästa läger</h3>
+                    </div>
                 </div>
 
                 <div className="content-container">
                                       
                 {profileItems.map(item => (
-                 <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={() => toggleExpand(item.id)}>    
-
-                   <h3>{item.title}</h3>
-
-
-                   {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
-                    <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`} >
-                      {expandedItemId === item.id && item.details.map((detail, index) => (
-                        <div className="detail" key={index}>
-                            <p className="bold-paragraph">{detail.event}: </p>
-                            <p>{detail.performance}{detail.unit}</p>
-                            <p>{formatDate(detail.date)}</p>
-                            {detail.outside ? <p>Utomhus</p> : <p>Inomhus</p>}
+            <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={() => toggleExpand(item.id)}>    
+                <h3>{item.title}</h3>
+                {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
+                    <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`}>
+                        {expandedItemId === item.id && item.details.map((detail, index) => (
+                            <div className="detail" key={index}>
+                                <p className="bold-paragraph">{detail.event}: </p>
+                                <p>{`${detail.performance} ${detail.unit}`}</p>
+                                <p>{formatDate(detail.date)}</p>
+                                <p>{detail.outside ? "Utomhus" : "Inomhus"}</p>
                             </div>
                         ))}
+                    {addingItemId === item.id && (
+                              <div className="add-result">
+                                  <input id="event-input" placeholder="T.ex. höjdhopp" autoFocus />
+                                  <input id="result-input" placeholder="1.80"/>
+                                  <select id="unit"
+                              onChange={(e) => handleChanges(e, setUnit)}>
+                              <option value="">T.ex m</option>
+                                <option value="m">m</option>
+                                <option value="cm">cm</option>
+                                <option value="s">sekunder</option>
+                                <option value="min">minuter</option>
+                                <option value="kg">kg</option>
+                              </select>
+                              <input type="date"/>
+                              <select id="setting-select">
+                    {addingItemId === item.id && (
+                              <div className="add-result">
+                                  <input id="event-input" placeholder="T.ex. höjdhopp" autoFocus />
+                                  <input id="result-input" placeholder="1.80"/>
+                                  <select id="unit"
+                              onChange={(e) => handleChanges(e, setUnit)}>
+                              <option value="">T.ex m</option>
+                                <option value="m">m</option>
+                                <option value="cm">cm</option>
+                                <option value="s">sekunder</option>
+                                <option value="min">minuter</option>
+                                <option value="kg">kg</option>
+                              </select>
+                              <input type="date"/>
+                              <select id="setting-select">
+                                <option value="">Inomhus</option>
+                                <option value="Inomhus">Inomhus</option>
+                                <option value="Utomhus">Utomhus</option>
+                              </select>
+                              </div>
+                )}
 
-                        
+                              </select>
+                              </div>
+                          )}
                     </div>
-                    )}
-                                       {expandedItemId === item.id &&
-                            <div id="add-icon-span" onClick={(e) => openModal(e, expandedItemId)}>
-                            <FontAwesomeIcon id="add-icon" icon={faPlus} />
-                            </div>
-                          }
+                )}
 
-                 </div>
-             ))}
+                {expandedItemId === item.id && (
+                    <div id="add-icon-span" onClick={(e) => toggleAddItem(e, item.id)}>
+                        <FontAwesomeIcon id="add-icon" icon={faPlus} />
+                    </div>
+                )}
+
+            </div>
+        ))}
 
               
                 </div>

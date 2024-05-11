@@ -2,28 +2,32 @@
     display: flex;
     position: relative;
     width: 90%;
-    height:15rem;
+    max-height:12rem;
     box-shadow: 1px 1px 10px 5px rgb(218, 218, 218, 0.8);
     border-radius: 10px;
     flex-direction: row;
     justify-content: space-between;
+    align-items: flex-start;
     opacity: 1;
     padding:1rem;
     background-color: rgb(187, 186, 186,0.5);
 }
 
 .profile-name-container{
+    padding-right: 1rem;
     height: auto;
     width: 60%;
-    margin-top: 1rem;
-    font-size: 1.2rem;
+/*     margin-top: 1rem; */
+    font-size: 1rem;
     color: rgb(231, 226, 226);
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
     flex-direction: column;
     font-weight: 400;
+    overflow-wrap: break-word;
 }
+
 .profile-name-container > h3{
     font-weight: 500;
     color: rgb(71, 70, 70);
@@ -33,9 +37,47 @@
 .picture-container{
     position: relative;
     display: flex;
+    flex-direction: column;
     justify-content: flex-end;
-    align-items: center;
-    height: 100%;
+    align-items:center;
+    height: auto;
+    width: 40%;
+/*     overflow: hidden; */
+}
+
+.instagram-wrapper{
+    display: flex;
+    justify-content:center;
+    align-items: flex-end;
+    flex-direction: row;
+    height: auto;
+     width: 120%;
+
+
+}
+
+.instagram-wrapper p {
+    text-align: center;
+    font-size: .7rem;
+    color: var(--orange);
+    white-space: nowrap; 
+    max-width: 120%; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+ 
+}
+
+.instagram-wrapper input{
+    height: 1rem;
+    font-size: .7rem;
+    background-color: rgba(255, 255, 255, 0.226);
+    width: 120%; 
+}
+
+.instagram-logo{
+    color: var(--text-grey);
+    width: 1.2rem;
+    height: 1.2rem;
 }
 
 #title{
@@ -48,15 +90,27 @@ font-style:oblique;
 .description-area {
     background-color: transparent;
     border: none;
-    outline: none;
+    height: auto;
     font-size: 0.8rem;
-    margin-top: 1rem;
+    padding-top: .5rem;
+/*     margin-top: .5rem; */
     color: rgb(71, 70, 70);
-   overflow: auto; 
+      min-height: 100%; 
+    max-height: 7rem;
+   overflow-y: auto; 
     width: 100%;
     box-shadow: none;
-/*     border: 1px solid black; */
+
+}
+
+
+.description-area textarea{
+    width: 100%;
+    height: 6rem;
+    font-size: 0.8rem;
+    outline: none;
     resize: none; 
+    background-color: rgb(71, 70, 70,.3);
 }
 .description-area:focus {
     border: none;
@@ -71,6 +125,7 @@ font-style:oblique;
     object-fit: cover; 
     cursor: pointer; 
     transition: opacity 0.3s ease; 
+    box-shadow: 0px 0px 5px 0px rgb(0, 0, 0, .7 );
   }
   
   .profile-pic:hover {
@@ -170,7 +225,7 @@ font-style:oblique;
     margin-top: 1rem;
     display:flex;
     width: 90%;
-    height: 20%;
+    height: auto;
     align-items: center;
     justify-content: space-between;
     padding:1rem;
@@ -181,7 +236,11 @@ font-style:oblique;
     color: var(--orange);
 }
 
-.upcoming-container > h3{
+.upcoming-item{
+    
+}
+
+.upcoming-item > h3{
     font-weight:300;
     font-size: 1rem;
 
@@ -258,3 +317,49 @@ font-style:oblique;
     -moz-appearance: textfield;
     min-height: 1rem;
   }
+
+  .add-result{
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      animation-name: appear;
+      animation-duration: .3s;
+      animation-fill-mode: forwards;
+    
+  }
+
+  #event-input{
+ width: 30%;
+ height: 1.5rem;
+ background-color: rgb(187, 186, 186,0.6);
+}
+
+#result-input{
+    width: 10%;
+    background-color: rgb(187, 186, 186,0.6);
+}
+
+.add-result select{
+    width:10%;
+    color: rgb(71, 70, 70);
+    font-size: .9rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+    border: none;
+    background-color: rgb(187, 186, 186,0.6);
+ /*    border-radius: 10px; */
+   }
+
+   .add-result input[type="date"]{
+    width: 10%;
+    background-color: rgb(187, 186, 186,0.6);
+   }
+
+   .setting-select{
+       width: 3rem;
+    color: rgb(71, 70, 70);
+    font-size: .9rem;
+    background-color: rgb(187, 186, 186,0.6);
+   }
