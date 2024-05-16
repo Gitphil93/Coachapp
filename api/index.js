@@ -1168,8 +1168,36 @@ app.put("/update-user/:userId", verifyToken, async (req, res) => {
   }
 });
 
+app.post("/add-pb/:userId", verifyToken, async (req, res) => {
+  const { userId } = req.params;
+  const { newPb } = req.body;
 
+  let client;
 
+  try {
+      client = await getConnection();
+      const database = client.db("Coachapp");
+      const usersCollection = database.collection("users");
+
+      const updateResult = await usersCollection.updateOne(
+          { _id: new ObjectId(userId) },
+          { $push: { "profile.personalBests": newPb } }
+      );
+
+      if (updateResult.modifiedCount === 0) {
+          res.status(404).json({ message: "No user found or no updates made" });
+      } else {
+          res.status(201).json({ message: "Personal best added successfully" });
+      }
+  } catch (error) {
+      console.error("Error adding personal best:", error);
+      res.status(500).json({ message: "An error occurred while adding the personal best" });
+  } finally {
+      if (client) {
+          releaseConnection(client);
+      }
+  }
+});
 
 
 

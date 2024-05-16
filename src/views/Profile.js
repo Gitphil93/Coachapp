@@ -7,12 +7,10 @@ import Menu from '../components/Menu';
 import MenuContext from '../context/MenuContext';
 import Loader from '../components/Loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen, faGear, faTrophy, faMountain, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faTrophy, faMountain, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram } from '@fortawesome/free-brands-svg-icons';
-
 import AdminButton from '../components/AdminButton';
-import Modal from '../components/Modal';
-import DateInput from '../components/DateInput';
+import ProfileItems from '../components/ProfileItems';
 
 
 export default function Profile() {
@@ -24,24 +22,23 @@ export default function Profile() {
       const [isEditingInstagram, setIsEditingInstagram] = useState(false);
       const [instagram, setInstagram] = useState('');
       const instagramRef = useRef(null);
-      const [addingItemId, setAddingItemId] = useState({})
+    /*   const [addingItemId, setAddingItemId] = useState(null) */
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [image, setImage] = useState(""); 
-    const [event, setEvent] = useState("")
+/*     const [event, setEvent] = useState("")
     const [pb, setPb] = useState(0)
-    const [pbDate, setPbDate] = useState("")
+    const [pbWeight, setPbWeight] = useState("")
+    const [date, setDate] = useState("")
+    const [setting, setSetting] = useState("") */
     const [user, setUser] = useState({})
-    const [unit, setUnit] =useState("")
-    const [expandedItemId, setExpandedItemId] = useState(null);
+    const [personalBests, setPersonalBests] = useState([])
+    /* const [unit, setUnit] =useState("") */
+ /*    const [expandedItemId, setExpandedItemId] = useState(null); */
+/*     const [animation, setAnimation] = useState("slideInFromRight") */
+
     const [bio, setBio] = useState("");
     const [imageUrl, setImageUrl] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZBRWavH_xKSiGgujWbvZOFI0lSClOPgX6M9f5sKj95w&s'); 
-    const [profileItems, setProfileItems] = useState([
-      { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23", date: "2024-01-02", unit:"s", outside: true }, { event: "Längdhopp", performance: "7.35", date: "2024-01-02", unit:"m", outside: true }, { event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true }] },
-      { id: 2, title: "Dina SB", details: [{ event: "200m", performance: "20.56", date: "2024-01-02", unit:"s", outside: true }, { event: "Höjdhopp", performance: "2.05", date: "2024-01-02", unit:"m", outside: true }] },
-      { id: 3, title: "Tävlingar", details: "Competition Details" },
-      { id: 4, title: "Resultat", details: "Results Details" },
-      { id: 5, title: "Statistik", details: "Statistics Details" },
-    ]);
+
 
     const [statistics, setStatistics] = useState([
       {
@@ -57,8 +54,17 @@ export default function Profile() {
   useEffect(() => {
     if (isEditingBio && bioRef.current) {
       bioRef.current.focus();
+      focusAtEnd()
     }
   }, [isEditingBio]);
+
+  const focusAtEnd = () => {
+    const textArea = bioRef.current;
+    textArea.focus();
+    // Set cursor position at the end of text
+    textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+};
+
 
   const toggleEditBio = () => {
     setIsEditingBio(!isEditingBio);
@@ -92,36 +98,38 @@ const handleBlurInstagram = () => {
     setIsEditingInstagram(false);
 };
 
-const toggleExpand = (itemId) => {
-  if (expandedItemId === itemId) {
-      setExpandedItemId(null);  // Om samma element klickas igen, stäng det
-      setAddingItemId(null);    // Återställ även addingItemId när inget element är expanderat
-  } else {
-      setExpandedItemId(itemId);  // Öppna det nya elementet
+/* const toggleExpand = (itemId, e) => {
+  e.stopPropagation(); 
+  if (!addingItemId && expandedItemId === itemId) {
+    setExpandedItemId(null); 
+  } else if (!addingItemId) {
+    setExpandedItemId(itemId); 
   }
 };
 
+
 const toggleAddItem = (e, itemId) => {
-  e.stopPropagation(); // Prevent event bubbling to keep the item expanded
+  e.stopPropagation(); 
   if (addingItemId === itemId) {
-      setAddingItemId(null); // Toggle off if it's the same item
+      setAddingItemId(null); 
+      setStep(1)
   } else {
-      setAddingItemId(itemId); // Toggle on new item
+      setAddingItemId(itemId); 
   }
-}
+} */
 
 
     const handleChanges = (event, setter) => {
       setter(event.target.value)
     }
-
+/* 
     const openModal = (event ,expandedItemId) => {
       event.stopPropagation()
       setIsModalOpen(true)
     }
     const closeModal = () => {
       setIsModalOpen(false)
-    }
+    } */
 
     const handleImageChange = async (event) => {
       const file = event.target.files[0];
@@ -174,6 +182,7 @@ const toggleAddItem = (e, itemId) => {
           setBio(data.user.profile?.bio || "Klicka här för att lägga till biografi"); 
           setInstagram(data.user.profile?.instagram || "Lägg till instagram");
           setImageUrl(`${data.user.profileImage}?${new Date().getTime()}`);
+          setPersonalBests(data.user.profile?.personalBests)
         } else {
           console.log("Kunde inte hämta användare");
         }
@@ -182,16 +191,8 @@ const toggleAddItem = (e, itemId) => {
       }
     }
     
-    
 
-    const addPb = (itemId, event) => {
-      event.stopPropagation(); // Prevents the event from bubbling up
-
-  
-      closeModal()
-  };
-
-  const formatDate = (dateString) => {
+/*   const formatDate = (dateString) => {
     const dateObj = new Date(dateString);
     const formattedDate = dateObj.toLocaleDateString('sv-SE', {
       day: '2-digit',
@@ -207,7 +208,7 @@ const toggleAddItem = (e, itemId) => {
 
   
     return `${formattedMonth}/${formattedDay}-${formattedYear}`;
-  };
+  }; */
   
     useEffect(() => {
         const token = localStorage.getItem("token")
@@ -250,7 +251,57 @@ const toggleAddItem = (e, itemId) => {
           console.error('Error updating user profile:', error);
       }
   };
+  
+ /*  const handleNext = () => {
+    setAnimation('slideInFromRight');
+    setStep(prevStep => prevStep + 1);
+  };
+  
+  const handleBack = () => {
+    setAnimation('slideInFromLeft');
+    setStep(prevStep => prevStep - 1);
+  };
     
+  const savePb = async () => {
+    const newPb = {
+        event,
+        performance: pb,
+        unit,
+        date,
+        insideOutside: setting,
+        weight: pbWeight
+    };
+
+    try {
+        const token = localStorage.getItem("token"); 
+        const response = await fetch(`http://192.168.0.30:5000/add-pb/${user._id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ newPb })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log('Personal best added successfully:', result);
+            setEvent("");
+            setPb("");
+            setUnit("");
+            setDate("");
+            setSetting("");
+            setPbWeight("");
+            setIsModalOpen(false);
+            setAddingItemId(null)
+        } else {
+            console.error('Failed to add personal best:', result);
+        }
+    } catch (error) {
+        console.error('Error adding personal best:', error);
+    }
+}; */
+
 
     return (
         <div>
@@ -261,47 +312,6 @@ const toggleAddItem = (e, itemId) => {
             {isLoading &&
             <Loader />
             }
-
-        <div id="modal-root">
-          <Modal isOpen={isModalOpen} onClose={closeModal}>
-            <div className="modal-wrapper">
-              <div className="modal-header">
-                  <h2>Lägg till PB</h2>
-              </div>
-
-                 <div className="modal-inputs">
-                    <div className="modal-top-row">
-                   <input className="modal-input" type="text" placeholder="Övning/gren" onChange={(e) => handleChanges(e, setEvent)} />
-                   <input className="modal-input" type="number" placeholder="10.23s/1.80m" onChange={(e) => handleChanges(e, setPb)} />
-
-                    </div>
-                  
-                
-                   <input className="modal-input" type="date" name="date" placeholder="YYYY-MM-DD" onChange={(e) => handleChanges(e, setPbDate)} />
-                   <div className="modal-radios">
-                     <span className="modal-radio">
-                   <label for="outside">Utomhus</label>
-                   <input  type="radio" id="html" name="outside" value="HTML"/>
-                   </span>
-                   <span className="modal-radio">
-                   <label for="inside">Inomhus</label>
-                    <input type="radio" id="html" name="outside" value="HTML"/>
-                    </span>
-                    </div>
-
-
-                </div>
-                
-
-              <div className="modal-buttons">
-                <button className="modal-delete-button" onClick={closeModal}>Stäng</button>
-                <button className="modal-button" onClick={addPb}>Lägg till</button>
-              </div>
-            </div>
-          </Modal>
-        </div>
-
-
 
             <div className="home-wrapper">
                 <div className="top-header">
@@ -318,6 +328,7 @@ const toggleAddItem = (e, itemId) => {
                         rows="6"
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
+                        onClick={focusAtEnd}
                         onBlur={handleBlurBio}
                       />
                     </div>
@@ -359,62 +370,119 @@ const toggleAddItem = (e, itemId) => {
                 </div>
 
                 <div className="content-container">
-                                      
-                {profileItems.map(item => (
-            <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={() => toggleExpand(item.id)}>    
+                                      <ProfileItems userObj={user}/>
+{/*                 {profileItems.map(item => (
+            <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={(e) => toggleExpand(item.id, e)}>    
                 <h3>{item.title}</h3>
                 {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
                     <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`}>
                         {expandedItemId === item.id && item.details.map((detail, index) => (
                             <div className="detail" key={index}>
                                 <p className="bold-paragraph">{detail.event}: </p>
-                                <p>{`${detail.performance} ${detail.unit}`}</p>
+                                <p>{`${detail.performance}${detail.unit}`}</p>
                                 <p>{formatDate(detail.date)}</p>
                                 <p>{detail.outside ? "Utomhus" : "Inomhus"}</p>
                             </div>
                         ))}
                     {addingItemId === item.id && (
-                              <div className="add-result">
-                                  <input id="event-input" placeholder="T.ex. höjdhopp" autoFocus />
-                                  <input id="result-input" placeholder="1.80"/>
-                                  <select id="unit"
-                              onChange={(e) => handleChanges(e, setUnit)}>
-                              <option value="">T.ex m</option>
-                                <option value="m">m</option>
-                                <option value="cm">cm</option>
-                                <option value="s">sekunder</option>
-                                <option value="min">minuter</option>
-                                <option value="kg">kg</option>
-                              </select>
-                              <input type="date"/>
-                              <select id="setting-select">
-                    {addingItemId === item.id && (
-                              <div className="add-result">
-                                  <input id="event-input" placeholder="T.ex. höjdhopp" autoFocus />
-                                  <input id="result-input" placeholder="1.80"/>
-                                  <select id="unit"
-                              onChange={(e) => handleChanges(e, setUnit)}>
-                              <option value="">T.ex m</option>
-                                <option value="m">m</option>
-                                <option value="cm">cm</option>
-                                <option value="s">sekunder</option>
-                                <option value="min">minuter</option>
-                                <option value="kg">kg</option>
-                              </select>
-                              <input type="date"/>
-                              <select id="setting-select">
-                                <option value="">Inomhus</option>
-                                <option value="Inomhus">Inomhus</option>
-                                <option value="Utomhus">Utomhus</option>
-                              </select>
-                              </div>
-                )}
+                              <div className="add-result-wrapper">
 
-                              </select>
-                              </div>
-                          )}
-                    </div>
-                )}
+                                 <div className="add-item-header">
+                                  <h3>Nytt PB</h3>
+                                  <FontAwesomeIcon onClick={toggleAddItem} className="delete-icon" icon={faTrash}></FontAwesomeIcon>
+                                  </div>
+
+
+                              <div className="add-result">
+                        
+                                {step === 1 && 
+                                <div className="step-container">
+                                  <div className="step-content" key={step} style={{ animationName: animation }}>
+                                  <div className="add-item-inputs">
+                                    <span className="item-input">
+                                       <label for="event">Gren/övning</label>
+                                       <input type="text" id="event-input" name="event" placeholder="T.ex. höjdhopp" onChange={(e) => handleChanges(e, setEvent)}/>
+                                   </span>
+
+                                   <span className="item-input">
+                                     <label for="result">Fyll i resultat</label>
+                                  <input type="number" name="result" id="result-input" placeholder="T.ex. 1.80" onChange={(e) => handleChanges(e, setPb)}/>
+                                  </span>
+
+                                  <span className="item-input">
+                                    <label for="unit">Välj enhet</label>
+                                  <select className="setting-select" id="unit" name="unit" onChange={(e) => handleChanges(e, setUnit)}>
+                                      <option value="">m/s/kg</option>
+                                      <option value="m">m</option>
+                                      <option value="cm">cm</option>
+                                      <option value="s">sekunder</option>
+                                      <option value="min">minuter</option>
+                                      <option value="kg">kg</option>
+                                   </select>
+                                   </span>
+                                   </div>
+
+                              <div className="add-result-button">
+                                <button onClick={handleBack}>Tillbaka</button>
+                                 <button onClick={handleNext}>Nästa</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                             }
+                        
+                             
+                             
+                             {step === 2 &&
+                             <div className="step-container">
+                                <div className="step-content" key={step} style={{ animationName: animation }}>
+                                   <div className="add-item-inputs" >
+                                  <span className="item-input">
+                                    <label for="date">Välj datum</label>
+                              <input type="date" name="date" onChange={(e) => handleChanges(e, setDate)} />
+                              </span>
+                              <span className="item-input">
+                                <label for="setting">Ute eller inne?</label>
+                              <select className="setting-select" name="setting" onChange={(e) => handleChanges(e, setSetting)}>
+                              <option value="">Ute/inne</option>
+                                <option value="Utomhus">Utomhus</option>
+                                <option value="Inomhus">Inomhus</option>
+                                </select>
+                                </span>
+                                </div>
+
+                                <div className="add-result-button">
+                              <button onClick={handleBack}>Tillbaka</button>
+                                 <button onClick={handleNext}>Nästa</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                                  }
+                         
+                            
+                             {step === 3 &&
+                             <div className="step-container">
+                               <div className="step-content" key={step} style={{ animationName: animation }}>
+                                <div className="add-item-inputs">
+                              <span className="item-input">
+                                <label for="weight">Vad vägde du vid tillfället?</label>
+                                <input type="text" id="pb-weight-input" value={pbWeight} placeholder="Vikt i kg" onChange={(e) => handleChanges(e, setPbWeight)}/>
+                                </span>
+                                </div>
+                                <div className="add-result-button">
+                              <button onClick={handleBack}>Tillbaka</button>
+                                 <button onClick={savePb}>Spara</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                                  }
+
+
+                                  </div>
+                                </div>
+                                )}
+                            
+                           </div>
+                     )}
 
                 {expandedItemId === item.id && (
                     <div id="add-icon-span" onClick={(e) => toggleAddItem(e, item.id)}>
@@ -423,7 +491,7 @@ const toggleAddItem = (e, itemId) => {
                 )}
 
             </div>
-        ))}
+        ))} */}
 
               
                 </div>

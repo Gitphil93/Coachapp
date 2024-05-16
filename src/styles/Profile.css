@@ -298,68 +298,143 @@ font-style:oblique;
       width: 100%;
   }
 
-  .modal-radio {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-  }
-  
-  .modal-radios  input[type="radio"]{
-      height: 2rem;
-      width: 2rem;
-
-  }
-
-  input[type="date"] {
-    display:block;
-    -webkit-appearance: textfield;
-    -moz-appearance: textfield;
-    min-height: 1rem;
-  }
-
   .add-result{
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      animation-name: appear;
-      animation-duration: .3s;
-      animation-fill-mode: forwards;
-    
   }
 
   #event-input{
- width: 30%;
+ width: 90%;
  height: 1.5rem;
- background-color: rgb(187, 186, 186,0.6);
+ background-color: white;
+ border-radius: 10px;
 }
 
 #result-input{
-    width: 10%;
-    background-color: rgb(187, 186, 186,0.6);
+    width: 90%;
+    height: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
 }
 
 .add-result select{
-    width:10%;
+    width:90%;
+    height: 1.5rem;
     color: rgb(71, 70, 70);
     font-size: .9rem;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    text-indent: 1px;
-    text-overflow: '';
     border: none;
-    background-color: rgb(187, 186, 186,0.6);
- /*    border-radius: 10px; */
+    background-color: white;
+    border-radius: 10px;
    }
 
    .add-result input[type="date"]{
-    width: 10%;
-    background-color: rgb(187, 186, 186,0.6);
+    width: 90%;
+    height: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
    }
 
    .setting-select{
-       width: 3rem;
+    width: 90%;
     color: rgb(71, 70, 70);
     font-size: .9rem;
-    background-color: rgb(187, 186, 186,0.6);
+    height: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
    }
+
+
+.step-container {
+    position: relative;
+    height: auto;
+    width: 100%;
+     overflow: hidden; 
+     height: 6rem;
+}
+
+.step-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; 
+    height: auto;
+    opacity: 0;
+    animation: slideInFromRight .5s ease-in-out 0.1s forwards; /* 0.2s is the delay */
+    will-change: transform, opacity;
+}
+
+   .add-result-button {
+       margin-top: 1rem;
+       display: flex;
+       justify-content: space-around;
+       width: 100%;
+   }
+
+   .add-result-button button {
+       width: 6rem;
+       height: 2rem;
+       border: none;
+       background-color: var(--blue);
+       color: white;
+       font-size: 1rem;
+       border-radius: 10px;
+   }
+
+
+
+.add-item-header{
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.add-item-inputs{
+    display: flex;
+    justify-content: center;
+}
+
+.item-input{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+}
+
+.item-input label{
+font-size: .8rem;
+color: var(--text-grey);
+font-weight: 600;
+}
+
+#pb-weight-input{
+    width: 50%;
+    height: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
+   
+}
+
+
+
+
+@keyframes slideInFromRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+}
