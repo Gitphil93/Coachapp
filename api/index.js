@@ -554,6 +554,30 @@ app.get("/get-all-users", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/search-users", verifyToken, async (req, res) => {
+  const { search } = req.query;
+  let client;
+  try {
+    client = await getConnection();
+    const database = client.db("Coachapp");
+    const usersCollection = database.collection("users");
+
+    const searchQuery = search ? { name: { $regex: search, $options: "i" } } : {};
+    const users = await usersCollection.find(searchQuery).toArray();
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error("Error searching users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Ett fel inträffade vid sökning av användare",
+    });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+});
+
 
 
 app.post("/add-exercise", verifyRole(2000), async (req, res) => {
@@ -1171,6 +1195,9 @@ app.put("/update-user/:userId", verifyToken, async (req, res) => {
 app.post("/add-pb/:userId", verifyToken, async (req, res) => {
   const { userId } = req.params;
   const { newPb } = req.body;
+  
+  // Skapa ett nytt ObjectId om inget id tillhandahålls
+  if (!newPb._id) newPb._id = new ObjectId();
 
   let client;
 
@@ -1187,7 +1214,7 @@ app.post("/add-pb/:userId", verifyToken, async (req, res) => {
       if (updateResult.modifiedCount === 0) {
           res.status(404).json({ message: "No user found or no updates made" });
       } else {
-          res.status(201).json({ message: "Personal best added successfully" });
+          res.status(201).json({ message: "Personal best added successfully", newPb });
       }
   } catch (error) {
       console.error("Error adding personal best:", error);
@@ -1198,6 +1225,42 @@ app.post("/add-pb/:userId", verifyToken, async (req, res) => {
       }
   }
 });
+
+app.post("/add-sb/:userId", verifyToken, async (req, res) => {
+  const { userId } = req.params;
+  const { newSb } = req.body;
+  
+  // Skapa ett nytt ObjectId om inget id tillhandahålls
+  if (!newSb._id) newSb._id = new ObjectId();
+
+  let client;
+
+  try {
+      client = await getConnection();
+      const database = client.db("Coachapp");
+      const usersCollection = database.collection("users");
+
+      const updateResult = await usersCollection.updateOne(
+          { _id: new ObjectId(userId) },
+          { $push: { "profile.seasonBests": newSb } }
+      );
+
+      if (updateResult.modifiedCount === 0) {
+          res.status(404).json({ message: "No user found or no updates made" });
+      } else {
+          res.status(201).json({ message: "Season best added successfully", newSb });
+      }
+  } catch (error) {
+      console.error("Error adding personal best:", error);
+      res.status(500).json({ message: "An error occurred while adding the season best" });
+  } finally {
+      if (client) {
+          releaseConnection(client);
+      }
+  }
+});
+
+
 
 
 

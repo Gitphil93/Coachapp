@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "../styles/Profile.css";
+import "../styles/myProfile.css";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Menu from '../components/Menu';
@@ -22,33 +22,13 @@ export default function Profile() {
       const [isEditingInstagram, setIsEditingInstagram] = useState(false);
       const [instagram, setInstagram] = useState('');
       const instagramRef = useRef(null);
-    /*   const [addingItemId, setAddingItemId] = useState(null) */
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [image, setImage] = useState(""); 
-/*     const [event, setEvent] = useState("")
-    const [pb, setPb] = useState(0)
-    const [pbWeight, setPbWeight] = useState("")
-    const [date, setDate] = useState("")
-    const [setting, setSetting] = useState("") */
     const [user, setUser] = useState({})
     const [personalBests, setPersonalBests] = useState([])
-    /* const [unit, setUnit] =useState("") */
- /*    const [expandedItemId, setExpandedItemId] = useState(null); */
-/*     const [animation, setAnimation] = useState("slideInFromRight") */
-
     const [bio, setBio] = useState("");
+    const [seasonBests, setSeasonBests] =useState([])
     const [imageUrl, setImageUrl] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZBRWavH_xKSiGgujWbvZOFI0lSClOPgX6M9f5sKj95w&s'); 
-
-
-    const [statistics, setStatistics] = useState([
-      {
-          personalBests: [
-              { event: "Höjdhopp", score: 2.00, date: "2023-10-27", unit: "m" },
-              { event: "Längdhopp", score: 5.60, date: "2023-10-27", unit: "m" }
-          ],
-          seasonBest: { event: "Höjdhopp", score: 1.89, date: "2024-04-01", unit: "m" }
-      }
-  ]);
 
 
   useEffect(() => {
@@ -183,6 +163,7 @@ const toggleAddItem = (e, itemId) => {
           setInstagram(data.user.profile?.instagram || "Lägg till instagram");
           setImageUrl(`${data.user.profileImage}?${new Date().getTime()}`);
           setPersonalBests(data.user.profile?.personalBests)
+          setSeasonBests(data.user.profile?.seasonBests)
         } else {
           console.log("Kunde inte hämta användare");
         }
@@ -363,136 +344,24 @@ const toggleAddItem = (e, itemId) => {
                 <div className="upcoming-container">
                   <div className="upcoming-item">
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faTrophy} /></span>Nästa tävling</h3>
+                    <div className="upcoming-item-content">
+                     <p>Du har inga kommande tävlingar</p> 
+                    </div>
                     </div>
                     <div className="upcoming-item">
                     <h3><span className="upcoming-icon"><FontAwesomeIcon icon={faMountain} /></span>Nästa läger</h3>
+                    <div className="upcoming-item-content">
+                   <p>Du har inga kommande läger</p>
+                    </div>
                     </div>
                 </div>
 
                 <div className="content-container">
-                                      <ProfileItems userObj={user}/>
-{/*                 {profileItems.map(item => (
-            <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={(e) => toggleExpand(item.id, e)}>    
-                <h3>{item.title}</h3>
-                {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
-                    <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`}>
-                        {expandedItemId === item.id && item.details.map((detail, index) => (
-                            <div className="detail" key={index}>
-                                <p className="bold-paragraph">{detail.event}: </p>
-                                <p>{`${detail.performance}${detail.unit}`}</p>
-                                <p>{formatDate(detail.date)}</p>
-                                <p>{detail.outside ? "Utomhus" : "Inomhus"}</p>
-                            </div>
-                        ))}
-                    {addingItemId === item.id && (
-                              <div className="add-result-wrapper">
-
-                                 <div className="add-item-header">
-                                  <h3>Nytt PB</h3>
-                                  <FontAwesomeIcon onClick={toggleAddItem} className="delete-icon" icon={faTrash}></FontAwesomeIcon>
-                                  </div>
-
-
-                              <div className="add-result">
-                        
-                                {step === 1 && 
-                                <div className="step-container">
-                                  <div className="step-content" key={step} style={{ animationName: animation }}>
-                                  <div className="add-item-inputs">
-                                    <span className="item-input">
-                                       <label for="event">Gren/övning</label>
-                                       <input type="text" id="event-input" name="event" placeholder="T.ex. höjdhopp" onChange={(e) => handleChanges(e, setEvent)}/>
-                                   </span>
-
-                                   <span className="item-input">
-                                     <label for="result">Fyll i resultat</label>
-                                  <input type="number" name="result" id="result-input" placeholder="T.ex. 1.80" onChange={(e) => handleChanges(e, setPb)}/>
-                                  </span>
-
-                                  <span className="item-input">
-                                    <label for="unit">Välj enhet</label>
-                                  <select className="setting-select" id="unit" name="unit" onChange={(e) => handleChanges(e, setUnit)}>
-                                      <option value="">m/s/kg</option>
-                                      <option value="m">m</option>
-                                      <option value="cm">cm</option>
-                                      <option value="s">sekunder</option>
-                                      <option value="min">minuter</option>
-                                      <option value="kg">kg</option>
-                                   </select>
-                                   </span>
-                                   </div>
-
-                              <div className="add-result-button">
-                                <button onClick={handleBack}>Tillbaka</button>
-                                 <button onClick={handleNext}>Nästa</button>
-                                 </div>
-                                 </div>
-                                 </div>
-                             }
-                        
-                             
-                             
-                             {step === 2 &&
-                             <div className="step-container">
-                                <div className="step-content" key={step} style={{ animationName: animation }}>
-                                   <div className="add-item-inputs" >
-                                  <span className="item-input">
-                                    <label for="date">Välj datum</label>
-                              <input type="date" name="date" onChange={(e) => handleChanges(e, setDate)} />
-                              </span>
-                              <span className="item-input">
-                                <label for="setting">Ute eller inne?</label>
-                              <select className="setting-select" name="setting" onChange={(e) => handleChanges(e, setSetting)}>
-                              <option value="">Ute/inne</option>
-                                <option value="Utomhus">Utomhus</option>
-                                <option value="Inomhus">Inomhus</option>
-                                </select>
-                                </span>
-                                </div>
-
-                                <div className="add-result-button">
-                              <button onClick={handleBack}>Tillbaka</button>
-                                 <button onClick={handleNext}>Nästa</button>
-                                 </div>
-                                 </div>
-                                 </div>
-                                  }
-                         
-                            
-                             {step === 3 &&
-                             <div className="step-container">
-                               <div className="step-content" key={step} style={{ animationName: animation }}>
-                                <div className="add-item-inputs">
-                              <span className="item-input">
-                                <label for="weight">Vad vägde du vid tillfället?</label>
-                                <input type="text" id="pb-weight-input" value={pbWeight} placeholder="Vikt i kg" onChange={(e) => handleChanges(e, setPbWeight)}/>
-                                </span>
-                                </div>
-                                <div className="add-result-button">
-                              <button onClick={handleBack}>Tillbaka</button>
-                                 <button onClick={savePb}>Spara</button>
-                                 </div>
-                                 </div>
-                                 </div>
-                                  }
-
-
-                                  </div>
-                                </div>
-                                )}
-                            
-                           </div>
-                     )}
-
-                {expandedItemId === item.id && (
-                    <div id="add-icon-span" onClick={(e) => toggleAddItem(e, item.id)}>
-                        <FontAwesomeIcon id="add-icon" icon={faPlus} />
-                    </div>
-                )}
-
-            </div>
-        ))} */}
-
+                                      <ProfileItems
+                                        user={user}
+                                        personalBestsObj={personalBests}
+                                        seasonBestsObj={seasonBests}
+                                        />            
               
                 </div>
                 <Footer/>

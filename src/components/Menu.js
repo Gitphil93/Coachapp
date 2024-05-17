@@ -51,7 +51,7 @@ export default function Menu({ hamburgerRef }) {
     <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}>
 
 
-      <Link to="/profile" className="menu-item" onClick={closeMenu}>
+      <Link to="/my-profile" className="menu-item" onClick={closeMenu}>
         <h2 className="menu-item-h2">Min profil</h2>
       </Link>
 

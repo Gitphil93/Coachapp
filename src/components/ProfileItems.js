@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import "../styles/profileItems.css"
 
 
-export default function ProfileItems({userObj}) {
+export default function ProfileItems({user, personalBestsObj, seasonBestsObj}) {
     const [event, setEvent] = useState("")
     const [pb, setPb] = useState(0)
     const [pbWeight, setPbWeight] = useState("")
@@ -11,53 +12,73 @@ export default function ProfileItems({userObj}) {
     const [setting, setSetting] = useState("")
     const [unit, setUnit] =useState("")
     const [step, setStep] = useState(1)
-    const [user, setUser] = useState({})
-    const [addingItemId, setAddingItemId] = useState(null)
-    const [expandedItemId, setExpandedItemId] = useState(null);
+    const [addPb, setAddPb] = useState(false)
+    const [addSb, setAddSb] = useState(false)
+    const [sbEvent, setSbEvent] = useState("")
+    const [sb, setSb] = useState(0)
+    const [sbWeight, setSbWeight] = useState("")
+    const [sbDate, setSbDate] = useState("")
+    const [sbSetting, setSbSetting] = useState("")
+    const [sbUnit, setSbUnit] =useState("")
+    const [sbStep, setSbStep] = useState(1)
     const [animation, setAnimation] = useState("slideInFromRight")
     const [personalBests, setPersonalBests] = useState([])
+    const [seasonBests, setSeasonBests] = useState([])
 
-    const [profileItems, setProfileItems] = useState([
-        { id: 1, title: "Dina PB", details: [{ event: "100m", performance: "10.23", date: "2024-01-02", unit:"s", outside: true }, { event: "Längdhopp", performance: "7.35", date: "2024-01-02", unit:"m", outside: true }, { event: "Kast med liten boll", performance: "55", date: "2024-01-02", unit:"m", outside: true }] },
-        { id: 2, title: "Dina SB", details: [{ event: "200m", performance: "20.56", date: "2024-01-02", unit:"s", outside: true }, { event: "Höjdhopp", performance: "2.05", date: "2024-01-02", unit:"m", outside: true }] },
-        { id: 3, title: "Tävlingar", details: "Competition Details" },
-        { id: 4, title: "Resultat", details: "Results Details" },
-        { id: 5, title: "Statistik", details: "Statistics Details" },
-      ]);
+    const [expandedSections, setExpandedSections] = useState({
+        pb: false,
+        sb: false,
+        competitions: false
+    });
 
       console.log("personalBests", personalBests)
+      console.log("seasonBests", seasonBests)
 
        useEffect(() => {
+           if(personalBestsObj){
+        setPersonalBests(personalBestsObj)
+           }
+           if(seasonBestsObj) {
+            setSeasonBests(seasonBestsObj)
+           }
+      }, [personalBestsObj, seasonBestsObj])  
 
-        setPersonalBests(userObj?.profile?.personalBests)
+      const toggleExpand = (e, sectionKey) => {
+        e.stopPropagation();
+        if (addPb || addSb) return; 
 
-      }, [userObj])  
-
-      const toggleExpand = (itemId, e) => {
-        e.stopPropagation(); 
-        if (!addingItemId && expandedItemId === itemId) {
-          setExpandedItemId(null); 
-        } else if (!addingItemId) {
-          setExpandedItemId(itemId); 
-        }
-      };
+        setExpandedSections(prev => ({
+            ...{
+                pb: false,
+                sb: false,
+                competitions: false
+            },
+            [sectionKey]: !prev[sectionKey]
+        }));
+    };
       
       
-      const toggleAddItem = (e, itemId) => {
+    const toggleAddItem = (e, addKey) => {
         e.stopPropagation(); 
-        if (addingItemId === itemId) {
-            setAddingItemId(null); 
-            setStep(1)
-        } else {
-            setAddingItemId(itemId); 
+       
+    
+        // Toggle adding based on addKey if needed, similar to the above example
+        // This assumes addKey determines which section's add state is being toggled
+        if (addKey === 'pb') {
+            setAddPb(!addPb);
+        } else if (addKey === 'sb') {
+            setAddSb(!addSb);
         }
-      }
+        setStep(1);
+    };
 
       const handleChanges = (event, setter) => {
+          event.stopPropagation()
         setter(event.target.value)
       }
 
       const formatDate = (dateString) => {
+          if (dateString === "") return
         const dateObj = new Date(dateString);
         const formattedDate = dateObj.toLocaleDateString('sv-SE', {
           day: '2-digit',
@@ -75,24 +96,30 @@ export default function ProfileItems({userObj}) {
         return `${formattedMonth}/${formattedDay}-${formattedYear}`;
       };
 
-      const handleNext = () => {
+      
+
+      const handleNext = (e) => {
+          e.stopPropagation()
         setAnimation('slideInFromRight');
         setStep(prevStep => prevStep + 1);
       };
       
-      const handleBack = () => {
+      const handleBack = (e) => {
+          e.stopPropagation()
         setAnimation('slideInFromLeft');
         setStep(prevStep => prevStep - 1);
       };
         
-      const savePb = async () => {
+      const savePb = async (e) => {
+          e.stopPropagation()
+          if (event.trim() === "" || pb.trim() === "" || unit === "") return
         const newPb = {
-            event,
-            performance: pb,
-            unit,
-            date,
+            event: event.trim().charAt(0).toUpperCase() + event.trim().slice(1).toLowerCase(),
+            performance: pb.trim(),
+            unit: unit,
+            date: date,
             insideOutside: setting,
-            weight: pbWeight
+            weight: pbWeight.trim()
         };
     
         try {
@@ -107,15 +134,18 @@ export default function ProfileItems({userObj}) {
             });
     
             const result = await response.json();
+            console.log(result)
             if (response.ok) {
                 console.log('Personal best added successfully:', result);
+                setPersonalBests(prevBests => [...prevBests, result.newPb])
                 setEvent("");
                 setPb("");
                 setUnit("");
                 setDate("");
                 setSetting("");
                 setPbWeight("");
-                setAddingItemId(null)
+                setAddPb(false)
+                setStep(1)
             } else {
                 console.error('Failed to add personal best:', result);
             }
@@ -125,27 +155,78 @@ export default function ProfileItems({userObj}) {
     };
 
 
+    const saveSb = async (e) => {
+        e.stopPropagation()
+        if (sbEvent.trim() === "" || sb.trim() === "" || sbUnit === "") return
+
+      const newSb = {
+          event: sbEvent.trim().charAt(0).toUpperCase() + sbEvent.trim().slice(1).toLowerCase(),
+          performance: sb.trim(),
+          unit: sbUnit,
+          date: sbDate,
+          insideOutside: sbSetting,
+          weight: sbWeight.trim()
+      };
+  
+      try {
+          const token = localStorage.getItem("token"); 
+          const response = await fetch(`http://192.168.0.30:5000/add-sb/${user._id}`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ newSb })
+          });
+  
+          const result = await response.json();
+          console.log(result)
+          if (response.ok) {
+              console.log('Personal best added successfully:', result);
+              setSeasonBests(prevBests => [...prevBests, result.newSb])
+              setSbEvent("");
+              setSb("");
+              setSbUnit("");
+              setSbDate("");
+              setSbSetting("");
+              setSbWeight("");
+              setAddSb(false)
+              setSbStep(1)
+          } else {
+              console.error('Failed to add season best:', result);
+          }
+      } catch (error) {
+          console.error('Error adding season best:', error);
+      }
+  };
+
+
+                const stopPropagation = (e) => {
+                e.stopPropagation()
+                }
   return (
-    <div>
-                {profileItems.map(item => (
-            <div className={`profile-item ${expandedItemId === item.id ? "expanded" : ""}`} key={item.id} onClick={(e) => toggleExpand(item.id, e)}>    
-                <h3>{item.title}</h3>
-                {item.title !== "Tävlingar" && item.title !== "Resultat" && item.title !== "Statistik" && (
-                    <div className={`details-container ${expandedItemId === item.id ? "expanded" : ""}`}>
-                        {expandedItemId === item.id && item.details.map((detail, index) => (
+        <div>
+        <div className={`profile-item ${expandedSections.pb ? "expanded" : ""}`} onClick={(e) => toggleExpand(e,'pb')}>
+                <div className="item-header-wrapper">
+                <h3 className={`item-header ${expandedSections.pb ? "expanded" : ""}`}>Personbästan</h3>
+                </div>
+                {expandedSections.pb && (
+                    <div className={`details-container ${expandedSections.pb ? "expanded" : ""}`}>
+                        
+                        {!addPb && personalBests.map((pb, index) => (
                             <div className="detail" key={index}>
-                                <p className="bold-paragraph">{detail.event}: </p>
-                                <p>{`${detail.performance}${detail.unit}`}</p>
-                                <p>{formatDate(detail.date)}</p>
-                                <p>{detail.outside ? "Utomhus" : "Inomhus"}</p>
+                                <p className="bold-paragraph">{pb.event}: </p>
+                                <p>{`${pb.performance}${pb.unit}`}</p>
+                                <p className='date-paragraph'>{formatDate(pb.date) || "-"}</p>
+                                <p className='setting-paragraph'>{pb.insideOutside || "-"}</p>
                             </div>
                         ))}
-                    {addingItemId === item.id && (
-                              <div className="add-result-wrapper">
+                                            {addPb && (
+                              <div className="add-result-wrapper" onClick={(e) => stopPropagation(e)}>
 
                                  <div className="add-item-header">
                                   <h3>Nytt PB</h3>
-                                  <FontAwesomeIcon onClick={toggleAddItem} className="delete-icon" icon={faTrash}></FontAwesomeIcon>
+                                  <FontAwesomeIcon onClick={(e) => toggleAddItem(e,"pb")} className="delete-icon" icon={faTrash}></FontAwesomeIcon>
                                   </div>
 
 
@@ -162,7 +243,7 @@ export default function ProfileItems({userObj}) {
 
                                    <span className="item-input">
                                      <label for="result">Fyll i resultat</label>
-                                  <input type="number" name="result" id="result-input" placeholder="T.ex. 1.80" onChange={(e) => handleChanges(e, setPb)}/>
+                                  <input type="text" name="result" id="result-input" placeholder="T.ex. 1.80" onChange={(e) => handleChanges(e, setPb)}/>
                                   </span>
 
                                   <span className="item-input">
@@ -199,7 +280,7 @@ export default function ProfileItems({userObj}) {
                               <span className="item-input">
                                 <label for="setting">Ute eller inne?</label>
                               <select className="setting-select" name="setting" onChange={(e) => handleChanges(e, setSetting)}>
-                              <option value="">Ute/inne</option>
+                              <option value="">Välj</option>
                                 <option value="Utomhus">Utomhus</option>
                                 <option value="Inomhus">Inomhus</option>
                                 </select>
@@ -207,8 +288,8 @@ export default function ProfileItems({userObj}) {
                                 </div>
 
                                 <div className="add-result-button">
-                              <button onClick={handleBack}>Tillbaka</button>
-                                 <button onClick={handleNext}>Nästa</button>
+                              <button onClick={(e) => handleBack(e)}>Tillbaka</button>
+                                 <button onClick={(e)=> handleNext(e)}>Nästa</button>
                                  </div>
                                  </div>
                                  </div>
@@ -225,8 +306,8 @@ export default function ProfileItems({userObj}) {
                                 </span>
                                 </div>
                                 <div className="add-result-button">
-                              <button onClick={handleBack}>Tillbaka</button>
-                                 <button onClick={savePb}>Spara</button>
+                              <button onClick={(e) => handleBack(e)}>Tillbaka</button>
+                                 <button onClick={(e) => savePb(e)}>Spara</button>
                                  </div>
                                  </div>
                                  </div>
@@ -236,38 +317,138 @@ export default function ProfileItems({userObj}) {
                                   </div>
                                 </div>
                                 )}
-                            
-                           </div>
-                     )}
-
-                {expandedItemId === item.id && (
-                    <div id="add-icon-span" onClick={(e) => toggleAddItem(e, item.id)}>
-                        <FontAwesomeIcon id="add-icon" icon={faPlus} />
                     </div>
                 )}
 
-            </div>
-        ))}
-        <div> 
-                     {personalBests.map((pb, index) => (
-                <div key={index} className={`profile-item ${expandedItemId === index ? "expanded" : ""}`} onClick={(e) => toggleExpand(index, e)}>
-                    <h3>{pb.event}</h3>
-                    <div className={`details-container ${expandedItemId === index ? "expanded" : ""}`}>
-                        <div className="detail">
-                            <p className="bold-paragraph">{pb.event}:</p>
-                            <p>{`${pb.performance} ${pb.unit}`}</p>
-                            <p>{formatDate(pb.date)}</p>
-                            <p>{pb.insideOutside === 'Inomhus' ? 'Inomhus' : 'Utomhus'}</p>
-                        </div>
-                        {addingItemId === index && (
-                            <div className="add-result-wrapper">
-                                {/* Komponent för att lägga till nytt PB, liknande ovan */}
-                            </div>
-                        )}
+            {expandedSections.pb && (
+                    <div id="add-icon-span" onClick={(e) => toggleAddItem(e ,"pb")}>
+                        <FontAwesomeIcon id="add-icon" icon={faPlus} />
                     </div>
+                )}
+            </div>
+
+            <div className={`profile-item ${expandedSections.sb ? "expanded" : ""}`} onClick={(e) => toggleExpand(e,'sb')}>
+                <div className="item-header-wrapper">
+                <h3 className={`item-header ${expandedSections.sb ? "expanded" : ""}`}>Säsongsbästan</h3>
                 </div>
-            ))}</div>
-    </div>
+                {expandedSections.sb && (
+                    <div className={`details-container ${expandedSections.sb ? "expanded" : ""}`}>
+                        
+                        {!addSb && seasonBests.map((sb, index) => (
+                            <div className="detail" key={index}>
+                                <p className="bold-paragraph">{sb.event}: </p>
+                                <p>{`${sb.performance}${sb.unit}`}</p>
+                                <p className='date-paragraph'>{sb.date ? sb.date.slice(0, 4) : "-"}</p>
+                                <p className='setting-paragraph'>{sb.insideOutside || "-"}</p>
+                            </div>
+                        ))}
+                                            {addSb && (
+                              <div className="add-result-wrapper" onClick={(e) => stopPropagation(e)}>
+
+                                 <div className="add-item-header">
+                                  <h3>Nytt säsongsbästa</h3>
+                                  <FontAwesomeIcon onClick={(e) => toggleAddItem(e,"sb")} className="delete-icon" icon={faTrash}></FontAwesomeIcon>
+                                  </div>
+
+
+                              <div className="add-result">
+                        
+                                {step === 1 && 
+                                <div className="step-container">
+                                  <div className="step-content" key={step} style={{ animationName: animation }}>
+                                  <div className="add-item-inputs">
+                                    <span className="item-input">
+                                       <label for="event">Gren/övning</label>
+                                       <input type="text" id="event-input" name="event" placeholder="T.ex. höjdhopp" onChange={(e) => handleChanges(e, setSbEvent)}/>
+                                   </span>
+
+                                   <span className="item-input">
+                                     <label for="result">Fyll i resultat</label>
+                                  <input type="text" name="result" id="result-input" placeholder="T.ex. 1.80" onChange={(e) => handleChanges(e, setSb)}/>
+                                  </span>
+
+                                  <span className="item-input">
+                                    <label for="unit">Välj enhet</label>
+                                  <select className="setting-select" id="unit" name="unit" onChange={(e) => handleChanges(e, setSbUnit)}>
+                                      <option value="">m/s/kg</option>
+                                      <option value="m">m</option>
+                                      <option value="cm">cm</option>
+                                      <option value="s">sekunder</option>
+                                      <option value="min">minuter</option>
+                                      <option value="kg">kg</option>
+                                   </select>
+                                   </span>
+                                   </div>
+
+                              <div className="add-result-button">
+                                <button onClick={handleBack}>Tillbaka</button>
+                                 <button onClick={handleNext}>Nästa</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                             }
+                        
+                             
+                             
+                             {step === 2 &&
+                             <div className="step-container">
+                                <div className="step-content" key={step} style={{ animationName: animation }}>
+                                   <div className="add-item-inputs" >
+                                  <span className="item-input">
+                                    <label for="date">Välj datum</label>
+                              <input type="date" name="date" onChange={(e) => handleChanges(e, setSbDate)} />
+                              </span>
+                              <span className="item-input">
+                                <label for="setting">Ute eller inne?</label>
+                              <select className="setting-select" name="setting" onChange={(e) => handleChanges(e, setSbSetting)}>
+                              <option value="">Välj</option>
+                                <option value="Utomhus">Utomhus</option>
+                                <option value="Inomhus">Inomhus</option>
+                                </select>
+                                </span>
+                                </div>
+
+                                <div className="add-result-button">
+                              <button onClick={(e) => handleBack(e)}>Tillbaka</button>
+                                 <button onClick={(e)=> handleNext(e)}>Nästa</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                                  }
+                         
+                            
+                             {step === 3 &&
+                             <div className="step-container">
+                               <div className="step-content" key={step} style={{ animationName: animation }}>
+                                <div className="add-item-inputs">
+                              <span className="item-input">
+                                <label for="weight">Vad vägde du vid tillfället?</label>
+                                <input type="text" id="pb-weight-input" value={pbWeight} placeholder="Vikt i kg" onChange={(e) => handleChanges(e, setSbWeight)}/>
+                                </span>
+                                </div>
+                                <div className="add-result-button">
+                              <button onClick={(e) => handleBack(e)}>Tillbaka</button>
+                                 <button onClick={(e) => saveSb(e)}>Spara</button>
+                                 </div>
+                                 </div>
+                                 </div>
+                                  }
+
+
+                                  </div>
+                                </div>
+                                )}
+                    </div>
+                )}
+
+            {expandedSections.sb && (
+                    <div id="add-icon-span" onClick={(e) => toggleAddItem(e, "sb")}>
+                        <FontAwesomeIcon id="add-icon" icon={faPlus} />
+                    </div>
+                )}
+            </div>
+            
+        </div>
   )
 }
 

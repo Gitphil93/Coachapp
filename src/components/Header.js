@@ -1,11 +1,15 @@
-import React from "react";
+import {React, useContext} from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/Header.css";
-
+import SearchProfile from "./SearchProfile";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
+import MenuContext from "../context/MenuContext";
 
 export default function Header({ onMenuToggle, hamburgerRef }) {
   const location = useLocation();
-
+  const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+  console.log(isMenuOpen)
   const handleLogoClick = () => {
     if (location.pathname !== "/home") {
       window.location.href = "/home";
@@ -22,9 +26,15 @@ export default function Header({ onMenuToggle, hamburgerRef }) {
         </div>
       </Link>
 
-      <div className="hamburger" ref={hamburgerRef} onClick={onMenuToggle}>
 
-        <img src="./hamburger.svg" id="hamburger-logo" alt="hamburger-logo" />
+      <SearchProfile />
+
+      <div className="hamburger" ref={hamburgerRef} onClick={onMenuToggle}>
+ {/*        <FontAwesomeIcon icon={faBars} id="hamburger-logo" alt="hamburger-logo" /> */}
+        <div className={`top-bar ${isMenuOpen ? "expanded" : ""}`}></div>
+        <div className={`middle-bar ${isMenuOpen ? "expanded" : ""}`}></div>
+        <div className={`bottom-bar ${isMenuOpen ? "expanded" : ""}`}></div>
+
       </div>
     </div>
   );

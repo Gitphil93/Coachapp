@@ -10,13 +10,14 @@ import Register from "./views/Register";
 import AddSession from "./views/AddSession";
 import { MenuProvider } from "./context/MenuContext.js";
 import MySessions from "./views/MySessions";
-import Profile from "./views/Profile";
+import MyProfile from "./views/MyProfile";
 import CheckToken from "./components/CheckToken";
 import LandingPage from "./views/LandingPage"
 import AdminDashboard from "./views/AdminDashboard"
 import StripeCancel from "./views/StripeCancel";
 import StripeSuccess from "./views/StripeSuccess";
 import CoachRegister from "./views/CoachRegister";
+import UserProfile from "./views/UserProfile";
 
 function App() {
 
@@ -37,7 +38,8 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="coach/register" element={<CoachRegister />} />
-            <Route path="profile" element={<Profile />} />
+            <Route path="my-profile" element={<MyProfile />} />
+            <Route path="user-profile/:userId" element={<UserProfile />} />
             <Route path="success" element={<StripeSuccess />} />
             <Route path="cancel" element={<StripeCancel />} />
           </Routes>
