@@ -1060,7 +1060,20 @@ const s3Client = new S3Client({region: "eu-north-1", credentials: {
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 } });
 
-const upload = multer({ dest: 'uploads/' });
+/* const upload = multer({ dest: 'uploads/' }); */
+
+const upload = multer({
+  storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+          const tempDir = '/tmp/uploads';
+          fs.mkdirSync(tempDir, { recursive: true }); 
+          cb(null, tempDir);
+      },
+      filename: function (req, file, cb) {
+          cb(null, file.fieldname + '-' + Date.now());
+      }
+  })
+});
 
 app.post('/upload-image', verifyToken, upload.single('profileImage'), async (req, res) => {
   const file = req.file;
