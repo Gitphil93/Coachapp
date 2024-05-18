@@ -49,7 +49,7 @@ export default function MySessions() {
     const [showPastSessions, setShowPastSessions] = useState(false)
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredPastSessions, setFilteredPastSessions] = useState([]);
-    const [result, setResult] = useState(0)
+    const [result, setResult] = useState("")
     const [unit, setUnit] = useState("")
 
     const openModal = (session, exercise) => {
@@ -174,7 +174,7 @@ export default function MySessions() {
             body: JSON.stringify({
               email: user.email,
               userComment: comment.trim() !== "" ? comment.trim() : "",
-              result: result + unit,
+              result: result.trim() + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
