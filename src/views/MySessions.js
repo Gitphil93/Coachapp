@@ -174,7 +174,7 @@ export default function MySessions() {
             body: JSON.stringify({
               email: user.email,
               userComment: comment.trim() !== "" ? comment.trim() : "",
-              result: result.trim() + unit,
+              result: result + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
