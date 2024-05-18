@@ -439,7 +439,12 @@ if (isPostSessionSuccess) {
           <div className="add-exercises">
             <div className="add-exercises-header">
               <h2 className="header-text">Lägg till övningar</h2>
+
+              {exerciseArray !== [] &&
+              <>
               <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
+              </>
+              }
             </div>
 
             <div className="expand-wrapper">
