@@ -440,7 +440,7 @@ if (isPostSessionSuccess) {
             <div className="add-exercises-header">
               <h2 className="header-text">Lägg till övningar</h2>
 
-              {exerciseArray !== [] &&
+              {exerciseArray.length !== 0 &&
               <>
               <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
               </>
@@ -572,7 +572,7 @@ if (isPostSessionSuccess) {
   </div>
 )}
 
-              {selectedAttendees !== [] &&
+              {selectedAttendees.length !== 0 &&
             <div className="save-exercise-button">
               <button className="save-button" onClick={postSession}>Spara pass</button>
             </div>
