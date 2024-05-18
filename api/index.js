@@ -847,7 +847,6 @@ app.post("/add-comment/:sessionId/:exerciseId", verifyToken, async (req, res) =>
     const database = client.db("Coachapp");
     const sessionsCollection = database.collection("sessions");
 
-    const { ObjectId } = require('mongodb');
     const sessionObjectId = new ObjectId(sessionId);
 
     const updateOperations = {};
@@ -904,7 +903,6 @@ app.delete("/delete-session/:sessionId", verifyRole(2000), async (req, res) => {
     const database = client.db("Coachapp");
     const sessionsCollection = database.collection("sessions");
 
-    const { ObjectId } = require('mongodb');
     const sessionObjectId = new ObjectId(sessionId);
 
     // Ta bort passet från databasen baserat på dess ID
@@ -939,7 +937,6 @@ app.put("/update-session/:sessionId", verifyToken, async (req, res) => {
     const database = client.db("Coachapp");
     const sessionsCollection = database.collection("sessions");
 
-    const { ObjectId } = require('mongodb');
     const sessionObjectId = new ObjectId(sessionId);
 
     // Uppdatera endast den specifika deltagaren i sessionen
