@@ -572,10 +572,11 @@ if (isPostSessionSuccess) {
   </div>
 )}
 
-
+              {selectedAttendees !== [] &&
             <div className="save-exercise-button">
               <button className="save-button" onClick={postSession}>Spara pass</button>
             </div>
+            }
           </div>
         </div>
 
