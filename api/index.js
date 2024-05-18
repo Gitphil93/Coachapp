@@ -281,7 +281,7 @@ app.post("/admin/register", verifyRole(2000), async (req, res) => {
     
       const emailResult = await transporter.sendMail({
         from: 'Appleet <philipjansson1027@hotmail.com>',
-        to:/*  newUser.email */ "philipjansson1027@hotmail.com",
+        to:  newUser.email  /*"philipjansson1027@hotmail.com"*/,
         subject: 'Välkommen Till Appleet!',
         text: `Hej ${newUser.name}! ${newUser.coach} har lagt till dig som användare på Appleet. din användarnyckel är: ${newUser.key}. Kopiera nyckeln och klicka på länken för att registrera dig. http://appleet.vercel.app/register.
         
