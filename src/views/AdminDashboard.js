@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         try {
             setIsLoading(true);
             const response = await fetch(
-                "http://192.168.0.30:5000/get-all-users",
+                "https://appleet-backend.vercel.app/get-all-users",
                 {
                     method: "GET",
                     headers: {
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
         try {
             setIsLoading(true)
-            const response = await fetch("http://192.168.0.30:5000/delete-user", {
+            const response = await fetch("https://appleet-backend.vercel.app/delete-user", {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
           try {
             setIsLoading(true)
             const response = await fetch(
-              "http://192.168.0.30:5000/get-exercises",
+              "https://appleet-backend.vercel.app/get-exercises",
               {
                 method: "GET",
                 headers: {
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
     
         try {
             setIsLoading(true);
-            const response = await fetch(`http://192.168.0.30:5000/delete-exercise/${exerciseId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/delete-exercise/${exerciseId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -113,7 +113,7 @@ export default function MySessions() {
             try {
                 setIsLoading(true);
                 const response = await fetch(
-                    "http://192.168.0.30:5000/get-sessions",
+                    "https://appleet-backend.vercel.app/get-sessions",
                     {
                         method: "GET",
                         headers: {
@@ -165,7 +165,7 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         if (!token) return
         try {
-          const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`https://appleet-backend.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -200,7 +200,7 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         if (!token) return
         try {
-            const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -227,7 +227,7 @@ export default function MySessions() {
         if (!token) return
 
         try {
-            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

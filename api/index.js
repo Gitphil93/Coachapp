@@ -97,8 +97,8 @@ app.post('/create-checkout-session', async (req, res) => {
         trial_period_days: 30,
       },
       customer_email: req.body.email,
-      success_url: 'http://192.168.0.30:3000/success',
-      cancel_url: 'http://192.168.0.30:3000/coach/register',
+      success_url: 'https://appleet-backend.vercel.app/success',
+      cancel_url: 'https://appleet-backend.vercel.app/coach/register',
     });
     res.json({ url: session.url });
   } catch (error) {

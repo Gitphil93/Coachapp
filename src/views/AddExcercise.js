@@ -73,7 +73,7 @@ console.log(categoryValue)
       return false;
     }
     try {
-      const response = await fetch("http://192.168.0.30:5000/add-exercise", {
+      const response = await fetch("https://appleet-backend.vercel.app/add-exercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ const removeExerciseFromModule = (exerciseId) => {
       try {
         setIsLoading(true)
         const response = await fetch(
-          "http://192.168.0.30:5000/get-exercises",
+          "https://appleet-backend.vercel.app/get-exercises",
           {
             method: "GET",
             headers: {
@@ -167,7 +167,7 @@ const removeExerciseFromModule = (exerciseId) => {
 
     try {
         setIsLoading(true);
-        const response = await fetch(`http://192.168.0.30:5000/delete-exercise/${exerciseId}`, {
+        const response = await fetch(`https://appleet-backend.vercel.app/delete-exercise/${exerciseId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -192,7 +192,7 @@ const postModule = async () => {
   if (!token) return;
 
   try {
-    const response = await fetch("http://192.168.0.30:5000/add-exercise", {
+    const response = await fetch("https://appleet-backend.vercel.app/add-exercise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

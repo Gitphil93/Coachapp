@@ -42,7 +42,7 @@ export default function SearchProfile() {
 
             try {
                 setIsLoading(true)
-              const response = await fetch(`http://192.168.0.30:5000/search-users?search=${searchValue}`, {
+              const response = await fetch(`https://appleet-backend.vercel.app/search-users?search=${searchValue}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`, 
                   'Content-Type': 'application/json'

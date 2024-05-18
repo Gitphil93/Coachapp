@@ -41,7 +41,7 @@ const CheckToken = () => {
 
   const updateToken = async (token) => {
     try {
-      const response = await fetch('http://192.168.0.30:5000/refresh-token', {
+      const response = await fetch('https://appleet-backend.vercel.app/refresh-token', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

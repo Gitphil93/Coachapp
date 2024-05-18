@@ -19,7 +19,7 @@ export default function CoachRegister() {
 
   const triggerCheckout = async (email) => {
     try {
-      const response = await fetch("http://192.168.0.30:5000/create-checkout-session", {
+      const response = await fetch("https://appleet-backend.vercel.app/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export default function CoachRegister() {
   
     if (passwordValue === passwordRepeatValue || nameValue !== "" || lastnameValue !== "" || emailValue !== "") {
       try {
-        const response = await fetch("http://192.168.0.30:5000/coach/register", {
+        const response = await fetch("https://appleet-backend.vercel.app/coach/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -117,7 +117,7 @@ const handleBlurInstagram = () => {
     formData.append("profileImage", file);
     const token = localStorage.getItem("token")
     try {
-        const response = await fetch("http://192.168.0.30:5000/upload-image", {
+        const response = await fetch("https://appleet-backend.vercel.app/upload-image", {
             method: "POST",
             headers: {
                "Authorization": `Bearer ${token}`,
@@ -133,7 +133,7 @@ const handleBlurInstagram = () => {
 
     const getUser = async (token) => {
       try {
-        const response = await fetch("http://192.168.0.30:5000/get-user", {
+        const response = await fetch("https://appleet-backend.vercel.app/get-user", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -181,7 +181,7 @@ const handleBlurInstagram = () => {
       console.log(updates)
       const token = localStorage.getItem("token")
       try {
-          const response = await fetch(`http://192.168.0.30:5000/update-user/${user._id}`, {
+          const response = await fetch(`https://appleet-backend.vercel.app/update-user/${user._id}`, {
               method: 'PUT',
               headers: {
                   'Content-Type': 'application/json',

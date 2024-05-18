@@ -111,7 +111,7 @@ const getToday = () => {
     if (!token) return
     if (token && today) {
 
-      fetch("http://192.168.0.30:5000/get-user", {
+      fetch("https://appleet-backend.vercel.app/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -142,7 +142,7 @@ const getSessions = async (token, today) => {
   if (!token) return;
   const decodedToken = jwtDecode(token)
   try {
-    const response = await fetch("http://192.168.0.30:5000/get-sessions", {
+    const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -211,7 +211,7 @@ const getSessions = async (token, today) => {
     try {
       setIsLoading(true)
       const response = await fetch(
-        "http://192.168.0.30:5000/admin/post-global-message",
+        "https://appleet-backend.vercel.app/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -275,7 +275,7 @@ const formatDate = (dateString) => {
   const decodedToken = jwtDecode(token)
   const role = decodedToken.role
   try {
-    const response = await fetch("http://192.168.0.30:5000/get-global-message", {
+    const response = await fetch("https://appleet-backend.vercel.app/get-global-message", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -308,7 +308,7 @@ const deleteGlobalMessage = async () => {
   if (!token) return;
 
   try {
-      const response = await fetch("http://192.168.0.30:5000/admin/delete-global-message", {
+      const response = await fetch("https://appleet-backend.vercel.app/admin/delete-global-message", {
           method: "DELETE",
           headers: {
               "Authorization": `Bearer ${token}`,
