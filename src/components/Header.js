@@ -2,8 +2,6 @@ import {React, useContext} from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 import SearchProfile from "./SearchProfile";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
 import MenuContext from "../context/MenuContext";
 
 export default function Header({ onMenuToggle, hamburgerRef }) {
@@ -29,8 +27,7 @@ export default function Header({ onMenuToggle, hamburgerRef }) {
 
       <SearchProfile />
 
-      <div className="hamburger" ref={hamburgerRef} onClick={onMenuToggle}>
- {/*        <FontAwesomeIcon icon={faBars} id="hamburger-logo" alt="hamburger-logo" /> */}
+      <div className="hamburger" ref={hamburgerRef} onClick={onMenuToggle}> 
         <div className={`top-bar ${isMenuOpen ? "expanded" : ""}`}></div>
         <div className={`middle-bar ${isMenuOpen ? "expanded" : ""}`}></div>
         <div className={`bottom-bar ${isMenuOpen ? "expanded" : ""}`}></div>

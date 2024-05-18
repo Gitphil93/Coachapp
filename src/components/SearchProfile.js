@@ -1,17 +1,21 @@
-import {React, useState, useEffect} from 'react'
+import {React, useState, useEffect, useContext} from 'react'
 import { useNavigate } from 'react-router-dom';
+import MenuContext from "../context/MenuContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import "../styles/searchProfile.css"
 import LoaderSpinner from "./LoaderSpinner"
 
 export default function SearchProfile() {
+
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const [toggleSearch, setToggleSearch] = useState(false)
     const [searchValue, setSearchValue] = useState("")
     const [users, setUsers] = useState([])
     const [isFindingUser, setIsFindingUser] = useState(false)
+    const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
+    console.log(MenuContext)
 
     const search = () => {
         setToggleSearch(!toggleSearch)
@@ -20,6 +24,12 @@ export default function SearchProfile() {
     const handleInputChange = (e) => {
         setSearchValue(e.target.value)
     }
+
+    useEffect(() => {
+      if (isMenuOpen) {
+        setToggleSearch(false)
+      }
+    }, [isMenuOpen])
 
     useEffect(() => {
         if(searchValue !== "" || users.length === 0) {
@@ -71,6 +81,10 @@ export default function SearchProfile() {
         setSearchValue("")
     };
 
+    const stopPropagation = (e) => {
+      e.stopPropagation()
+    }
+
       
   return (
     <div>      
@@ -79,10 +93,11 @@ export default function SearchProfile() {
          </div>
 
 
-            <div className={`search-container ${toggleSearch ? "expanded" : ""}`}>
+         <div className={`search-overlay ${toggleSearch ? "open" : ""}`} onClick={search}>
+            <div className={`search-container ${toggleSearch ? "expanded" : ""}`} onClick={(e) => stopPropagation(e)}>
                 
-                <div className="search-input">
-                    <input type="text" placeholder='Sök...' value={searchValue} onChange={(e) => handleInputChange(e)} autoFocus/>
+                <div className={`search-input ${toggleSearch ? "expanded" : ""}`}>
+                    <input type="text" placeholder='Sök användare...' value={searchValue} onChange={(e) => handleInputChange(e)} autoFocus/>
                 </div>
 
                 <div className="search-results">
@@ -97,6 +112,16 @@ export default function SearchProfile() {
                                     </span> }
 
                                     <p>{user.name} {user.lastname}</p>
+
+                                      {user.profile?.title ? (
+                                      <span>
+                                    <p>{user.profile.title}</p>
+                                    </span>
+                                    ) : (
+                                      <span>
+                                    <p>{user.role === 2000 ? "Coach" : "Atlet"}</p>
+                                    </span>
+                                    )}
                                 </div>
                                 ))
                                     }
@@ -118,7 +143,7 @@ export default function SearchProfile() {
 
                 
             </div>
-
+        </div>
 </div>
   )
 }

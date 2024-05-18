@@ -50,6 +50,11 @@
       font-weight: 500;
       color: rgb(71, 70, 70);
   }
+
+  #exercise-description{
+    color: var(--text-grey);
+    font-size: .9rem;
+  }
   #exercise-comment{
     font-style: italic;
     font-size: 0.8rem;

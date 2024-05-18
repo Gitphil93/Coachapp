@@ -14,14 +14,16 @@ import ProfileItems from '../components/ProfileItems';
 
 
 export default function Profile() {
-      const navigate = useNavigate()
-      const [isLoading, setIsLoading] = useState(false)
-      const [isModalOpen, setIsModalOpen] = useState(false)
-      const [isEditingBio, setIsEditingBio] = useState(false);
-      const bioRef = useRef(null);
-      const [isEditingInstagram, setIsEditingInstagram] = useState(false);
-      const [instagram, setInstagram] = useState('');
-      const instagramRef = useRef(null);
+    const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const bioRef = useRef(null);
+    const [isEditingInstagram, setIsEditingInstagram] = useState(false);
+    const [instagram, setInstagram] = useState('');
+    const instagramRef = useRef(null);
+    const [title, setTitle] = useState("")
+    const [isEditingTitle, setIsEditingTitle] = useState(false)
     const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
     const [image, setImage] = useState(""); 
     const [user, setUser] = useState({})
@@ -78,38 +80,22 @@ const handleBlurInstagram = () => {
     setIsEditingInstagram(false);
 };
 
-/* const toggleExpand = (itemId, e) => {
-  e.stopPropagation(); 
-  if (!addingItemId && expandedItemId === itemId) {
-    setExpandedItemId(null); 
-  } else if (!addingItemId) {
-    setExpandedItemId(itemId); 
+
+  const toggleEditTitle = () => {
+    setIsEditingTitle(!isEditingTitle)
   }
-};
 
-
-const toggleAddItem = (e, itemId) => {
-  e.stopPropagation(); 
-  if (addingItemId === itemId) {
-      setAddingItemId(null); 
-      setStep(1)
-  } else {
-      setAddingItemId(itemId); 
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value)
   }
-} */
 
-
-    const handleChanges = (event, setter) => {
-      setter(event.target.value)
+  const handleBlurTitle = () => {
+    if (title !== "Lägg till titel" && title.trim() !== ""){
+      let formattedTitle = title.trim().charAt(0).toUpperCase() + title.trim().slice(1)
+      updateUserProfile({title: formattedTitle})
     }
-/* 
-    const openModal = (event ,expandedItemId) => {
-      event.stopPropagation()
-      setIsModalOpen(true)
-    }
-    const closeModal = () => {
-      setIsModalOpen(false)
-    } */
+    setIsEditingTitle(false)
+  }
 
     const handleImageChange = async (event) => {
       const file = event.target.files[0];
@@ -156,11 +142,12 @@ const toggleAddItem = (e, itemId) => {
         });
     
         if (response.ok) {
-          const data = await response.json(); // Läser och parsar JSON-svaret
+          const data = await response.json(); 
           console.log(data)
           setUser(data.user)
           setBio(data.user.profile?.bio || "Klicka här för att lägga till biografi"); 
           setInstagram(data.user.profile?.instagram || "Lägg till instagram");
+          setTitle(data.user.profile?.title || "Lägg till titel");
           setImageUrl(`${data.user.profileImage}?${new Date().getTime()}`);
           setPersonalBests(data.user.profile?.personalBests)
           setSeasonBests(data.user.profile?.seasonBests)
@@ -171,25 +158,7 @@ const toggleAddItem = (e, itemId) => {
         console.error("Något gick fel när användaren hämtades", err);
       }
     }
-    
 
-/*   const formatDate = (dateString) => {
-    const dateObj = new Date(dateString);
-    const formattedDate = dateObj.toLocaleDateString('sv-SE', {
-      day: '2-digit',
-      month: '2-digit',
-    });
-
-    const formattedYear = dateObj.getFullYear().toString().slice(2)
-
-    const [month, day, year] = formattedDate.split('/').map(part => parseInt(part, 10));
-    const formattedMonth = month < 10 ? month.toString() : month;
-    const formattedDay = day < 10 ? day.toString() : day;
-  
-
-  
-    return `${formattedMonth}/${formattedDay}-${formattedYear}`;
-  }; */
   
     useEffect(() => {
         const token = localStorage.getItem("token")
@@ -210,7 +179,7 @@ const toggleAddItem = (e, itemId) => {
 
     const updateUserProfile = async (updates) => {
       console.log(updates)
-      const token = localStorage.getItem("token"); // Assume token is stored in localStorage
+      const token = localStorage.getItem("token")
       try {
           const response = await fetch(`http://192.168.0.30:5000/update-user/${user._id}`, {
               method: 'PUT',
@@ -232,56 +201,6 @@ const toggleAddItem = (e, itemId) => {
           console.error('Error updating user profile:', error);
       }
   };
-  
- /*  const handleNext = () => {
-    setAnimation('slideInFromRight');
-    setStep(prevStep => prevStep + 1);
-  };
-  
-  const handleBack = () => {
-    setAnimation('slideInFromLeft');
-    setStep(prevStep => prevStep - 1);
-  };
-    
-  const savePb = async () => {
-    const newPb = {
-        event,
-        performance: pb,
-        unit,
-        date,
-        insideOutside: setting,
-        weight: pbWeight
-    };
-
-    try {
-        const token = localStorage.getItem("token"); 
-        const response = await fetch(`http://192.168.0.30:5000/add-pb/${user._id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ newPb })
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            console.log('Personal best added successfully:', result);
-            setEvent("");
-            setPb("");
-            setUnit("");
-            setDate("");
-            setSetting("");
-            setPbWeight("");
-            setIsModalOpen(false);
-            setAddingItemId(null)
-        } else {
-            console.error('Failed to add personal best:', result);
-        }
-    } catch (error) {
-        console.error('Error adding personal best:', error);
-    }
-}; */
 
 
     return (
@@ -301,7 +220,21 @@ const toggleAddItem = (e, itemId) => {
                 <div className="card-container">
                 <div className="profile-name-container">
                   <h3>{user.name} {user.lastname}</h3>
-                  <p id="title">Hacker</p>
+
+                  {isEditingTitle ? (
+                    <div>
+                      <input type="text"
+                      onChange={(e) => handleTitleChange(e)}
+                      value={title}
+                      onBlur={handleBlurTitle}
+                     />
+                    </div>
+
+                  ) : (
+                    <div>
+                    <p id="title" onClick={toggleEditTitle}>{title}</p>
+                    </div>
+                  )}
                   {isEditingBio ? (
                     <div className="description-area">
                       <textarea

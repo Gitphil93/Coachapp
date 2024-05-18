@@ -37,8 +37,16 @@ export default function UserProfile() {
     <div className="card-container">
                 <div className="profile-name-container">
                   <h3>{user.name} {user.lastname}</h3>
-                  <p id="title">Hacker</p>
-            
+                  {user.profile?.title ? (
+                  <div>
+                  <p id="title">{user.profile?.title}</p>
+                  </div>
+                  ) : (
+                    <div>
+                    <p id="title">{user.role === 2000 ? "Coach" : "Atlet"}</p>
+                    </div>
+                  )}
+
                     <div className="description-area">
                     <p>{user.profile?.bio || "Användaren har inte lagt till någon biografi"}</p>
                     </div>

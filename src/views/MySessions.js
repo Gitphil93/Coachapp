@@ -544,7 +544,7 @@ export default function MySessions() {
                         return (
                             <div id="exercise-item" key={exerciseIndex}>
                                 <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                <p>{exercise.description}</p>
+                                <p id="exercise-description">{exercise.description}</p>
 
                                 {Object.keys(resultsByAuthor).length > 0 && (
                                 <div className="result-row comment-container">
