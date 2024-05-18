@@ -1056,7 +1056,7 @@ app.delete("/admin/delete-global-message", verifyToken, verifyRole(2000), async 
 });
 
 const s3Client = new S3Client({region: "eu-north-1", credentials: {
-  accessKeyId: process.env.AWS_ACCESS_KEY,
+  accessKeyId: process.env.AWS_KEY,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 } });
 
