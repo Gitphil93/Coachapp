@@ -6,6 +6,10 @@ import MenuContext from "../context/MenuContext";
 import Modal from "../components/Modal.js";
 import Loader from "../components/Loader.js"
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode"
+import Footer from "../components/Footer";
+import Success from "../components/Success"
+import AdminButton from "../components/AdminButton";
 
 
 
@@ -18,9 +22,11 @@ export default function AddSession() {
   const [searchTerm, setSearchTerm] = useState("")
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [selectedName, setSelectedName] = useState("")
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedPlace, setSelectedPlace] = useState("");
+  const [user, setUser] = useState({})
   const [users, setUsers] = useState([]);
   const [exerciseArray, setExerciseArray] = useState([]);
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -30,7 +36,10 @@ export default function AddSession() {
   const [comment, setComment] = useState(""); 
   const [filteredExercises, setFilteredExercises] = useState([]);
   const [isPostSessionSuccess, setIsPostSessionSuccess] = useState(false);
+  const [showNotification, setShowNotification] = useState(true)
+  const [exercisesInCategory, setExercisesInCategory] = useState({})
 
+  console.log(exercisesInCategory)
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -44,6 +53,9 @@ export default function AddSession() {
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
+  const handleNameChange = (e) => {
+    setSelectedName(e.target.value)
+  }
 
   const handleTimeChange = (e) => {
     setSelectedTime(e.target.value);
@@ -102,6 +114,18 @@ export default function AddSession() {
     );
   };
 
+  const addModuleExercises = (module) => {
+    module.exercises.forEach((exercise) => {
+      // Kopiera övningen och lägg till isModule-informationen
+      const modifiedExercise = { ...exercise, isModule: true };
+      console.log(modifiedExercise)
+      setSelectedExercises((prevExercises) => [...prevExercises, modifiedExercise]);
+    });
+    setExerciseArray((prevExercises) =>
+      prevExercises.filter((e) => e.name !== module.name),
+    );
+  };
+
   const moveExerciseUp = (index) => {
     if (index > 0) {
       const exercises = [...selectedExercises];
@@ -143,11 +167,14 @@ export default function AddSession() {
   useEffect(() => {
     async function getUsers() {
       const token = localStorage.getItem("token");
+      if (!token) return
+      const decodedToken = jwtDecode(token)
+      setUser(decodedToken)
       if (token) {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-all-users",
+            "http://192.168.0.30:5000/get-all-users",
             {
               method: "GET",
               headers: {
@@ -173,13 +200,17 @@ if (isPostSessionSuccess) {
 }, [isPostSessionSuccess]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token")
+      if (!token) return
+
     async function getExercises() {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token");    
+      if (!token) return
       if (token) {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-exercises",
+            "http://192.168.0.30:5000/get-exercises",
             {
               method: "GET",
               headers: {
@@ -193,6 +224,7 @@ if (isPostSessionSuccess) {
           const categories = Array.from(
             new Set(data.map((exercise) => exercise.category)),
           );
+
           setExerciseCategories(categories);
         } catch (err) {
           console.log(err, "Kunde inte hämta övningarna");
@@ -229,7 +261,8 @@ if (isPostSessionSuccess) {
 
   const postSession = async () => {
     const token = localStorage.getItem("token")
-      if (selectedAttendees.length === 0 || selectedDate === "" || selectedTime === "" || selectedExercises.length === 0) {
+    if (!token) return
+      if (selectedAttendees.length === 0 || selectedTime === "" || selectedExercises.length === 0) {
           console.log("Fyll i alla fält")
           return false
       }
@@ -237,18 +270,20 @@ if (isPostSessionSuccess) {
       if (token) {
       try{
         setIsLoading(true)
-        const response = await fetch("https://appleet-backend.vercel.app/post-session", {
+        const response = await fetch("http://192.168.0.30:5000/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-              attendees: selectedAttendees.map(({ name, lastname, email }) => ({ name, lastname, email, signed: false })),
+              attendees: selectedAttendees.map(({ name, lastname, email, thumbnailImage }) => ({ name, lastname, email, thumbnailImage, signed: false })),
+              title: selectedName.trim().charAt(0).toUpperCase() + selectedName.trim().slice(1),
               date: selectedDate.trim(),
               time: selectedTime.trim(),
               place: selectedPlace.trim().charAt(0).toUpperCase() + selectedPlace.trim().slice(1),
-              exercises: selectedExercises
+              exercises: selectedExercises,
+              coach: user.email
             }),
           });
 
@@ -258,7 +293,7 @@ if (isPostSessionSuccess) {
 
             selectedAttendees.forEach(async (attendee) => {
                 console.log(1,data.session)
-             /*    await assignSessionToUser(attendee.email, data.session); */
+            
               });
         
               setComment("")
@@ -267,6 +302,8 @@ if (isPostSessionSuccess) {
               setSelectedDate("")
               setSelectedTime("")
               setSelectedPlace("")
+              setSelectedName("")
+              setShowNotification(true)
               setIsPostSessionSuccess(true);
               setExpandedCategory(false)
               window.scrollTo({
@@ -286,32 +323,37 @@ if (isPostSessionSuccess) {
     }
   }
 
-  /* const assignSessionToUser = async (email, data) => {
-    const token = localStorage.getItem("token")
-    try {
-      setIsLoading(true)
-      const response = await fetch("https://appleet-backend.vercel.app/assign-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          email: email,
-          session: data
-        }),
-      });
-  
-      if (response.ok) {
-        console.log("Träningspass tillagt till användaren");
-      } else {
-        console.error("Kunde inte tilldela träningspass till användaren");
-      }
-    } catch (error) {
-      console.error("Något gick fel vid tilldelning av träningspass:", error);
+  const isExerciseFromModule = (exercise) => {
+    // Kontrollera om `exerciseArray` är definierad och inte tom
+    if (exerciseArray && exerciseArray.length > 0) {
+      return selectedExercises.some((item) => item._id === exercise._id && item.isModule);
     }
-  }; */
+    return false; // Returnera false om `exerciseArray` inte är definierad eller är tom
+  };
 
+  const updateCategoriesAndCounts = () => {
+    if (!Array.isArray(exerciseArray) || exerciseArray.length === 0) {
+      console.log('Inga övningar att bearbeta.');
+      return;
+    }
+    const categoryCount = exerciseArray.reduce((acc, exercise) => {
+      const { category } = exercise;
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {});
+  
+    // Säkerställ att alla kategorier behålls
+    const allCategories = new Set([...exerciseCategories, ...Object.keys(categoryCount)]);
+    setExerciseCategories([...allCategories]);
+  
+    setExercisesInCategory(categoryCount);
+  };
+
+  useEffect(() => {
+    updateCategoriesAndCounts();
+  }, [exerciseArray]);
+  
+  
   return (
     <div>
       {isLoading && 
@@ -323,16 +365,14 @@ if (isPostSessionSuccess) {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
-      <div
-        className="home-wrapper-exercises"
-        style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
-        }}
-       
-      >
-        <h1 className="view-header">Skapa pass</h1>
+      <AdminButton />
+
+
+      <div className="home-wrapper">
+        <div className="view-header">
+        <h1>Skapa pass</h1>
+        </div>
+
 
         
 
@@ -353,31 +393,43 @@ if (isPostSessionSuccess) {
           </div>
 )}
 
+          <div className="name-wrapper">
+                <h2 className="header-text">Namn</h2>
+                <input
+                 className="input-name"
+                 type="text"
+                 value={selectedName}
+                 onChange={handleNameChange}
+             />
+           </div>
+
           <div className="date-time-header">
-            <h2 className="header-text">Datum</h2>
+            <h2 className="header-text">Datum*</h2>
             <h2 className="header-text">Tid</h2>
           </div>
 
           <div className="datetime-wrapper">
             <div className="datetime-picker">
               <input
-                type="text"
+                id="date-input"
+                type="date"
                 placeholder="YYYY-MM-DD"
                 value={selectedDate}
                 onChange={handleDateChange}
               />
               <input
-                type="text"
-                placeholder="HH:MM"
+                id="time-input"
+                type="time"
                 value={selectedTime}
                 onChange={handleTimeChange}
               />
             </div>
           </div>
 
-          <div className="input-name">
+          <div className="place-wrapper">
             <h2 className="header-text">Plats</h2>
             <input
+            className="input-name"
               type="text"
               value={selectedPlace}
               onChange={handlePlaceChange}
@@ -397,7 +449,8 @@ if (isPostSessionSuccess) {
                     className="expand"
                     onClick={() => toggleExpand(category)}
                   >
-                    <h3>{category}</h3>
+                    <h3 id="category-header">{category}</h3>
+                    <h3 id="number" className="category-number">{exercisesInCategory[category] || 0}</h3>
                     <img
                       id="arrow"
                       src="/arrow.png"
@@ -418,20 +471,32 @@ if (isPostSessionSuccess) {
                         : "expanded-content"
                     }
                   >
-                    {exerciseArray.map((exercise) => {
-                      if (exercise.category === category) {
-                        return (
-                          <button
-                            key={exercise.name}
-                            className="exercise-button"
-                            onClick={() => addExercises(exercise)}
-                          >
-                            {exercise.name}
-                          </button>
-                        );
-                      }
-                      return null;
-                    })}
+             {exerciseArray.map((item) => {
+  if (item.category === category) {
+    if (item.isModule) {
+      return (
+        <button
+          key={item._id}
+          className="module-button"
+          onClick={() => addModuleExercises(item)}
+        >
+          {item.name}
+        </button>
+      );
+    } else {
+      return (
+        <button
+          key={item._id}
+          className="exercise-button"
+          onClick={() => addExercises(item)}
+        >
+          {item.name}
+        </button>
+      );
+    }
+  }
+  return null;
+})}
                   </div>
                 </div>
               ))}
@@ -463,11 +528,15 @@ if (isPostSessionSuccess) {
         </h3>
       </div>
     </div>
+
     <div className="session-summary-exercises">
+      <div className="header-row">
       <h2 className="header-text">Övningar</h2>
+      <h2 className="category-number">{selectedExercises.length}</h2>
+      </div>
       <div className="selected-exercises">
         {selectedExercises.map((exercise, index) => (
-          <div key={exercise.name} className="exercise-item">
+          <div key={exercise._id} className="exercise-item">
             <img
               src="/arrow.png"
               alt="arrow-icon"
@@ -476,10 +545,10 @@ if (isPostSessionSuccess) {
               className="up-button"
             />
              {exercise.comment && (
-          <img id="commented-svg" src="/comment.svg" alt="commented-picture" />
+          <img id="commented-svg" src="/comment.svg" alt="talk-bubble" />
         )}
             <button
-              className="exercise-button"
+             className={isExerciseFromModule(exercise) ? "module-button" : "exercise-button"}
               onClick={() => openModal(exercise)}
             >
               {exercise.name}
@@ -552,7 +621,7 @@ if (isPostSessionSuccess) {
                 <div className="filtered-exercises">
         {filteredExercises.map((exercise) => (
           <button
-            key={exercise.name}
+            key={exercise._id}
             className="exercise-button"
             onClick={() => addFromSearch(exercise)}
           >
@@ -570,7 +639,7 @@ if (isPostSessionSuccess) {
           </Modal>
         </div>
 
-
+          <Footer/>
       </div>
     </div>
   );

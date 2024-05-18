@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import "../styles/Menu.css";
 import MenuContext from "../context/MenuContext.js";
 import {jwtDecode} from "jwt-decode"
 
 export default function Menu({ hamburgerRef }) {
+  const navigate = useNavigate()
   const { isMenuOpen, toggleMenu } = useContext(MenuContext);
   const menuRef = useRef(null);
   const [role, setRole] = useState(0)
@@ -17,6 +18,10 @@ export default function Menu({ hamburgerRef }) {
       const token = localStorage.getItem("token")
       const decodedToken = jwtDecode(token)
       setRole(decodedToken.role)
+      if (!token)   {
+        navigate("/login")
+          return
+         } 
 }, [])
 
 
@@ -28,13 +33,7 @@ export default function Menu({ hamburgerRef }) {
   
   useEffect(() => {
     const handleClickOutsideMenu = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        isMenuOpen &&
-        event.target !== hamburgerRef.current &&
-        event.target.parentNode !== hamburgerRef.current
-      ) {
+      if (menuRef.current === event.target) {
         closeMenu();
       }
     };
@@ -47,20 +46,14 @@ export default function Menu({ hamburgerRef }) {
   }, [isMenuOpen]);
 
   return (
+
+    <div className={`overlay ${isMenuOpen ? "open" : ""}`} ref={menuRef}>
     <div className={`menu-wrapper ${isMenuOpen ? "open" : ""}`} ref={menuRef}>
 
 
-      {role >= 2000 &&
-      <Link to="/my-athletes" className="menu-item" onClick={closeMenu}>
-        <h2 className="menu-item-h2">Mina Atleter</h2>
+      <Link to="/my-profile" className="menu-item" onClick={closeMenu}>
+        <h2 className="menu-item-h2">Min profil</h2>
       </Link>
-    }
-
-      {role >= 2000 &&
-            <Link to="/exercises" className="menu-item" onClick={closeMenu}>
-              <h2 className="menu-item-h2">Hantera övningar</h2>
-            </Link>
-          }
 
 
       <Link to="/my-sessions" className="menu-item" onClick={closeMenu}>
@@ -83,11 +76,21 @@ export default function Menu({ hamburgerRef }) {
         </div>
       </Link>
 
+
+          {role >= 1999 &&
+      <Link to="https://billing.stripe.com/p/login/test_14k29FeDs7Ys50ccMM" target="_blank" rel="noopener noreferrer" className="menu-item" onClick={closeMenu}>
+        <div>
+          <h2 className="menu-item-h2">Min prenumeration</h2>
+        </div>
+      </Link>
+    }
+
       <Link to="/login" className="menu-item" id="logout" onClick={handleLogout}>
         <div>
           <h4>Logga ut</h4>
         </div>
       </Link>
+    </div>
     </div>
   );
 }

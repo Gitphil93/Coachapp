@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useContext, useRef, useLayoutEffect} from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/mySessions.css";
 import MenuContext from "../context/MenuContext.js";
 import Header from '../components/Header';
@@ -8,13 +8,22 @@ import {jwtDecode} from "jwt-decode";
 import Modal from "../components/Modal"
 import Loader from "../components/Loader"
 import Weather from "../components/Weather"
+import Footer from "../components/Footer"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment } from '@fortawesome/free-solid-svg-icons';
+import AdminButton from '../components/AdminButton';
+
+
+
 
 export default function MySessions() {
+    const navigate = useNavigate()
     const location = useLocation();
     const selectedSession = location.state ? location.state.selectedSession : "";
     const [today, setToday] = useState("")
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [currentExercise, setCurrentExercise] = useState('');
     const modalRef = useRef();
@@ -37,9 +46,11 @@ export default function MySessions() {
     const [sliderValue, setSliderValue] = useState(0)
     const [notSignedSessions, setNotSignedSessions] = useState([]); 
     const [summaryComment, setSummaryComment] = useState("")
-
-        console.log(expandedContent._id)
-
+    const [showPastSessions, setShowPastSessions] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredPastSessions, setFilteredPastSessions] = useState([]);
+    const [result, setResult] = useState(0)
+    const [unit, setUnit] = useState("")
 
     const openModal = (session, exercise) => {
         setCurrentSessionId(session._id); 
@@ -58,9 +69,23 @@ export default function MySessions() {
         setIsDeleteModalOpen(false);
       };
 
+
       const handleComment = (e) => {
         setComment(e.target.value)
       }
+
+      const handleResultChange = (e) => {
+          let value = e.target.value
+          if(value.includes(",")) {
+           value = value.replace(",",".")
+          }
+
+          setResult(value)
+      }
+      const handleUnitChange = (e) => {
+        setUnit(e.target.value)
+      }
+
 
       const handleSummaryCommentChange = (e) => {
           setSummaryComment(e.target.value)
@@ -75,10 +100,10 @@ export default function MySessions() {
         setToday(date)
       }
       
-
       const getSessions = async () => {
- 
         const token = localStorage.getItem("token");
+        if (!token) return;
+    
         const decodedToken = jwtDecode(token);
         const role = decodedToken.role;
         setRole(role);
@@ -88,7 +113,7 @@ export default function MySessions() {
             try {
                 setIsLoading(true);
                 const response = await fetch(
-                    "https://appleet-backend.vercel.app/get-sessions",
+                    "http://192.168.0.30:5000/get-sessions",
                     {
                         method: "GET",
                         headers: {
@@ -100,31 +125,29 @@ export default function MySessions() {
                 const sessions = data.sessions;
                 const currentTime = new Date();
     
-                // Sortera alla sessioner baserat på tid och datum
+                // Sort all sessions based on time and date
                 const sortedSessions = sessions.sort((a, b) => {
                     const dateA = new Date(`${a.date}T${a.time}`);
                     const dateB = new Date(`${b.date}T${b.time}`);
-                    return dateA - dateB;
+                    return dateA - dateB; // Sortera i stigande ordning (äldsta först)
                 });
     
-                setAllSessions(sortedSessions);
-    
+                // Funktion för att kontrollera om en session är förfluten
                 const sessionIsPast = (session) => {
                     const sessionTime = new Date(`${session.date}T${session.time}`);
-                    const oneHourPast = new Date(sessionTime.getTime() + 60 * 60 * 1000); // Add one hour to session start time
-                    return currentTime > oneHourPast;
+                    const twoHourPast = new Date(sessionTime.getTime() + 120 * 60 * 1000);
+                    return currentTime > twoHourPast;
                 };
     
                 if (role >= 2000) {
+
                     setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session)));
-                    setAllPastSessions(sortedSessions.filter(sessionIsPast));
+                    setAllPastSessions(sortedSessions.filter(sessionIsPast).reverse());
                 } else {
                     const userSessions = sortedSessions.filter(session => session.attendees.some(attendee => attendee.email === decodedToken.email));
-                    setUserUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                    setUserPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
-                    setAllUpcomingSessions(sortedSessions.filter(session => !sessionIsPast(session) && session.attendees.every(attendee => !attendee.signed)));
-                    setAllPastSessions(sortedSessions.filter(session => sessionIsPast(session) && session.attendees.every(attendee => attendee.signed)));
-                    const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed);
+                    setAllUpcomingSessions(userSessions.filter(session => !sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed));
+                    setAllPastSessions(userSessions.filter(session => sessionIsPast(session) && session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse())
+                    const notSignedSessions = userSessions.filter(session => sessionIsPast(session) && !session.attendees.find(attendee => attendee.email === decodedToken.email).signed).reverse();
                     setNotSignedSessions(notSignedSessions);
                 }
             } catch (err) {
@@ -135,19 +158,23 @@ export default function MySessions() {
         }
     };
     
+    
 
 
     const postComment = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return
         try {
-          const response = await fetch(`https://appleet-backend.vercel.app/add-comment/${currentSessionId}/${currentExercise._id}`, {
+          const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              userComment: comment,
+              email: user.email,
+              userComment: comment.trim() !== "" ? comment.trim() : "",
+              result: result.trim() + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
@@ -158,6 +185,8 @@ export default function MySessions() {
           if (response.ok) {
             console.log("Kommentaren postades framgångsrikt!");
             getSessions();
+            setUnit("")
+            setResult("")
           } else {
             console.error("Något gick fel när du försökte posta kommentaren.");
           }
@@ -169,8 +198,9 @@ export default function MySessions() {
 
       const deleteSession = async () => {
         const token = localStorage.getItem("token");
+        if (!token) return
         try {
-            const response = await fetch(`https://appleet-backend.vercel.app/delete-session/${sessionToRemoveId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/delete-session/${sessionToRemoveId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -194,9 +224,10 @@ export default function MySessions() {
     const submitSession = async (sessionId) => {
         console.log(sessionId)
         const token = localStorage.getItem("token");
-        console.log(user.email)
+        if (!token) return
+
         try {
-            const response = await fetch(`https://appleet-backend.vercel.app/update-session/${sessionId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/update-session/${sessionId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -222,10 +253,6 @@ export default function MySessions() {
         }
     };
     
-      
-    const isAnyContentExpanded = () => {
-        return allSessions.some(session => isContentExpanded(session));
-    };
 
     const toggleExpandContent = (session, e) => {
         console.log(session)
@@ -234,7 +261,7 @@ export default function MySessions() {
         }
         setExpandedContent(prevContent => {
             if (!session || (prevContent && prevContent._id === session._id)) {
-                return false; 
+                return ""; 
             } else {
                 return session;
             }
@@ -253,12 +280,22 @@ export default function MySessions() {
     }, [expandedContent]);
 
     useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (!token) {
+            navigate("/login")
+            return
+        }
+
+        try {
+            setIsLoading(true)
+        getToday()
         getSessions();
-    /*     if (selectedSession) {
-            toggleExpandContent(selectedSession);
-        } else {
-            setExpandedContent(null);
-        } */
+    } catch(err){
+        console.error("Something went wrong with fetching data:", err)
+    } finally {
+        setIsLoading(false)
+    }
+
     }, []);
 
   
@@ -285,7 +322,8 @@ export default function MySessions() {
     
     const handleTouchMove = (sessionId, e) => {
         if (role >= 2000) {
-            if (!isAnyContentExpanded(sessionId)) {
+            
+            if (expandedContent === "") {
                 const deltaX = e.touches[0].clientX - touchStartX;
     
                 if (deltaX < 0) {
@@ -300,7 +338,7 @@ export default function MySessions() {
     
     const handleTouchEnd = (sessionId) => {
         if (role >= 2000) {
-            if (!isAnyContentExpanded(sessionId)) {
+            if (expandedContent === "") {
                 const deltaX = sessionXValues[sessionId] || 0;
                 if (Math.abs(deltaX) > 200) {
                     openDeleteModal(sessionId);
@@ -325,7 +363,7 @@ export default function MySessions() {
         
 
         if (Math.abs(deltaX) <= 100) {
-            return 'linear-gradient(to bottom right, rgb(235, 233, 233) 50%, rgb(4, 52, 85))'
+            return 'rgba(187, 186, 186,0.5)'
         } else{
         return `rgba(${red}, ${green}, ${blue}, ${alpha})`
     }
@@ -335,6 +373,47 @@ export default function MySessions() {
     const handleSliderValue = (e) => {
         setSliderValue(e.target.value)
     }
+
+    const toggleShowPastSessions = () => {
+        setShowPastSessions(prevShow => !prevShow); // Växla mellan true och false
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value.trim();
+        setSearchTerm(value);
+    
+        if (value) {
+            
+            const filteredSessions = allPastSessions.filter(session => {
+                const sessionDate = new Date(session.date);
+                const sessionDateString = sessionDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+                const sessionYearMonth = sessionDate.toISOString().slice(0, 7); // 'YYYY-MM'
+    
+               
+                return sessionDateString === value || sessionYearMonth === value;
+            });
+            setFilteredPastSessions(filteredSessions);
+        } else {
+            setFilteredPastSessions(allPastSessions);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const dateObj = new Date(dateString);
+        const formattedDate = dateObj.toLocaleDateString('sv-SE', {
+          day: '2-digit',
+          month: '2-digit'
+        });
+      
+        // Ta bort inledande nollor från månad och dag
+        const [month, day] = formattedDate.split('/').map(part => parseInt(part, 10));
+        const formattedMonth = month < 10 ? month.toString() : month;
+        const formattedDay = day < 10 ? day.toString() : day;
+      
+        return `${formattedMonth}/${formattedDay}`;
+      };
+    
+    
 
     return (
         <div>
@@ -352,6 +431,26 @@ export default function MySessions() {
                              value={comment}
                              placeholder="Skriv kommentar">
                      </input>
+                    
+                    <div className="modal-result-row">
+                     <input type="text"
+                    className="input-name"
+                         onChange={handleResultChange}
+                             value={result}
+                             placeholder="Resultat">
+                     </input>
+
+                     <select onChange={handleUnitChange}>
+                     <option>Välj enhet</option>
+                         <option value="m">m</option>
+                         <option value="cm">cm</option>
+                         <option value="s">s</option>
+                         <option value="h">h</option>
+                         <option value="min">min</option>
+                         <option value="kg">kg</option>
+                     </select>
+                     </div>
+
                 </div>
               <div className="modal-buttons">
                 <button className="modal-button" onClick={postComment}>Kommentera</button>
@@ -379,113 +478,112 @@ export default function MySessions() {
           </Modal>
         </div>
 
+        
+        
+
 
             {isLoading &&
             <Loader/>
         }
             <Header onMenuToggle={toggleMenu} hamburgerRef={hamburgerRef} />
             <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} hamburgerRef={hamburgerRef} />
-
+            <AdminButton />
          
-            <div className="home-wrapper" style={{ filter: isMenuOpen ? "blur(4px) brightness(40%)" : "blur(0) brightness(100%)" }}>
-                <h1 className="view-header">Mina pass</h1>
+            <div className="home-wrapper">
+             <div className="view-header">
+                 <h1>Mina Pass</h1>
+              </div>
 
-                <div  className="sessions-wrapper" >
-                    <div className="sessions-header">
-                        <h2>Kommande pass</h2>
-                        {allUpcomingSessions.length > 0 &&
-                        <h3 className="sessions-number">{allUpcomingSessions.length}</h3>
-                    }
-                    </div>
-                    {role >= 2000 ? (
-                        allUpcomingSessions.map((session, index) => (
-                            
-                            <div
-                            id={expandedContent ? expandedContent._id : ""} 
-                            key={session._id}
-                            className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
-                            style={{
-                                transform: `translateX(${sessionXValues[session._id]}px)`,
-                            }}
-                            onClick={(e) => toggleExpandContent(session, e)}
-                            onTouchStart={(e) => handleTouchStart(session._id, e)}
-                            onTouchMove={(e) => handleTouchMove(session._id, e)}
-                            onTouchEnd={() => handleTouchEnd(session._id)}// Uppdatera sessionens position baserat på sessionX
-                        >   
-                                <div className="sessions-content" style={{ background: calculateSwipeColor(session._id)}}>
-                                    <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
-                                        <h2><Weather sessionDate={session.date ? session.date : today}
-                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
-                                    </div>
 
-                                    
-                                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p>{exercise.description}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
+                    <div className="sessions-wrapper">
+    <div className="sessions-header">
+        <h2>Kommande pass</h2>
+        {allUpcomingSessions.length > 0 &&
+        <h3 className="sessions-number">{allUpcomingSessions.length}</h3>
+        }
+    </div>
+    {allUpcomingSessions.map((session, index) => (
+        <div
+            id={expandedContent ? expandedContent._id : ""}
+            key={session._id}
+            className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")}
+            style={{
+                transform: `translateX(${sessionXValues[session._id]}px)`,
+            }}
+            onClick={(e) => toggleExpandContent(session, e)}
+            onTouchStart={(e) => handleTouchStart(session._id, e)}
+            onTouchMove={(e) => handleTouchMove(session._id, e)}
+            onTouchEnd={() => handleTouchEnd(session._id)}
+        >
+            <div className="sessions-content" style={{ backgroundColor: calculateSwipeColor(session._id) }}>
+                <div className="session-top">
+                    <h2> {getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
+                    <h2><Weather sessionDate={session.date ? session.date : today}
+                        sessionTime={session.time ? session.time : "12:00"}/></h2>
+                </div>
+
+                {!isContentExpanded(session) &&
+                <div className="session-center">
+                    <h2>{session.title}</h2>
+                </div>
+                }
+
+                {isContentExpanded(session) && (
+                <div className="expanded-session-content">
+                    {session.exercises.map((exercise, exerciseIndex) => {                           
+                                const resultsByAuthor = (exercise.results && Array.isArray(exercise.results)) ? exercise.results.reduce((acc, result) => {
+                                    if (acc[result.author]) {
+                                        acc[result.author].push(result.value);
+                                    } else {
+                                        acc[result.author] = [result.value];
+                                    }
+                                    return acc;
+                                }, {}) : {};
+                              
+
+                        return (
+                            <div id="exercise-item" key={exerciseIndex}>
+                                <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                <p id="exercise-description">{exercise.description}</p>
+
+                                {Object.keys(resultsByAuthor).length > 0 && (
+                                <div className="result-row comment-container">
+                                    {Object.entries(resultsByAuthor).map(([author, values], index) => (
+                                        <p key={index} id="exercise-comment">{author}: {values.join(", ")}</p>
                                     ))}
                                 </div>
                                 )}
 
-                                    <div className="session-bottom">
-                                        <h2>{session.place}</h2>
-                                        <div className="session-initials">
-                                            {session.attendees.map((initials, attendeeIndex) => (
-                                                <span key={attendeeIndex} className="initials-wrapper">
-                                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                                </span>
-                                            ))}
-                                        </div>
+                                {exercise.userComments && exercise.userComments.map((userComment, userCommentIndex) => (
+                                    <div key={userCommentIndex} className="comment-container">
+                                        {userComment.comment && <p id="exercise-comment">{userComment.author}: {userComment.comment}</p>}
                                     </div>
-                                </div>
+                                ))}
                             </div>
-                        ))
-                    ) : (
-                        userUpcomingSessions.map((session, index) => (
-                        <div id={expandedContent ? expandedContent._id : ""} key={session._id} className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} onClick={(e) => toggleExpandContent(session, e)}>
+                        );
+                    })}
+                </div>
+                )}
 
-                                <div className="sessions-content">
-                                    <div className="session-top">
-                                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
-                                        <h2><Weather sessionDate={session.date ? session.date : today}
-                                              sessionTime={session.time ? session.time : "12:00"}/></h2>
-                                    </div>
+                <div className="session-bottom">
+                    <h2>{session.place}</h2>
+                    <div className="session-initials">
+                          {session.attendees.map((attendee, index) => (
+                              <span key={index} className="initials-wrapper">
+                            {attendee.thumbnailImage  ? (
+                            <img src={attendee.thumbnailImage} alt="Profilbild" className="author-avatar"/>
+                            ) : (
+                            <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
+                         )}
+                  </span>
+                ))}
+              </div>
+                </div>
+            </div>
+        </div>
+    ))}
 
-                                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
-                                    ))}
-                                </div>
-                                )}
 
-                                    <div className="session-bottom">
-                                        <h2>{session.place}</h2>
-                                        <div className="session-initials">
-                                            {session.attendees.map((initials, attendeeIndex) => (
-                                                <span key={attendeeIndex} className="initials-wrapper">
-                                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
                 </div>
 
                 {role === 1000 && notSignedSessions.length > 0 && (
@@ -501,8 +599,14 @@ export default function MySessions() {
             <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index} onClick={(e) => toggleExpandContent(session, e)}> 
                 <div className="sessions-content">
                     <div className="session-top">
-                        <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                        <h2>{getDayOfWeek(session.date)} {formatDate(session.date)} {session.time}</h2>
                     </div>
+
+                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
 
                     {isContentExpanded(session) && (
                         <div className="expanded-session-content">
@@ -552,12 +656,16 @@ export default function MySessions() {
                     <div className="session-bottom">
                         <h2>{session.place}</h2>
                         <div className="session-initials">
-                            {session.attendees.map((initials, attendeeIndex) => (
-                                <span key={attendeeIndex} className="initials-wrapper">
-                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                </span>
-                            ))}
-                        </div>
+                          {session.attendees.map((attendee, index) => (
+                              <span key={index} className="initials-wrapper">
+                            {attendee.profileImage ? (
+                            <img src={attendee.profileImage} alt="Profilbild" className="author-avatar"/>
+                            ) : (
+                            <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
+                         )}
+                  </span>
+                ))}
+              </div>
                     </div>
                 </div>
             </div>
@@ -569,146 +677,88 @@ export default function MySessions() {
 
                  
 
-                <div className="sessions-wrapper">
+<div className="sessions-wrapper">
     <div className="sessions-header">
-        <h2>Tidigare pass</h2>
+        <h2 onClick={() => toggleShowPastSessions()}>Tidigare pass</h2>
+        {showPastSessions &&
+            <input
+                id="date-filter"
+                type="text" 
+                value={searchTerm}
+                onChange={handleSearch}
+                placeholder="YYYY-MM-DD"
+            />
+        }
+        <img
+            id="arrow"
+            src="/arrow.png"
+            alt="arrow-icon"
+            onClick={() => toggleShowPastSessions()}
+            style={{ transform: showPastSessions ? "rotate(90deg)" : "rotate(-90deg)" }}
+        />
     </div>
-    {role >= 2000 ? (
-        allPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
+    {showPastSessions && (
+        (searchTerm ? filteredPastSessions : allPastSessions).map((session, index) => (
+            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index} onClick={(e) => toggleExpandContent(session, e)}>
                 <div className="sessions-content">
                     <div className="session-top">
-                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
+                        <h2>{getDayOfWeek(session.date)} {session.date} {session.time}</h2>
                     </div>
 
+                    {!isContentExpanded(session) &&
+                                    <div className="session-center">
+                                       <h2>{session.title}</h2>
+                                     </div>
+                                    }
+                                    
                     {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item" key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
+                        <div className="expanded-session-content">
+                            {session.exercises.map((exercise, exerciseIndex) => (
+                                <div id="exercise-item" key={exerciseIndex}>
+                                    <h3 id="exercise-name" onClick={(e) => openModal(session, exercise)}>{exercise.name}</h3>
+                                    <p id="exercise-comment">{exercise.comment}</p>
+                                    {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
                                         <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
                                     ))}
-
-<div className="session-brief-wrapper">
-                                <div className="session-brief-header">
-                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
                                 </div>
-                        
-                  <div className="session-summary-container">
-                  {session.attendees.map((attendee, attendeeIndex) => (
-            <div className="session-summary-wrapper" key={attendeeIndex}>
-                <span className="initials-wrapper">
-                <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
-                </span>
-                <span id="summary-comment">
-                <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd'} </p>
-                </span>
-                <span id="score">
-                <p id="exercise-comment"> {attendee.howDidSessionGo || 0}/10</p>
-                </span>
-
-            </div>
-            
-              ))}
-            </div>
-      
-
-                            </div>
-
-                            
-                                </div>
-                                )}
-
-                    <div className="session-bottom">
-                        <h2>{session.place}</h2>
-                        <div className="session-initials">
-                            {session.attendees.map((initials, attendeeIndex) => (
-                                <span key={attendeeIndex} className="initials-wrapper">
-                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                </span>
                             ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        ))
-    ) : (
-        userPastSessions.map((session, index) => (
-            <div className={"sessions-expandable" + (isContentExpanded(session) ? " expanded" : "")} key={index}  onClick={(e) => toggleExpandContent(session, e)}> 
-                <div className="sessions-content">
-                    <div className="session-top">
-                        <h2> {getDayOfWeek(session.date)} {session.date} {session.time}</h2>
-                    </div>
-
-                    {isContentExpanded(session) && (
-                                <div className="expanded-session-content">
-                                    {session.exercises.map((exercise, exerciseIndex) => (
-                                    <div id="exercise-item"key={exerciseIndex}>
-                                        <h3 id="exercise-name" onClick={ (e) => openModal(session, exercise)}>{exercise.name}</h3>
-                                        <p id="exercise-comment">{exercise.comment}</p>
-                                        {exercise.userComment && exercise.userComment.map((userComment, userCommentIndex) => (
-                                        <p key={userCommentIndex} id="exercise-comment">{userComment.author}: {userComment.comment}</p>
-                                        ))}
-                                    </div>
-                                    ))}
-                                        <div className="session-brief-wrapper">
-                                <div className="session-brief-header">
-                                    <p id="exercise-comment">Sammanfattning av träningspass</p>
+                            <div className="session-results-wrapper">
+                                {session.attendees.map((result, resultIndex) => (
+                                <div key={resultIndex} className="session-results"> 
+                                <p id="result-name">{result.name} {result.lastname}</p>
+                                <p id="result-score">{result.howDidSessionGo}/10</p>
+                                <p id="result-comment">{result.summaryComment}</p>
                                 </div>
-                        
-                  <div className="session-summary-container">
-                  {session.attendees.map((attendee, attendeeIndex) => (
-             user.email === attendee.email && (
-                <div className="session-summary-wrapper" key={attendeeIndex}>
-                    <span className="initials-wrapper">
-                        <h3 id="initials">{attendee.name[0]}{attendee.lastname[0]}</h3>
-                    </span>
-                    <span id="summary-comment">
-                        <p id="exercise-comment">{attendee.summaryComment || 'Ingen sammanfattning tillagd men jag testar att bryta raden'} </p>
-                    </span>
-                    <span id="score">
-                        <p id="exercise-comment">{attendee.howDidSessionGo || 0}/10</p>
-                    </span>
-                </div>
-            )
-            
-              ))}
-            </div>
-      
-
-                            </div>
-                                </div>
-                                )}
-
                                 
-
+                               ))}
+                            </div>
+                        </div>
+                    )}
                     <div className="session-bottom">
                         <h2>{session.place}</h2>
                         <div className="session-initials">
-                            {session.attendees.map((initials, attendeeIndex) => (
-                                <span key={attendeeIndex} className="initials-wrapper">
-                                    <h3 id="initials">{initials.name[0] + initials.lastname[0]}</h3>
-                                </span>
-                            ))}
-                        </div>
+                          {session.attendees.map((attendee, index) => (
+                              <span key={index} className="initials-wrapper">
+                            {attendee.thumbnailImage ? (
+                            <img src={attendee.thumbnailImage} alt="Profilbild" className="author-avatar"/>
+                            ) : (
+                            <h3 id="initials">{attendee.name[0] + attendee.lastname[0]}</h3>
+                         )}
+                  </span>
+                ))}
+              </div>
                     </div>
-                    
                 </div>
-            
             </div>
-            
         ))
     )}
-  
 </div>
 
 
 
 
+
+                                    <Footer/>
             </div>
         </div>
     );

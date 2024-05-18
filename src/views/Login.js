@@ -2,6 +2,9 @@ import React, { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import LoaderSpinner from "../components/LoaderSpinner";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+ import { faEnvelope, faLock} from '@fortawesome/free-solid-svg-icons';
+
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
@@ -17,13 +20,13 @@ export default function Login() {
   const login = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("https://appleet-backend.vercel.app/login", {
+      const response = await fetch("http://192.168.0.30:5000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: emailValue,
+          email: emailValue.toLowerCase(),
           password: passwordValue,
         }),
       });
@@ -31,7 +34,7 @@ export default function Login() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token); // lagrar token i localstorage för att lätt kunna hämta det
-        navigate("/");
+        navigate("/home");
       }
 
     } catch (err) {
@@ -42,7 +45,16 @@ export default function Login() {
   };
 
   return (
+
+    <div>
+                    <div className="video-container">
+        <video width="100%" height="100%" autoPlay playsInline muted loop>
+            <source src="/start-video4.mp4" type="video/mp4"/>
+          </video>
+          </div>
+
     <div className="login-wrapper">
+
       <div className="logo-header">
         <h1>appleet.</h1>
         </div>
@@ -53,21 +65,32 @@ export default function Login() {
         </div>
 
         <div className="input-wrapper" id="login-input">
-          <div className="input-name">
+
+          <div className="input-login-form">
+            <span className="form-icon">
+          <FontAwesomeIcon icon={faEnvelope} />
+          </span>
             <input
               type="email"
               placeholder="Email"
               value={emailValue}
               onChange={(e) => handleChange(e, setEmailValue)}
-            ></input>
+              
+            >
+            </input>
           </div>
-          <div className="input-name">
+        
+          <div className="input-login-form">
+            <span className="form-icon">
+          <FontAwesomeIcon icon={faLock} />
+          </span>
             <input
               type="password"
               placeholder="Lösenord"
               value={passwordValue}
               onChange={(e) => handleChange(e, setPasswordValue)}
-            ></input>
+            >
+            </input>
           </div>
         </div>
 
@@ -86,5 +109,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

@@ -6,21 +6,17 @@
 }
 
 .input-name {
-  margin-top: 1rem;
+
   position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
-}
-
-input {
   position: relative;
   height: 2rem;
-  border: none;
   box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
   border-radius: 5px;
-  outline: none;
 }
+
 input::placeholder {
   font-style: oblique;
 }
@@ -48,9 +44,13 @@ textarea::placeholder {
 }
 
 .save-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
   width: 80%;
-  position: absolute;
-  bottom: 4rem;
+  min-height: 50dvh;
+/*   position: absolute;
+  bottom: 4rem; */
 }
 
 .save-button {
@@ -74,14 +74,100 @@ textarea::placeholder {
 
 .select-category {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 1rem;
-  width: 100%;
+  width: 80%;
 }
 #category {
-  width: 80%;
+  width: 50%;
   height: 2rem;
   box-shadow: 1px 1px 5px 1px rgb(218, 218, 218);
   outline: none;
   border: none;
+  border-radius: 5px;
 }
+
+.expand-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  width: 90%;
+  min-height: 100vh;
+  height: auto;
+}
+
+.module-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  min-height: 30vh;
+  border-radius: 10px;
+  background-color: white;
+  justify-content: center;
+}
+
+.selected-module-exercises{
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  align-items: center;
+  max-height: 20rem;
+  transition: max-height 0.3s ease-in-out;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
+.select-module-category{
+  width: 100%;
+  height: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+
+}
+
+.select-module-category select {
+  width: 100%;
+  margin-top: 1rem;
+  height: 2rem;
+  border:none;
+  border-radius: 5px;
+
+}
+
+#add-category{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 45%;
+  font-size: 1rem;
+
+}
+
+#plus-icon{
+  width: 1.6rem;
+  height: auto;
+}
+
+.new-category{
+  margin-top: 1rem;
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation-name: appear;
+  animation-duration: .3s;
+  animation-fill-mode: forwards;
+}
+
+.new-category input{
+  width: 70%;
+}
+

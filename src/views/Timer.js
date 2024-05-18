@@ -3,6 +3,7 @@ import "../styles/Timer.css";
 import MenuContext from "../context/MenuContext";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu";
+import AdminButton from "../components/AdminButton";
 
 export default function Timer() {
   const [time, setTime] = useState(0);
@@ -11,6 +12,7 @@ export default function Timer() {
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
 
   useEffect(() => {
+
     let intervalId;
 
     if (isRunning) {
@@ -21,6 +23,11 @@ export default function Timer() {
 
     return () => clearInterval(intervalId);
   }, [isRunning]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (!token) return
+  }, []);
 
   const minutes = Math.floor(time / (60 * 1000));
   const seconds = Math.floor((time % (60 * 1000)) / 1000);
@@ -44,16 +51,12 @@ export default function Timer() {
         setIsOpen={setIsMenuOpen}
         hamburgerRef={hamburgerRef}
       />
+      <AdminButton/>
 
-      <div
-        className="home-wrapper"
-        style={{
-          filter: isMenuOpen
-            ? "blur(4px) brightness(40%)"
-            : "blur(0) brightness(100%)",
-        }}
-      >
-        <h1 className="view-header">Timer</h1>
+      <div className="home-wrapper">
+         <div className="view-header">
+        <h1>Timer</h1>
+        </div>
 
         <div className="timer">
           <div className="counter">

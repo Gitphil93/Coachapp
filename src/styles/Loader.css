@@ -8,8 +8,8 @@
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 100%; 
-    z-index: 4;
+    width: 110%; 
+    z-index: 10;
     background-color: rgb(38, 42, 56);
 }
 
@@ -41,7 +41,7 @@
     stroke: rgb(255, 255, 255);
   }
   
-  /* Animations */
+
   @keyframes ringA {
     from, 4% {
       stroke-dasharray: 0 660;

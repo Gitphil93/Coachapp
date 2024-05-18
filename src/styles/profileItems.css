@@ -1,0 +1,261 @@
+
+
+.profile-item {
+    position: relative;
+    margin-top: 1rem;
+    width:100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3rem;  
+    min-height: 0rem;
+    box-shadow: 1px 1px 10px 5px rgb(218, 218, 218, 0.8);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    background-color: rgb(187, 186, 186,0.5);
+  /*   overflow: hidden; */
+    transition: all .3s ease;  
+}
+
+.profile-item.expanded {
+    width: 100%;
+    min-height: 20rem; 
+    overflow-y: auto;
+    flex-direction: column;
+   background-color: rgb(187, 186, 186,0.3);
+} 
+
+.details-container {
+
+    overflow-y: auto;
+    width: 100%;
+    height: auto;
+    transition: padding 0.3s 0.1s ease;
+}
+
+.details-container.expanded {
+   padding: 1rem; 
+   height: auto;
+   max-height: 15rem;
+}
+
+
+.detail {
+    width: 100%;
+    height: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-header-wrapper{
+    position: relative;
+    width: 100%;
+    height: 2rem;
+}
+
+.item-header{
+    position: absolute;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: .5px;
+    left: 1rem;
+   color: rgb(71, 70, 70);
+   white-space: nowrap; 
+   top:25%;
+   font-weight: 600;
+   transform: translateX(0%);
+   transition: all 0.3s ease-in-out;
+}
+
+.item-header.expanded{
+    left:50%;
+    transform: translateX(-50%);
+    padding-left: 1rem;
+    margin-top: 1rem;
+
+
+}
+
+.detail > p {
+    color: rgb(71, 70, 70);
+    font-size: .9rem;
+}
+
+#add-icon-span{
+    background-color: rgba(71, 70, 70, 0.3); 
+   width: 100%;
+    height: 3rem;
+    display: flex;  
+    align-items: center;  
+    justify-content: center; 
+}
+
+#add-icon{
+    color: var(--light-orange);
+    height: 1.3rem; 
+    width: 1.3rem;  
+
+}
+
+.add-result{
+}
+
+#event-input{
+width: 90%;
+height: 1.5rem;
+background-color: white;
+border-radius: 10px;
+}
+
+#result-input{
+  width: 90%;
+  height: 1.5rem;
+  background-color: white;
+  border-radius: 10px;
+}
+
+.add-result select{
+  width:90%;
+  height: 1.5rem;
+  color: rgb(71, 70, 70);
+  font-size: .9rem;
+  border: none;
+  background-color: white;
+  border-radius: 10px;
+ }
+
+ .add-result input[type="date"]{
+  width: 90%;
+  height: 1.5rem;
+  background-color: white;
+  border-radius: 10px;
+ }
+
+ .setting-select{
+  width: 90%;
+  color: rgb(71, 70, 70);
+  font-size: .9rem;
+  height: 1.5rem;
+  background-color: white;
+  border-radius: 10px;
+ }
+
+
+.step-container {
+  position: relative;
+  height: auto;
+  width: 100%;
+   overflow: hidden; 
+   height: 6rem;
+}
+
+.step-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; 
+  height: auto;
+  opacity: 0;
+  animation: slideInFromRight .5s ease-in-out 0.1s forwards; /* 0.2s is the delay */
+  will-change: transform, opacity;
+}
+
+ .add-result-button {
+     margin-top: 1rem;
+     display: flex;
+     justify-content: space-around;
+     width: 100%;
+ }
+
+ .add-result-button button {
+     width: 6rem;
+     height: 2rem;
+     border: none;
+     background-color: var(--blue);
+     color: white;
+     font-size: 1rem;
+     border-radius: 10px;
+ }
+
+
+
+.add-item-header{
+  color: var(--text-grey);
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+
+}
+
+.add-item-header h3 {
+    font-size: 1rem;
+}
+
+.add-item-inputs{
+  display: flex;
+  justify-content: center;
+}
+
+.item-input{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+}
+
+.item-input label{
+font-size: .8rem;
+color: var(--text-grey);
+font-weight: 600;
+}
+
+#pb-weight-input{
+  width: 50%;
+  height: 1.5rem;
+  background-color: white;
+  border-radius: 10px;
+ 
+}
+
+
+.date-paragraph {
+    text-align: center;
+    width:5rem;
+}
+.setting-paragraph {
+    text-align: center;
+    width:5rem;
+}
+
+.bold-paragraph{
+    font-weight: 600;
+    width: 43%;
+    text-overflow: ellipsis; 
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+

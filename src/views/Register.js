@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import "../styles/Register.css";
 import LoaderSpinner from "../components/LoaderSpinner";
 import Loader from "../components/Loader";
 
 export default function Register() {
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
@@ -20,20 +21,21 @@ export default function Register() {
   
     if (passwordValue === passwordRepeatValue) {
       try {
-        const response = await fetch("https://appleet-backend.vercel.app/register", {
+        const response = await fetch("http://192.168.0.30:5000/athlete/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: emailValue,
+            email: emailValue.toLowerCase(),
             password: passwordValue,
-            key: keyValue,
+            key: keyValue.trim(),
           }),
         });
-        const data = response.status;
+        
 
-        if (data === 201) {
+        if (response.ok) {
+          navigate("/login")
           console.log("Användare skapad");
         }
       } catch (err) {
@@ -47,6 +49,14 @@ export default function Register() {
   };
 
   return (
+    <div>
+
+<div className="video-container">
+        <video width="100%" height="100%" autoPlay playsInline muted loop>
+            <source src="/start-video4.mp4" type="video/mp4"/>
+          </video>
+          </div>
+
     <div className="register-wrapper">
             <div className="logo-header">
         <h1>appleet.</h1>
@@ -57,7 +67,7 @@ export default function Register() {
         </div>
 
         <div className="input-wrapper">
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="email"
               placeholder="Email"
@@ -65,7 +75,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setEmailValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="password"
               placeholder="Lösenord"
@@ -73,7 +83,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setPasswordValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="password"
               placeholder="Upprepa lösenord"
@@ -81,7 +91,7 @@ export default function Register() {
               onChange={(e) => handleChange(e, setPasswordRepeatValue)}
             ></input>
           </div>
-          <div className="input-name">
+          <div className="input-login-form">
             <input
               type="text"
               placeholder="Nyckel"
@@ -109,6 +119,7 @@ export default function Register() {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }

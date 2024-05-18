@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap');
+
+.landing-wrapper{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Istället för 100dvh */
+    min-height: 100vh; 
+    width: 100%;
+    background-color: white;
+    overflow: scroll;
+    z-index: 1;
+}
+
+.video-container{
+    z-index:0;
+}
+
+video{
+    pointer-events: none;
+    position:fixed;
+    margin:0;
+    padding:0;
+    object-fit: cover;
+    filter:  brightness(0.5);
+    z-index: 0;
+}
+
+.overlay-content{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height:100dvh;
+    color: white;
+    z-index: 1;
+    backdrop-filter: blur(10px)
+    
+}
+
+.appleet-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    min-height: 100vh;
+    height: auto;
+    background-color: transparent;
+
+}
+
+.page-two-container{
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.appleet-header-h1{
+    visibility: hidden; 
+    animation-duration: .5s;
+    animation-name: appear;
+    animation-delay: .5s; 
+    animation-fill-mode: forwards; 
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(.5);
+        visibility: visible; 
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+        visibility: visible; 
+    }
+}
+
+.appleet-header > h1{
+    display: flex;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.904);
+    font-family: "Racing Sans One", sans-serif;
+}
+
+.landing-buttons{
+    height: 10rem;
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    gap:5vmin;
+    align-items: center;
+    visibility: hidden; /* Göm elementet */
+ 
+}
+.landing-button{
+    width: 10rem;
+    height: 3rem;
+    color: rgb(255, 255, 255);
+    border: 2px solid rgba(255, 187, 0, 1);
+    border-radius: 10px;
+    background-color: rgba(32, 28, 82, 0.2);
+    letter-spacing: 1px;
+    font-weight: 400;
+    font-size: 1rem;
+    transform: scale(1);
+    transition:transform .1s ease;
+}
+
+#login {
+    animation-duration: .5s;
+    animation-name: appear;
+    animation-delay: .6s; 
+    animation-fill-mode: forwards; 
+}
+#signup{
+    animation-duration: .5s;
+    animation-name: appear;
+    animation-delay: .7s; 
+    animation-fill-mode: forwards; 
+}
+.landing-button:active{
+    transform: scale(.95);
+}
+
+.hook-container1{
+    width: 100%;
+    padding: 1rem;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+   /*  background-color:rgb(255, 255, 255, .1); */
+    
+}
+
+.hook-container2{
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: flex-end;
+    height: 10rem;
+    align-items: center;
+/*     background-color:rgb(255, 255, 255, .1); */
+}
+
+
+.hook-container1 > h2{
+    font-weight: 600;
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+.hook-container2 > h2{
+    font-weight: 300;
+}
+
+.try-for-free-container{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    visibility: hidden;
+    animation-duration: .5s;
+    animation-name: appear;
+    animation-delay: .8s; 
+    animation-fill-mode: forwards; 
+}
+#try-for-free-button {
+    height: 3rem;
+    width: 20rem;
+    color: white;
+    background-color: rgba(106, 235, 149, 0.2);
+    border-radius: 10px;
+    border: 2px solid rgba(83, 248, 83, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    transform: scale(1);
+    transition:transform .1s ease;
+/*     animation-name: buttonshift;
+    animation-duration: 2s; 
+    animation-iteration-count: infinite; 
+    animation-timing-function: ease; */
+    animation: 5s linear 1s infinite buttonshift;
+    transition: animation 1s ease;
+    animation-direction: alternate;
+}
+#try-for-free-button:active{
+    transform: scale(.95)
+}
+
+@keyframes buttonshift {
+    0%   { background-color: rgba(2, 253, 86, 0.4) ; }
+    25%  { background-color: rgba(57, 252, 39, 0.4);}
+    50%  { background-color: rgba(78, 255, 146, 0.4);} 
+    75%  { background-color: rgba(2, 177, 69, 0.4);}
+    100% { background-color: rgba(11, 214, 0, 0.4); }
+
+}
+
