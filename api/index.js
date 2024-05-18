@@ -77,13 +77,13 @@ async function run() {
 run().catch(console.dir);
 
 
-/* app.options('*', (req, res) => {
+ app.options('*', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(200).send();
 });
- */
+ 
 
 app.post('/create-checkout-session', async (req, res) => {
   try {
