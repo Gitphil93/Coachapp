@@ -39,7 +39,6 @@ export default function AddSession() {
   const [showNotification, setShowNotification] = useState(true)
   const [exercisesInCategory, setExercisesInCategory] = useState({})
 
-  console.log(exercisesInCategory)
 
   const openModal = (exercise) => {
     setSelectedExercise(exercise);
@@ -174,7 +173,7 @@ export default function AddSession() {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-all-users",
+            "http://192.168.0.30:5000/get-all-users",
             {
               method: "GET",
               headers: {
@@ -210,7 +209,7 @@ if (isPostSessionSuccess) {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "https://appleet-backend.vercel.app/get-exercises",
+            "http://192.168.0.30:5000/get-exercises",
             {
               method: "GET",
               headers: {
@@ -270,7 +269,7 @@ if (isPostSessionSuccess) {
       if (token) {
       try{
         setIsLoading(true)
-        const response = await fetch("https://appleet-backend.vercel.app/post-session", {
+        const response = await fetch("http://192.168.0.30:5000/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -345,6 +344,7 @@ if (isPostSessionSuccess) {
     // Säkerställ att alla kategorier behålls
     const allCategories = new Set([...exerciseCategories, ...Object.keys(categoryCount)]);
     setExerciseCategories([...allCategories]);
+    setExerciseCategories([]);
   
     setExercisesInCategory(categoryCount);
   };
@@ -353,6 +353,10 @@ if (isPostSessionSuccess) {
     updateCategoriesAndCounts();
   }, [exerciseArray]);
   
+
+  const addExercise = () => {
+    navigate("/add-exercise")
+  }
   
   return (
     <div>
@@ -377,7 +381,7 @@ if (isPostSessionSuccess) {
         
 
         <div className="input-wrapper">
-          <h2 className="header-text">Lägg till deltagare</h2>
+          <h2 className="header-text">Välj passdeltagare</h2>
 
           {users.length !== 0 && (
           <div className="attendees">
@@ -440,7 +444,7 @@ if (isPostSessionSuccess) {
             <div className="add-exercises-header">
               <h2 className="header-text">Lägg till övningar</h2>
 
-              {exerciseArray.length !== 0 &&
+              {exerciseCategories.length !== 0 &&
               <>
               <img id="search-svg" src="/search.svg" alt="search-svg" onClick={openSearchModal} />
               </>
@@ -448,6 +452,11 @@ if (isPostSessionSuccess) {
             </div>
 
             <div className="expand-wrapper">
+                {exerciseCategories.length === 0 &&
+                <div className="no-exercises">
+                  <h2 onClick={addExercise}>Du har inte skapat några övningar ännu. Klicka här för att lägga till övningar</h2>
+                </div>
+                }
               {exerciseCategories.map((category) => (
                 <div key={category}>
                   <div
@@ -509,6 +518,9 @@ if (isPostSessionSuccess) {
 
             {selectedAttendees.length > 0 && (
   <div className="session-summary">
+    <div className="session-summary-view-header">
+    <h1>Sammanfattning</h1>
+    </div>
     <div className="session-summary-attendees">
       <h2 className="header-text">Deltagare</h2>
       <div className="attendees">

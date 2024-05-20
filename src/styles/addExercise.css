@@ -171,3 +171,6 @@ textarea::placeholder {
   width: 70%;
 }
 
+.module-name{
+  margin-top: 1rem;
+}

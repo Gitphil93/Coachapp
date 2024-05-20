@@ -24,7 +24,7 @@ export default function AdminDashboard() {
     const [exerciseCategories, setExerciseCategories] = useState([])
     const [expandedCategory, setExpandedCategory] = useState(null);
     const [selectedExercise, setSelectedExercise] = useState("")
-    console.log(user)
+
 
 
     const openDeleteModal = (user) => {
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         try {
             setIsLoading(true);
             const response = await fetch(
-                "https://appleet-backend.vercel.app/get-all-users",
+                "http://192.168.0.30:5000/get-all-users",
                 {
                     method: "GET",
                     headers: {
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
         try {
             setIsLoading(true)
-            const response = await fetch("https://appleet-backend.vercel.app/delete-user", {
+            const response = await fetch("http://192.168.0.30:5000/delete-user", {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
           try {
             setIsLoading(true)
             const response = await fetch(
-              "https://appleet-backend.vercel.app/get-exercises",
+              "http://192.168.0.30:5000/get-exercises",
               {
                 method: "GET",
                 headers: {
@@ -124,7 +124,6 @@ export default function AdminDashboard() {
               },
             );
             const data = await response.json();
-            console.log(data);
             setExerciseArray(data);
             const categories = Array.from(
               new Set(data.map((exercise) => exercise.category)),
@@ -144,7 +143,7 @@ export default function AdminDashboard() {
     
         try {
             setIsLoading(true);
-            const response = await fetch(`https://appleet-backend.vercel.app/delete-exercise/${exerciseId}`, {
+            const response = await fetch(`http://192.168.0.30:5000/delete-exercise/${exerciseId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

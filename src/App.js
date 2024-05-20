@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css"
 import Home from "./views/Home";
-import AddExcercise from "./views/AddExcercise";
+import AddExercise from "./views/AddExercise";
 import AddAthlete from "./views/AddAthlete";
 import Timer from "./views/Timer";
 import Login from "./views/Login";
@@ -29,7 +29,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="home" element={<Home />} />
-            <Route path="add-excercise" element={<AddExcercise />} />
+            <Route path="add-exercise" element={<AddExercise />} />
             <Route path="add-athlete" element={<AddAthlete />} />
             <Route path="add-session" element={<AddSession />} />
             <Route path="admin-dashboard" element={<AdminDashboard />} />

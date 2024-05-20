@@ -182,7 +182,7 @@ margin-top: 1rem;
 }
 
 .session-summary {
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -190,6 +190,10 @@ margin-top: 1rem;
 
 .session-summary-exercises {
   margin-top: 2rem;
+}
+
+.session-summary-attendees {
+  margin-top: 1rem;
 }
 
 .session-summary-time-place{
@@ -326,4 +330,32 @@ margin-top: 1rem;
 
 .name-wrapper{
   margin-top: 1rem;
+}
+
+.session-summary-view-header {
+  font-size: .8rem;
+/*   margin-top: 1rem; */
+  text-align: center;
+}
+
+.session-summary-view-header h1 {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+
+.no-exercises{
+  margin-top: 1rem;
+  color: var(--text-grey);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  text-align: center;
+}
+
+.no-exercises h2{
+  font-weight: 400;
+  font-style: italic;
 }

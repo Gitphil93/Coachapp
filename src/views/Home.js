@@ -84,7 +84,6 @@ const getToday = () => {
     }
     setIsLoading(true)
     const decodedToken = jwtDecode(token);
-    console.log(decodedToken)
     setRole(decodedToken.role);
     setUser({ name: decodedToken.name, lastname: decodedToken.lastname });
     getToday()
@@ -111,7 +110,7 @@ const getToday = () => {
     if (!token) return
     if (token && today) {
 
-      fetch("https://appleet-backend.vercel.app/get-user", {
+      fetch("http://192.168.0.30:5000/get-user", {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -142,7 +141,7 @@ const getSessions = async (token, today) => {
   if (!token) return;
   const decodedToken = jwtDecode(token)
   try {
-    const response = await fetch("https://appleet-backend.vercel.app/get-sessions", {
+    const response = await fetch("http://192.168.0.30:5000/get-sessions", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -211,7 +210,7 @@ const getSessions = async (token, today) => {
     try {
       setIsLoading(true)
       const response = await fetch(
-        "https://appleet-backend.vercel.app/admin/post-global-message",
+        "http://192.168.0.30:5000/admin/post-global-message",
         {
           method: "POST",
           headers: {
@@ -275,7 +274,7 @@ const formatDate = (dateString) => {
   const decodedToken = jwtDecode(token)
   const role = decodedToken.role
   try {
-    const response = await fetch("https://appleet-backend.vercel.app/get-global-message", {
+    const response = await fetch("http://192.168.0.30:5000/get-global-message", {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -308,7 +307,7 @@ const deleteGlobalMessage = async () => {
   if (!token) return;
 
   try {
-      const response = await fetch("https://appleet-backend.vercel.app/admin/delete-global-message", {
+      const response = await fetch("http://192.168.0.30:5000/admin/delete-global-message", {
           method: "DELETE",
           headers: {
               "Authorization": `Bearer ${token}`,
@@ -549,29 +548,29 @@ const deleteGlobalMessage = async () => {
               </div>
 
               <div className="admin-modal">
-                <Link
-                  to="/add-session"
+
+              <Link
+                  to="/add-athlete"
                   className="admin-modal-item"
                   onClick={closeAdminModal}
                 >
-                  <h2>Lägg till pass</h2>
+                  <h2>Lägg till atlet</h2>
                 </Link>
 
                 <Link
-                  to="/add-excercise"
+                  to="/add-exercise"
                   className="admin-modal-item"
                   onClick={closeAdminModal}
                 >
                   <h2>Lägg till övning</h2>
                 </Link>
 
-
                 <Link
-                  to="/add-athlete"
+                  to="/add-session"
                   className="admin-modal-item"
                   onClick={closeAdminModal}
                 >
-                  <h2>Lägg till atlet</h2>
+                  <h2>Lägg till pass</h2>
                 </Link>
 
                 <div className="admin-modal-item" onClick={openGlobalMessageModal}>

@@ -11,13 +11,13 @@ root.render(
   </React.StrictMode>,
 );
 
-if ('serviceWorker' in navigator) {
+/* if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
       .then(reg => console.log('Service Worker registered', reg))
       .catch(err => console.error('Service Worker registration failed', err));
   });
-}
+} */
 const meta = document.createElement('meta');
 meta.setAttribute('name', 'viewport');
 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');

@@ -7,7 +7,7 @@ import MenuContext from "../context/MenuContext";
 export default function Header({ onMenuToggle, hamburgerRef }) {
   const location = useLocation();
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
-  console.log(isMenuOpen)
+
   const handleLogoClick = () => {
     if (location.pathname !== "/home") {
       window.location.href = "/home";

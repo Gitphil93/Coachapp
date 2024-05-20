@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
-import "../styles/addExcercise.css";
+import "../styles/addExercise.css";
 import Success from "../components/Success";
 import Header from "../components/Header.js";
 import Menu from "../components/Menu.js";
@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 
 
-export default function AddExcercise() {
+export default function AddExercise() {
   const [isLoading, setIsLoading] = useState(false)
   const [nameValue, setNameValue] = useState("");
   const [moduleNameValue, setModuleNameValue] = useState("")
@@ -66,14 +66,14 @@ console.log(categoryValue)
     setUser(decodedToken)
   }, [])
 
-  const addExcercise = async () => {
+  const addExercise = async () => {
     const token = localStorage.getItem("token")
     if (!token) return
     if (nameValue === "" || categoryValue === "") {
       return false;
     }
     try {
-      const response = await fetch("https://appleet-backend.vercel.app/add-exercise", {
+      const response = await fetch("http://192.168.0.30:5000/add-exercise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ const removeExerciseFromModule = (exerciseId) => {
       try {
         setIsLoading(true)
         const response = await fetch(
-          "https://appleet-backend.vercel.app/get-exercises",
+          "http://192.168.0.30:5000/get-exercises",
           {
             method: "GET",
             headers: {
@@ -167,7 +167,7 @@ const removeExerciseFromModule = (exerciseId) => {
 
     try {
         setIsLoading(true);
-        const response = await fetch(`https://appleet-backend.vercel.app/delete-exercise/${exerciseId}`, {
+        const response = await fetch(`http://192.168.0.30:5000/delete-exercise/${exerciseId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -190,9 +190,9 @@ const removeExerciseFromModule = (exerciseId) => {
 const postModule = async () => {
   const token = localStorage.getItem("token");
   if (!token) return;
-
+  if (moduleNameValue === "" || moduleCategoryValue === "" || moduleExercises.length === 0) return
   try {
-    const response = await fetch("https://appleet-backend.vercel.app/add-exercise", {
+    const response = await fetch("http://192.168.0.30:5000/add-exercise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -352,7 +352,7 @@ useEffect(() => {
          
 
         <div className="save-button-wrapper">
-          <button className="save-button" onClick={addExcercise}>
+          <button className="save-button" onClick={addExercise}>
             Spara övning
           </button>
         </div>
@@ -412,8 +412,10 @@ useEffect(() => {
             </div>
 
   
+              <div className="module-name">
               <label for="name">Vad vill du kalla din modul?</label>
               <input name="name" value={moduleNameValue} onChange={handleModuleNameChange} placeholder="T.ex. Uppvärmingsmodul 1" id="name" className="input-name" />
+              </div>
               <div className="select-module-category">
                 <label for="category">I vilken kategori vill du lägga till modulen?</label>
                 <select
