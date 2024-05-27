@@ -344,7 +344,6 @@ if (isPostSessionSuccess) {
     // Säkerställ att alla kategorier behålls
     const allCategories = new Set([...exerciseCategories, ...Object.keys(categoryCount)]);
     setExerciseCategories([...allCategories]);
-    setExerciseCategories([]);
   
     setExercisesInCategory(categoryCount);
   };
@@ -381,7 +380,7 @@ if (isPostSessionSuccess) {
         
 
         <div className="input-wrapper">
-          <h2 className="header-text">Välj passdeltagare</h2>
+          <h2 className="header-text">Välj passdeltagare *</h2>
 
           {users.length !== 0 && (
           <div className="attendees">

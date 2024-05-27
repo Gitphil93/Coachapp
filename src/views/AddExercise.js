@@ -32,6 +32,8 @@ export default function AddExercise() {
   const [moduleExercises, setModuleExercises] = useState([])
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [newCategoryValue, setNewCategoryValue] = useState("")
+  const [isCreatingExercise, setIsCreatingExercise] = useState(true)
+  const [isCreatingModule, setIsCreatingModule] = useState(false)
 
 console.log(categoryValue)
   
@@ -82,7 +84,7 @@ console.log(categoryValue)
         body: JSON.stringify({
           name: nameValue.trim().charAt(0).toUpperCase() + nameValue.trim().slice(1),
           description: descriptionValue.trim().charAt(0).toUpperCase() + descriptionValue.trim().slice(1),
-          category: categoryValue,
+          category: categoryValue.trim(),
           coach: user.email
         }),
       });
@@ -243,7 +245,7 @@ const addCategory = () => {
   }
 
   setExerciseCategories(prevCategories => [...prevCategories, newCategoryValue]);
-  setCategoryValue(newCategoryValue);
+  setCategoryValue(newCategoryValue.trim());
   setShowNewCategory(false);
   setNewCategoryValue("")
 };
@@ -251,6 +253,26 @@ const addCategory = () => {
 useEffect(() => {
     getExercises()
 }, []);
+
+const showAddExercise = () => {
+  if (isCreatingExercise) {
+    return
+} else if (!isCreatingExercise) {
+  setIsCreatingExercise(true)
+  setIsCreatingModule(false)
+}
+}
+
+const showAddModule = () => {
+  if (isCreatingModule) {
+    return
+} else if (!isCreatingModule) {
+  setIsCreatingModule(true)
+  setIsCreatingExercise(false)
+}
+}
+
+
 
   return (
     <div>
@@ -264,11 +286,20 @@ useEffect(() => {
 
 
       <div className="home-wrapper">
-         <div className="view-header">
-        <h1>Skapa övning</h1>
+         <div className="nav-header">
+           <div className="nav-header-button">
+           <button className={`nav-button ${isCreatingExercise ? "active" : ""}`} onClick={showAddExercise}>Skapa övning</button>
+        </div>
+        <div className="nav-header-button">
+        <button className={`nav-button ${isCreatingModule ? "active" : ""}`} onClick={showAddModule}>Skapa modul</button>
+        </div>
         </div>
 
-
+          {isCreatingExercise &&
+          <>
+          <div className="view-header">
+            <h1>Skapa övning</h1>
+          </div>
         <div className="input-wrapper">
           <div>
             <label for="name">Namn</label>
@@ -356,12 +387,23 @@ useEffect(() => {
             Spara övning
           </button>
         </div>
-        
+        </>
+          }
 
+          {isCreatingModule &&
+          <>
         <div className="expand-container">
         <div className="view-header">
           <h1>Skapa modul</h1>
         </div>
+
+
+        <div className="add-guide">
+          <p>En modul är en samling övningar som gör det enklare och snabbare att skapa ett pass.
+              Välj övningar, ge din modul ett namn och lägg till modulen i en kategori. Nya kategorier skapar du under fliken "Skapa övning".
+          </p>
+          </div>
+
 
           <div className="expand-wrapper">
               {exerciseCategories.map((category) => (
@@ -414,7 +456,7 @@ useEffect(() => {
   
               <div className="module-name">
               <label for="name">Vad vill du kalla din modul?</label>
-              <input name="name" value={moduleNameValue} onChange={handleModuleNameChange} placeholder="T.ex. Uppvärmingsmodul 1" id="name" className="input-name" />
+              <input name="name" value={moduleNameValue} onChange={handleModuleNameChange} placeholder="T.ex. Uppvärmningsmodul 1" id="name" className="input-name" />
               </div>
               <div className="select-module-category">
                 <label for="category">I vilken kategori vill du lägga till modulen?</label>
@@ -451,7 +493,10 @@ useEffect(() => {
           <div className="save-button-wrapper">
             <button className="save-button" onClick={postModule}>Spara Modul</button>
             </div>
+  
             </div>
+            </>
+          }
             <Footer></Footer>
       </div>
 

@@ -25,8 +25,15 @@ const app = express();
 //Middleware
 app.use(compression());
 app.use(express.json());
+const allowedOrigins = ['http://localhost:3000', 'http://192.168.0.30:5000', 'https://appleet.vercel.app'];
 const corsOptions = {
-  origin: 'https://appleet.vercel.app', 
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, 
@@ -1056,6 +1063,57 @@ const s3Client = new S3Client({region: "eu-north-1", credentials: {
   accessKeyId: process.env.AWS_KEY,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 } });
+
+app.post("/like-global-message", verifyToken, async (req, res) => {
+  const { messageId } = req.body; // ID för meddelandet som ska gillas
+  const userEmail = req.decoded.email; // Användarens e-post från JWT
+  const userName = `${req.decoded.name} ${req.decoded.lastname}`; // Användarens namn från JWT
+  
+  let client;
+  try {
+    client = await getConnection();
+    const db = client.db("Coachapp");
+    const globalMessageCollection = db.collection("globalmessage");
+
+    const globalMessage = await globalMessageCollection.findOne({ _id: new ObjectId(messageId) });
+
+    if (!globalMessage) {
+      return res.status(404).json({ error: "Meddelandet hittades inte" });
+    }
+
+    const hasLiked = globalMessage.likes.includes(userName);
+
+    let updateResult;
+    if (hasLiked) {
+      // Ta bort gilla-markering
+      updateResult = await globalMessageCollection.updateOne(
+        { _id: new ObjectId(messageId) },
+        { $pull: { likes: userName } }
+      );
+    } else {
+      // Lägg till gilla-markering
+      updateResult = await globalMessageCollection.updateOne(
+        { _id: new ObjectId(messageId) },
+        { $addToSet: { likes: userName } }
+      );
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(400).json({ error: "Ingen uppdatering gjordes" });
+    }
+
+    res.status(200).json({ message: "Meddelandet har uppdaterats" });
+  } catch (error) {
+    console.error("Ett fel uppstod vid uppdatering av meddelandet:", error);
+    res.status(500).json({ error: "Ett fel uppstod vid uppdatering av meddelandet" });
+  } finally {
+    if (client) {
+      releaseConnection(client);
+    }
+  }
+});
+
+
 
 /* const upload = multer({ dest: 'uploads/' }); */
 

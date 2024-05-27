@@ -198,6 +198,7 @@
 
 
 .global-message {
+  position: relative;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -209,6 +210,25 @@
   animation-duration: .3s;
   animation-delay: .1s;
   animation-fill-mode: forwards;
+}
+
+.heart-icon{
+  color: red;
+  
+}
+
+.like-wrapper{
+  gap: .5rem;
+  width: 2rem;
+  position: absolute;
+  right: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.like-wrapper p{
+font-size: .8rem;
 }
 
 .global-message-author {

@@ -12,7 +12,8 @@ import Footer from "../components/Footer.js"
 import AdminButton from "../components/AdminButton";
 import Greeting from "../components/Greeting";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 
 export default function Home() {
   const [isGlobalMessageModalOpen, setIsGlobalMessageModalOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function Home() {
  /*  const modalRef = useRef(); */
   const [name, setName] = useState("");
   const [globalMessage, setGlobalMessage] = useState("");
+  const [globalMessageLike, setGlobalMessageLike] = useState(0)
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [userRole, setUserRole] = useState(0);
   const [initials, setInitials] = useState("");
@@ -33,7 +35,6 @@ export default function Home() {
   const [globalMessageInput, setGlobalMessageInput] = useState("")
   const [profilePic, setProfilePic] = useState({})
   const navigate = useNavigate()
-
 
 
     const handleInputChange = (e) => {
@@ -286,8 +287,15 @@ const formatDate = (dateString) => {
 
       if (data.globalMessage.globalMessage === "") {
         setGlobalMessage("");
+        if (data.globalMessage.likes)  {
+          setGlobalMessageLike(data.globalMessage.likes.length)
+        }
       } else if (role > 2000){ // admin hämtar alla meddelanden, alltså i en array
         // Därför tar vi det sista
+     
+        if (data.globalMessage[data.globalMessage.length -1].likes)  {
+          setGlobalMessageLike(data.globalMessage[data.globalMessage.length -1].likes.length)
+        }
         setGlobalMessage(data.globalMessage[data.globalMessage.length -1])
       } else {
         setGlobalMessage(data.globalMessage);
@@ -344,6 +352,38 @@ const deleteGlobalMessage = async () => {
   const adminDashboard = () => {
     navigate("/admin-dashboard")
   }
+
+  const likeGlobalMessage = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch("http://192.168.0.30:5000/like-global-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          messageId: globalMessage._id,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedLikes = globalMessage.likes?.includes(`${user.name} ${user.lastname}`)
+          ? globalMessage.likes.filter(name => name !== `${user.name} ${user.lastname}`)
+          : [...globalMessage.likes, `${user.name} ${user.lastname}`];
+
+        setGlobalMessage({
+          ...globalMessage,
+          likes: updatedLikes,
+        });
+        setGlobalMessageLike(updatedLikes.length);
+      }
+    } catch (err) {
+      console.error("Error toggling like on global message:", err);
+    }
+  };
    
   return (
     <div>
@@ -392,8 +432,19 @@ const deleteGlobalMessage = async () => {
                   </span>
                 </>
               )}
-          </div>
+              <div className="like-wrapper">
+                <span className="heart-icon">
+                  <FontAwesomeIcon
+                    icon={globalMessage.likes?.includes(`${user.name} ${user.lastname}`) ? faHeart : faHeartRegular}
+                    onClick={likeGlobalMessage}
+                  />
+                </span>
+                <p>{globalMessageLike > 0 ? globalMessageLike : ""}</p>
+              </div>
+            </div>
         )}
+
+        
 
                   {userRole >= 2000 && (
                <div className="menu-icon">

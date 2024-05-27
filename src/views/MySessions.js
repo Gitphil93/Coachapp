@@ -163,7 +163,16 @@ export default function MySessions() {
 
     const postComment = async () => {
         const token = localStorage.getItem("token");
-        if (!token) return
+        if (!token) return;
+        
+        const trimmedComment = comment.trim();
+        const trimmedResult = result.trim();
+      
+        if (trimmedComment === "" && trimmedResult === "") {
+          console.error("Kommentar och resultat är båda tomma.");
+          return;
+        }
+      
         try {
           const response = await fetch(`http://192.168.0.30:5000/add-comment/${currentSessionId}/${currentExercise._id}`, {
             method: "POST",
@@ -173,20 +182,20 @@ export default function MySessions() {
             },
             body: JSON.stringify({
               email: user.email,
-              userComment: comment.trim() !== "" ? comment.trim() : "",
-              result: result.trim() + unit,
+              userComment: trimmedComment,
+              result: trimmedResult + unit,
               author: user.name[0] + user.lastname[0]
             }),
           });
-
-          setComment("")
-          closeModal()
-        
+      
+          setComment("");
+          closeModal();
+          
           if (response.ok) {
             console.log("Kommentaren postades framgångsrikt!");
             getSessions();
-            setUnit("")
-            setResult("")
+            setUnit("");
+            setResult("");
           } else {
             console.error("Något gick fel när du försökte posta kommentaren.");
           }
@@ -194,6 +203,7 @@ export default function MySessions() {
           console.error("Ett fel uppstod vid hantering av kommentaren:", error);
         }
       };
+      
 
 
       const deleteSession = async () => {
