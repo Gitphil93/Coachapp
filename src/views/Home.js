@@ -23,7 +23,7 @@ export default function Home() {
  /*  const modalRef = useRef(); */
   const [name, setName] = useState("");
   const [globalMessage, setGlobalMessage] = useState("");
-  const [globalMessageLike, setGlobalMessageLike] = useState(0)
+  const [globalMessageLikes, setGlobalMessageLikes] = useState([])
   const { toggleMenu, isMenuOpen, setIsMenuOpen } = useContext(MenuContext);
   const [userRole, setUserRole] = useState(0);
   const [initials, setInitials] = useState("");
@@ -288,13 +288,13 @@ const formatDate = (dateString) => {
       if (data.globalMessage.globalMessage === "") {
         setGlobalMessage("");
         if (data.globalMessage.likes)  {
-          setGlobalMessageLike(data.globalMessage.likes.length)
+          setGlobalMessageLikes(data.globalMessage.likes)
         }
-      } else if (role > 2000){ // admin hämtar alla meddelanden, alltså i en array
+      } else if (role > 2000) { // admin hämtar alla meddelanden, alltså i en array
         // Därför tar vi det sista
      
         if (data.globalMessage[data.globalMessage.length -1].likes)  {
-          setGlobalMessageLike(data.globalMessage[data.globalMessage.length -1].likes.length)
+          setGlobalMessageLikes(data.globalMessage[data.globalMessage.length -1].likes)
         }
         setGlobalMessage(data.globalMessage[data.globalMessage.length -1])
       } else {
@@ -378,7 +378,7 @@ const deleteGlobalMessage = async () => {
           ...globalMessage,
           likes: updatedLikes,
         });
-        setGlobalMessageLike(updatedLikes.length);
+        setGlobalMessageLikes(updatedLikes);
       }
     } catch (err) {
       console.error("Error toggling like on global message:", err);
@@ -439,7 +439,8 @@ const deleteGlobalMessage = async () => {
                     onClick={likeGlobalMessage}
                   />
                 </span>
-                <p>{globalMessageLike > 0 ? globalMessageLike : ""}</p>
+                <p>{globalMessageLikes.length > 0 ? globalMessageLikes.length : ""}</p>
+
               </div>
             </div>
         )}

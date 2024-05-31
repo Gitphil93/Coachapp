@@ -25,7 +25,7 @@ const app = express();
 //Middleware
 app.use(compression());
 app.use(express.json());
-const allowedOrigins = ['http://localhost:3000', 'http://192.168.0.30:5000', 'https://appleet.vercel.app'];
+const allowedOrigins = ['http://localhost:3000', 'http://192.168.0.30:3000', 'https://appleet.vercel.app'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -451,6 +451,15 @@ app.post("/login", async (req, res) => {
     });
     resObj.success = true;
     resObj.token = token;
+
+    const date = new Date()
+    date.setHours(date.getHours() +2)
+
+
+    await usersCollection.updateOne(
+      { email: credentials.email },
+      { $set: { lastLoggedIn: date } }
+    );
 
     return res.status(200).json(resObj);
   } catch (error) {

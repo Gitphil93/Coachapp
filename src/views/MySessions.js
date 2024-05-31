@@ -51,6 +51,7 @@ export default function MySessions() {
     const [filteredPastSessions, setFilteredPastSessions] = useState([]);
     const [result, setResult] = useState("")
     const [unit, setUnit] = useState("")
+    console.log(unit)
 
     const openModal = (session, exercise) => {
         setCurrentSessionId(session._id); 
@@ -165,11 +166,12 @@ export default function MySessions() {
         const token = localStorage.getItem("token");
         if (!token) return;
         
+        
         const trimmedComment = comment.trim();
         const trimmedResult = result.trim();
       
-        if (trimmedComment === "" && trimmedResult === "") {
-          console.error("Kommentar och resultat är båda tomma.");
+        if (trimmedComment === "" && trimmedResult === "" && unit === "") {
+          console.error("Kommentar, resultat och enhet är tomma.");
           return;
         }
       
@@ -439,19 +441,23 @@ export default function MySessions() {
                     className="input-name"
                          onChange={handleComment}
                              value={comment}
-                             placeholder="Skriv kommentar">
+                             placeholder="Kommentera övning">
                      </input>
+
+                     <div className="modal-header">
+                <h2 className="modal-h2">Fyll i resultat och enhet</h2>
+              </div>
                     
                     <div className="modal-result-row">
                      <input type="text"
                     className="input-name"
                          onChange={handleResultChange}
                              value={result}
-                             placeholder="Resultat">
+                             placeholder="T.ex. 100">
                      </input>
 
                      <select onChange={handleUnitChange}>
-                     <option>Välj enhet</option>
+                     <option value="">Välj enhet</option>
                          <option value="m">m</option>
                          <option value="cm">cm</option>
                          <option value="s">s</option>
