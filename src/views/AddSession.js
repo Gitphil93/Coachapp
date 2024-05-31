@@ -173,7 +173,7 @@ export default function AddSession() {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "http://192.168.0.30:5000/get-all-users",
+            "https://appleet-backend.vercel.app/get-all-users",
             {
               method: "GET",
               headers: {
@@ -209,7 +209,7 @@ if (isPostSessionSuccess) {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "http://192.168.0.30:5000/get-exercises",
+            "https://appleet-backend.vercel.app/get-exercises",
             {
               method: "GET",
               headers: {
@@ -269,7 +269,7 @@ if (isPostSessionSuccess) {
       if (token) {
       try{
         setIsLoading(true)
-        const response = await fetch("http://192.168.0.30:5000/post-session", {
+        const response = await fetch("https://appleet-backend.vercel.app/post-session", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

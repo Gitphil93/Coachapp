@@ -77,7 +77,7 @@ export default function AdminButton() {
         try {
           setIsLoading(true)
           const response = await fetch(
-            "http://192.168.0.30:5000/admin/post-global-message",
+            "https://appleet-backend.vercel.app/admin/post-global-message",
             {
               method: "POST",
               headers: {
@@ -114,7 +114,7 @@ export default function AdminButton() {
     
         try {
             setIsLoading(true);
-            const response = await fetch("http://192.168.0.30:5000/admin/delete-global-message", {
+            const response = await fetch("https://appleet-backend.vercel.app/admin/delete-global-message", {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -150,7 +150,7 @@ export default function AdminButton() {
           const token = localStorage.getItem('token'); // Justera detta beroende på var din token lagras
       
           // Lägg till Authorization-header med token
-          const response = await fetch("http://192.168.0.30:5000/get-global-message", {
+          const response = await fetch("https://appleet-backend.vercel.app/get-global-message", {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

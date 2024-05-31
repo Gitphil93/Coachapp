@@ -124,7 +124,7 @@ export default function ProfileItems({user, personalBestsObj, seasonBestsObj}) {
     
         try {
             const token = localStorage.getItem("token"); 
-            const response = await fetch(`http://192.168.0.30:5000/add-pb/${user._id}`, {
+            const response = await fetch(`https://appleet-backend.vercel.app/add-pb/${user._id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export default function ProfileItems({user, personalBestsObj, seasonBestsObj}) {
   
       try {
           const token = localStorage.getItem("token"); 
-          const response = await fetch(`http://192.168.0.30:5000/add-sb/${user._id}`, {
+          const response = await fetch(`https://appleet-backend.vercel.app/add-sb/${user._id}`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
